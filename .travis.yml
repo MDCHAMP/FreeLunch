@@ -2,6 +2,6 @@ language: python
 python:
   - "3.8"
 script: 
-  - python -m pytest  --cov-report term --cov=app
+  - python -m pytest
 after_success:
   - codecov
