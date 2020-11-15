@@ -1,7 +1,9 @@
 language: python
 python:
   - "3.8"
+install:
+  pip install coverage
 script: 
   - python -m pytest
 after_success:
-  - codecov
+  - bash <(curl -s https://codecov.io/bash)
