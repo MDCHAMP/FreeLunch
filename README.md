@@ -61,7 +61,3 @@ Return json friendly dict with fun metadata!
 ```python
 full_output = opt(full_output = True)
 ```
-
-
-
-.. anyone want to buy me lunch? (THE PUN IS VERY MUCH INTENDED)
