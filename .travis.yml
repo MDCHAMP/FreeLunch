@@ -3,6 +3,7 @@ python:
   - "3.8"
 install:
   pip install coverage
+  pip install -e .
 script: 
   - coverage run -m pytest 
 after_success:
