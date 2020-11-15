@@ -1,7 +1,7 @@
 # FreeLunch - Meta-heuristic optimisation suite for python
 
 
-[![Build Status](https://travis-ci.com/MDCHAMP/FreeLunch.svg?branch=main)](https://travis-ci.com/MDCHAMP/FreeLunch)
+[![Build Status](https://travis-ci.com/MDCHAMP/FreeLunch.svg?branch=main)](https://travis-ci.com/MDCHAMP/FreeLunch) [![codecov](https://codecov.io/gh/MDCHAMP/FreeLunch/branch/main/graph/badge.svg)](https://codecov.io/gh/MDCHAMP/FreeLunch)
 
 Basically a dump of useful / funny metaheurisitcs with a (hopefully) simpe interface
 
