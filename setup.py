@@ -1,13 +1,3 @@
-from setuptools import setup
-
-setup(
-    name='freelunch',
-    version='0.0.1',
-    description='Meta-heuristic optimisation tools',
-    py_modules=['freelunch'],
-    package_dir={'':'src'},
-)
-
 from setuptools import setup, find_packages
 
 
@@ -18,7 +8,7 @@ with open('README.md') as f:
 # This call to setup() does all the work
 setup(
     name="freelunch",
-    version="0.0.1",
+    version="0.0.2",
     description="Heuristic and meta-heuristic optimisation suite in Python",
     long_description=rm,
     long_description_content_type="text/markdown",
