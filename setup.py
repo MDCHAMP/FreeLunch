@@ -32,6 +32,7 @@ setup(
         "Programming Language :: Python :: 3.8",
     ],
     packages=["freelunch"],
+    package_dir={'':'src'},
     include_package_data=False,
     install_requires=["numpy"],
 )
