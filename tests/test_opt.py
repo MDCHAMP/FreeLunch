@@ -4,8 +4,10 @@ Testing
 import pytest
 import numpy as np
 
-from src.main import DE, SA
-from src.benchmarks import ackley, exponential, happycat, periodic
+
+import freelunch
+from freelunch.__main__ import DE, SA
+from freelunch.benchmarks import ackley, exponential, happycat, periodic
 
 optimiser_classes = [DE]
 benchmark_problems = [ackley, exponential, happycat, periodic]

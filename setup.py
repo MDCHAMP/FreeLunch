@@ -8,7 +8,7 @@ setup(
     package_dir={'':'src'},
 )
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 # The text of the README file
@@ -31,7 +31,7 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.8",
     ],
-    packages=["freelunch"],
+    packages=find_packages('src'),
     package_dir={'':'src'},
     include_package_data=False,
     install_requires=["numpy"],

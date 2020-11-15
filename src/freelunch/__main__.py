@@ -15,10 +15,10 @@ full_output = opt(full_output = True) # returns json friendly dict
 
 """
 import numpy as np
-import src.tech as tech
 
-from src.base import continuous_space_optimiser
-
+from freelunch import tech
+from freelunch import benchmarks
+from freelunch.base import continuous_space_optimiser
 
 class DE(continuous_space_optimiser):
     '''
