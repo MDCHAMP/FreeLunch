@@ -130,5 +130,5 @@ dmypy.json
 
 
 #vscode
-
+*.vscode
 *.code-workspace
