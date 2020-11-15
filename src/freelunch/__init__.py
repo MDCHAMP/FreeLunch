@@ -1,3 +1,3 @@
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 
-from __main__ import *
+from freelunch.freelunch import *

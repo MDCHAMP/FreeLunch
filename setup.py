@@ -8,7 +8,7 @@ with open('README.md') as f:
 # This call to setup() does all the work
 setup(
     name="freelunch",
-    version="0.0.2",
+    version="0.0.3",
     description="Heuristic and meta-heuristic optimisation suite in Python",
     long_description=rm,
     long_description_content_type="text/markdown",
@@ -21,7 +21,7 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.8",
     ],
-    packages=find_packages('src'),
+    packages=['freelunch'],
     package_dir={'':'src'},
     include_package_data=False,
     install_requires=["numpy"],
