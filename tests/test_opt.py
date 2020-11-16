@@ -6,7 +6,7 @@ import numpy as np
 
 
 import freelunch
-from freelunch.__main__ import DE, SA
+from freelunch.freelunch import DE, SA
 from freelunch.benchmarks import ackley, exponential, happycat, periodic
 
 optimiser_classes = [DE]
