@@ -2,11 +2,8 @@
 Testing 
 '''
 import pytest
-import numpy as np
 
-
-import freelunch
-from freelunch.freelunch import DE, SA
+from freelunch import DE, SA
 from freelunch.benchmarks import ackley, exponential, happycat, periodic
 
 optimiser_classes = [DE]
