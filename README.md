@@ -3,11 +3,11 @@
 
 [![Build Status](https://travis-ci.com/MDCHAMP/FreeLunch.svg?branch=main)](https://travis-ci.com/MDCHAMP/FreeLunch) [![codecov](https://codecov.io/gh/MDCHAMP/FreeLunch/branch/main/graph/badge.svg)](https://codecov.io/gh/MDCHAMP/FreeLunch)
 
-Basically a dump of useful / funny metaheurisitcs with a (hopefully) simpe interface
+Basically a dump of useful / funny metaheurisitcs with a (hopefully) simpe interface. 
 
-Feeling cute might add benchmarking later idk
+Feeling cute might add automatic benchmarking later idk.
 
-There are literally so many implementations of all of these so... here's one more!
+There are literally so many implementations of all of these so... here's one more! 
 
 ## Features
 
@@ -54,7 +54,10 @@ opt = freelunch.DE(obj=my_objective_function, bounds=my_bounds) # Differential e
 ```
 
 `obj` - objective function, callable: `obj(sol) -> float or None`
-`bounds` - bounds for elements of sol: `bounds [[lower, upper]]*len(sol)` where: `(sol[i] <= lower) -> bool` and `(sol[i] >= upper) -> bool`.
+
+
+`bounds` - bounds for elements of sol: `bounds [[lower, upper]]*len(sol)` 
+where: `(sol[i] <= lower) -> bool` and `(sol[i] >= upper) -> bool`.
 
 Check out the hyperparameters and set your own, (defualts set automatically):
 
@@ -122,7 +125,7 @@ full_output = opt(full_output=True)
 
 ### Benchmarks 
 
-Access from `freelunch.benchmakrs` for example:
+Access from `freelunch.benchmarks` for example:
 
 ```python
 bench = freelunch.benchmarks.ackley(n=2) # 2D ackley function
