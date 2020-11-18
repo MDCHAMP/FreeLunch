@@ -11,12 +11,16 @@ class benchmark:
     '''
     base class for benchmarking functions
     '''
+    default_bounds = lambda n:None
+    optimum = lambda n:None
 
     def __init__(self, n=None):
         if n is None:
             self.n = 2
         else:
             self.n = n
+        self.bounds = self.default_bounds(n) 
+        self.optimum = self.optimum(n)
 
     def __call__(self, dna):
         if len(dna) == 0:

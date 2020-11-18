@@ -131,7 +131,8 @@ Access from `freelunch.benchmarks` for example:
 bench = freelunch.benchmarks.ackley(n=2) # Instanciate a 2D ackley benchmark function
 
 fit = bench(sol) # evaluate by calling
-bench.default_bounds(n) # [[-10, 10],[-10, 10]]
-bench.optimum(n) # [0, 0]bench.f0 # 0.0
+bench.bounds # [[-10, 10],[-10, 10]]
+bench.optimum # [0, 0] 
+bench.f0 # 0.0
 ```
 

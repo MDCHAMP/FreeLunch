@@ -26,6 +26,7 @@ def test_true_optima(obj, n):
 @pytest.mark.parametrize('obj', benchmark_problems)
 @pytest.mark.parametrize('n', dims)
 def test_run_opt_with_defualts(opt, obj, n):
-	out = opt(obj=obj(n), bounds=obj.default_bounds(n))(full_output=True)
+	o = obj(n)
+	out = opt(obj=o, bounds=o.bounds)(full_output=True)
 	assert type(out) is dict
 	assert (obj.tol is None) or (abs(out['scores'][0] - obj.f0) < obj.tol)
