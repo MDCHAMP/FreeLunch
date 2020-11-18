@@ -19,7 +19,7 @@ def test_instancing_defaults(opt):
 @pytest.mark.parametrize('n', dims)
 def test_true_optima(obj, n):
 	b = obj(n)
-	evaluates = b(obj.optimum(n))
+	evaluates = b(b.optimum)
 	assert evaluates == b.f0
 
 @pytest.mark.parametrize('opt', optimiser_classes)

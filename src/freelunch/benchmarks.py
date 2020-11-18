@@ -12,15 +12,15 @@ class benchmark:
     base class for benchmarking functions
     '''
     default_bounds = lambda n:None
-    optimum = lambda n:None
+    rtm_optimum = lambda n:None
 
     def __init__(self, n=None):
         if n is None:
             self.n = 2
         else:
             self.n = n
-        self.bounds = self.default_bounds(n) 
-        self.optimum = self.optimum(n)
+        self.bounds = self.default_bounds() 
+        self.optimum = self.rtn_optimum()
 
     def __call__(self, dna):
         if len(dna) == 0:
@@ -35,8 +35,8 @@ class ackley(benchmark):
     ackely function in n dimensions
     '''
 
-    default_bounds = lambda n:np.array([[-10, 10]]*n)
-    optimum = lambda n:np.array([0]*n)
+    default_bounds = lambda self:np.array([[-10, 10]]*self.n)
+    rtn_optimum = lambda self:np.array([0]*self.n)
     f0 = 0
     tol = 10**-3
 
@@ -53,8 +53,8 @@ class exponential(benchmark):
     exponential function in n dimensions
     '''
     
-    default_bounds = lambda n:np.array([[-10, 10]]*n)
-    optimum = lambda n:np.array([0]*n)
+    default_bounds = lambda self:np.array([[-10, 10]]*self.n)
+    rtn_optimum = lambda self:np.array([0]*self.n)
     f0 = -1
     tol = 10**-3
 
@@ -69,8 +69,8 @@ class happycat(benchmark):
     happycat function in n dimensions
     '''
     
-    default_bounds = lambda n:np.array([[-2, 2]]*n)
-    optimum = lambda n:np.array([-1]*n)
+    default_bounds = lambda self:np.array([[-2, 2]]*self.n)
+    rtn_optimum = lambda self:np.array([-1]*self.n)
     f0 = 0
     tol = None
 
@@ -87,8 +87,8 @@ class periodic(benchmark):
     periodic function in n dimensions
     '''
     
-    default_bounds = lambda n:np.array([[-10, 10]]*n)
-    optimum = lambda n:np.array([0]*n)
+    default_bounds = lambda self:np.array([[-10, 10]]*self.n)
+    rtn_optimum = lambda self:np.array([0]*self.n)
     f0 = 0.9
     tol = None
 
