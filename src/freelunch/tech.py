@@ -38,7 +38,6 @@ class adaptable_parameter:
 # %% Common methods
 
 def uniform_continuous_init(bounds, N):
-    print(bounds)
     out = np.empty((N,), dtype=object)
     for i in range(N):
         out[i] = solution(np.array([np.random.uniform(a,b) for a, b in bounds]))
