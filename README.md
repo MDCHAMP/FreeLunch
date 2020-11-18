@@ -3,7 +3,7 @@
 
 [![Build Status](https://travis-ci.com/MDCHAMP/FreeLunch.svg?branch=main)](https://travis-ci.com/MDCHAMP/FreeLunch) [![codecov](https://codecov.io/gh/MDCHAMP/FreeLunch/branch/main/graph/badge.svg)](https://codecov.io/gh/MDCHAMP/FreeLunch)
 
-Basically a dump of useful / funny metaheurisitcs with a (hopefully) simpe interface. 
+Basically a dump of useful / funny metaheuristics with a (hopefully) simple interface. 
 
 Feeling cute might add automatic benchmarking later idk.
 
@@ -23,7 +23,7 @@ Your favourite not in the list? Feel free to add it.
 - SADE
 - PSA
 - Quantum Bees
-- Grenade Eplosion Method
+- Grenade Explosion Method
 - The Penguin one
 
 
@@ -40,13 +40,13 @@ Tier list: TBA
 
 ### Optimisers
 
-Install with pip (req. numpy).
+Install with pip (req. `numpy`).
 
 ```
 pip install freelunch
 ```
 
-Import and instance your favourite meta-hueristics!
+Import and instance your favourite meta-heuristics!
 
 ```python
 import freelunch
@@ -59,7 +59,7 @@ opt = freelunch.DE(obj=my_objective_function, bounds=my_bounds) # Differential e
 `bounds` - bounds for elements of sol: `bounds [[lower, upper]]*len(sol)` 
 where: `(sol[i] <= lower) -> bool` and `(sol[i] >= upper) -> bool`.
 
-Check out the hyperparameters and set your own, (defualts set automatically):
+Check out the hyperparameters and set your own, (defaults set automatically):
 
 ```python
 print(opt.hyper_definitions)
@@ -107,7 +107,7 @@ Return best `m` solutions in `np.ndarray`:
 best_m = opt(return_m=m)
 ```
 
-Return json friendly dict with fun metadata!
+Return `json` friendly `dict` with fun metadata!
 
 ```python
 full_output = opt(full_output=True)
@@ -128,11 +128,10 @@ full_output = opt(full_output=True)
 Access from `freelunch.benchmarks` for example:
 
 ```python
-bench = freelunch.benchmarks.ackley(n=2) # 2D ackley function
+bench = freelunch.benchmarks.ackley(n=2) # Instanciate a 2D ackley benchmark function
 
 fit = bench(sol) # evaluate by calling
-fit.default_bounds(n) # [[-10, 10],[-10, 10]]
-fit.optimum(n) # [0, 0]
-fit.f0 # 0.0
+bench.default_bounds(n) # [[-10, 10],[-10, 10]]
+bench.optimum(n) # [0, 0]bench.f0 # 0.0
 ```
 
