@@ -10,7 +10,7 @@ import numpy as np
 # %% Custom exceptions
 
 class BadObjectiveFunctionScores(Exception):
-    '''Exception raised when both objective score comaprisons evaluate false'''
+    '''Exception raised when both objective score comparisons evaluate false'''
 
 class ZeroLengthSolutionError(Exception):
     '''Exception raised when an empty solution is passed to a benchmark'''
@@ -69,7 +69,7 @@ def sotf(olds, news):
             out[i] = old
         else: 
             raise BadObjectiveFunctionScores(
-                    'Winner could not be determined by comparing objective scores. socres:{} and {}'.format(
+                    'Winner could not be determined by comparing objective scores. scores:{} and {}'.format(
                         old.fitness, new.fitness
                     )) 
     return out

@@ -1,23 +1,10 @@
 """
 Main module definitions in here
 
-I think the dream is to have it call like this
-
-import opt2
-
-opt = opt2.DE(obj, hypers, bounds)
-
-quick_result = opt() # returns optimum only
-best_of_runs = opt(nruns = n) # returns optimum only
-best_m = opt(return_m = m) # returns best m solutions in np.array
-full_output = opt(full_output = True) # returns json friendly dict
-
-
 """
 import numpy as np
 
 from freelunch import tech
-from freelunch import benchmarks
 from freelunch.base import continuous_space_optimiser
 
 class DE(continuous_space_optimiser):
@@ -66,8 +53,8 @@ class SA(continuous_space_optimiser):
     tags = ['Continuous domain', 'Annealing']
     hyper_definitions = {
         'K':'number of timesteps (int)',
-        'ts':'Temperatures (np.ndarray)',
-        'P':'Acceptance probability (func(e, e, T) -> bool)'
+        'T':'Temperatures (np.ndarray, T.shape=(k,))',
+        'P':'Acceptance probability (P(e, e, T) -> bool)'
     }
 
     def run(self):
