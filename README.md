@@ -17,11 +17,11 @@ Your favourite not in the list? Feel free to add it.
 
 - Differential evolution `freelunch.DE`
 - Simulated Annealing `freelunch.SA`
+- Particle Swarm `freelunch.PSO`
 
 --Coming soon to 0.1.0--
 
 - SADE
-- PSA
 - Quantum Bees
 - Grenade Explosion Method
 - The Penguin one
