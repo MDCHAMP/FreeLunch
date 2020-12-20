@@ -27,6 +27,39 @@ class solution:
         self.dna = dna
         self.fitness = None 
 
+class particle:
+    '''
+    Want to store info on particles in a swarm? I got you bud
+    '''
+    def __init__(self, pos=None, vel=None, fitness=np.Inf, best=None, best_pos=None):
+        self.pos = pos
+        self.vel = vel
+        self._fitness = np.Inf
+        self.fitness = fitness 
+        self.best = best
+        self.best_pos = best_pos
+
+    @property
+    def dna(self):
+        return self.pos
+
+    @property
+    def fitness(self):
+        return self._fitness
+
+    @fitness.setter
+    def fitness(self, fitness):
+        if (fitness is not None) and (fitness < self._fitness):
+            self.best = fitness
+            self.best_pos = self.pos
+        self._fitness = fitness
+
+    def as_sol(self):
+        sol = solution()
+        sol.dna = self.best_pos
+        sol.fitness = self.best
+        return sol
+
 class adaptable_parameter:
     '''
     Class for adaptable parameters for optimisers like SADE etc.
@@ -81,3 +114,8 @@ def apply_sticky_bounds(dna, bounds):
         elif dna[i] < low: out[i] = low
     return out
 
+
+
+
+# %%
+    

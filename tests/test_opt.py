@@ -3,10 +3,10 @@ Testing
 '''
 import pytest
 
-from freelunch import DE, SA
+from freelunch import DE, SA, PSO
 from freelunch.benchmarks import ackley, exponential, happycat, periodic
 
-optimiser_classes = [DE]
+optimiser_classes = [DE, PSO]
 benchmark_problems = [ackley, exponential, happycat, periodic]
 dims = [1,2,3,4]
 
