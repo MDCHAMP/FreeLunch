@@ -27,7 +27,7 @@ class solution:
         self.dna = dna
         self.fitness = None 
 
-class particle:
+class particle(solution):
     '''
     Want to store info on particles in a swarm? I got you bud
     '''
