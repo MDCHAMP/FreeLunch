@@ -62,7 +62,7 @@ class SA(continuous_space_optimiser):
         raise NotImplementedError
 
 
-class _PSO(continuous_space_optimiser,ABC):
+class PSO(continuous_space_optimiser):
     '''
     Base Class for Particle Swarm Optimisations
     '''
@@ -90,10 +90,17 @@ class _PSO(continuous_space_optimiser,ABC):
             pop[i].vel = np.squeeze((2*np.random.rand(self.bounds.shape[0],1)-1)*np.diff(self.bounds))
         return pop
 
-    @abstractmethod
     def move_swarm(self, pop, gen):
-        # Function which moves the swarm
-        pass
+        # Basic particle swarm move
+
+        inertia = self.hypers['I'][1]-(self.hypers['I'][1]-self.hypers['I'][0])*gen/self.hypers['G']
+        # This loop is slow, should vectorise at some point
+        for p in pop:
+            p.vel = inertia*p.vel + \
+                self.hypers['A'][0]*np.random.rand()*(p.best_pos-p.pos) + \
+                self.hypers['A'][1]*np.random.rand()*(self.g_best.pos-p.pos)
+            p.pos = tech.apply_sticky_bounds(p.pos + p.vel, self.bounds)
+        return pop
 
     def test_pop(self, pop):
         # Test all population and update bests
@@ -133,22 +140,6 @@ class _PSO(continuous_space_optimiser,ABC):
 
         return [ p.as_sol() for p in pop ]
 
-
-class PSO(_PSO):
-    '''
-    Vanilla Particle Swarm
-    '''
-
-    def move_swarm(self, pop, gen):
-        # Basic particle swarm move
-
-        inertia = self.hypers['I'][1]-(self.hypers['I'][1]-self.hypers['I'][0])*gen/self.hypers['G']
-        # This loop is slow, should vectorise at some point
-        for p in pop:
-            p.vel = inertia*p.vel + \
-                self.hypers['A'][0]*np.random.rand()*(p.best_pos-p.pos) + \
-                self.hypers['A'][1]*np.random.rand()*(self.g_best.pos-p.pos)
-            p.pos = tech.apply_sticky_bounds(p.pos + p.vel, self.bounds)
-        return pop
+    
 
 
