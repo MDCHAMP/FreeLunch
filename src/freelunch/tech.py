@@ -31,10 +31,10 @@ class particle:
     '''
     Want to store info on particles in a swarm? I got you bud
     '''
-    def __init__(self, pos=None, vel=None, fitness=np.Inf, best=None, best_pos=None):
+    def __init__(self, pos=None, vel=None, fitness=None, best=None, best_pos=None):
         self.pos = pos
         self.vel = vel
-        self._fitness = np.Inf
+        self._fitness = None
         self.fitness = fitness 
         self.best = best
         self.best_pos = best_pos
@@ -49,7 +49,7 @@ class particle:
 
     @fitness.setter
     def fitness(self, fitness):
-        if (fitness is not None) and (fitness < self._fitness):
+        if (fitness is not None) and ((self._fitness is None) or (fitness < self._fitness)):
             self.best = fitness
             self.best_pos = self.pos
         self._fitness = fitness
