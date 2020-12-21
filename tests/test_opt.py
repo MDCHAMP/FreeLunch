@@ -2,6 +2,7 @@
 Testing 
 '''
 import pytest
+import numpy as np
 
 from freelunch import DE, SA, PSO
 from freelunch.benchmarks import ackley, exponential, happycat, periodic
@@ -27,6 +28,7 @@ def test_true_optima(obj, n):
 @pytest.mark.parametrize('n', dims)
 def test_run_opt_with_defualts(opt, obj, n):
 	o = obj(n)
+	np.random.seed(1)
 	out = opt(obj=o, bounds=o.bounds)(full_output=True)
 	assert type(out) is dict
 	assert (obj.tol is None) or (abs(out['scores'][0] - obj.f0) < obj.tol)
