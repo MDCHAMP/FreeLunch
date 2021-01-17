@@ -60,6 +60,24 @@ class particle(solution):
         sol.fitness = self.best
         return sol
 
+class krill(particle):
+
+    '''
+    I am a krill, a type of animal (maybe implemented later), and a type of solution
+
+    I am also basically just a particle...
+    '''
+
+    def __init__(self, pos=None, vel=None, motion=None, forage=None, fitness=None, best=None, best_pos=None):
+        super().__init__(pos, vel, fitness, best, best_pos)
+        self.motion = motion
+        self.forage = forage
+
+    
+
+
+
+
 class adaptable_parameter:
     '''
     Class for adaptable parameters for optimisers like SADE etc.
@@ -114,6 +132,9 @@ def apply_sticky_bounds(dna, bounds):
         elif dna[i] < low: out[i] = low
     return out
 
+def lin_reduce(lims,n,n_max):
+    # Linearly reduce with generations, e.g. inertia values
+    return lims[1] + (lims[0]-lims[1])*n/n_max
 
 
 
