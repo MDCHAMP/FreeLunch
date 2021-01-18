@@ -94,6 +94,6 @@ class periodic(benchmark):
 
     def obj(self, dna):
         t1 = np.sum(np.sin(dna)**2) +1
-        t2 = - 0.1 * np.exp(np.sum(dna**2))
+        t2 = - 0.1 * np.exp(-np.sum(dna**2))
         return t1 + t2
 
