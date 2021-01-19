@@ -25,7 +25,7 @@ class solution:
     '''
     def __init__(self, dna=None, fitness=None):
         self.dna = dna
-        self.fitness = None 
+        self.fitness = fitness 
 
 class particle(solution):
     '''
