@@ -122,7 +122,7 @@ class PSO(continuous_space_optimiser):
         # Initialise the swarm
         pop = self.init_pop(self.hypers['N'])
 
-        # Test Inital Population
+        # Test Initial Population
         self.test_pop(pop)
         self.g_best = self.best_particle(pop)
 
