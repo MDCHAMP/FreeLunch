@@ -31,4 +31,5 @@ def test_run_opt_with_defualts(opt, obj, n):
 	np.random.seed(1)
 	out = opt(obj=o, bounds=o.bounds)(full_output=True)
 	assert type(out) is dict
+  assert all(x<=y for x, y in zip(out['scores'], out['scores'][1:])) # scores are ordered
 	assert (obj.tol is None) or (abs(out['scores'][0] - obj.f0) < obj.tol)

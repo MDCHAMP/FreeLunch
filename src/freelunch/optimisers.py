@@ -4,7 +4,6 @@ Main module definitions in here
 """
 import numpy as np
 from scipy.spatial.distance import pdist, cdist, squareform
-from abc import ABC, abstractmethod
 
 from freelunch import tech
 from freelunch.base import continuous_space_optimiser
@@ -399,4 +398,5 @@ class KrillHerd(continuous_space_optimiser):
                 pop[i].fitness = self.obj(dna)
 
         return [ p.as_sol() for p in pop ]
+
 
