@@ -139,6 +139,7 @@ class PSO(continuous_space_optimiser):
             # Update global best
             self.g_best = self.best_particle(pop)
 
+
         return sorted([ p.as_sol() for p in pop ],key=lambda x: x.fitness)
 
     
@@ -267,8 +268,7 @@ class KrillHerd(continuous_space_optimiser):
             Khat = (herd[0][i] - herd[0][neighbours[i,:]]) / spread
             Xhat = (herd[1][neighbours[i,:],:] - herd[1][i,:]) / (dists[i,neighbours[i,:]] + self.hypers['eps'])[:,None]
             alpha[0][i,:] = np.sum( Xhat * Khat[:,None] , axis=0)
-
-
+            
         # Exploration/exploitation coefficient
         Cbest = 2*(np.random.rand() + gen / self.hypers['G'])
 
