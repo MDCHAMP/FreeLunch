@@ -15,6 +15,10 @@ class BadObjectiveFunctionScores(Exception):
 class ZeroLengthSolutionError(Exception):
     '''Exception raised when an empty solution is passed to a benchmark'''
 
+class SolutionCollapseError(Exception):
+    '''Exception raised when all solutions are identical'''
+
+
 
 
 # %% Useful classes
@@ -49,7 +53,7 @@ class particle(solution):
 
     @fitness.setter
     def fitness(self, fitness):
-        if (fitness is not None) and ((self._fitness is None) or (fitness < self._fitness)):
+        if (fitness is not None) and ((self._fitness is None) or (fitness < self.best)):
             self.best = fitness
             self.best_pos = self.pos
         self._fitness = fitness
@@ -100,6 +104,7 @@ def compute_obj(pop, obj):
         sol.fitness = obj(sol.dna)
         if np.isnan(sol.fitness):
             sol.fitness = None
+    return pop
 
 def binary_crossover(sol1, sol2, p):
     out = np.empty_like(sol1)
@@ -109,6 +114,7 @@ def binary_crossover(sol1, sol2, p):
         else:
             out[i] = b
     return out
+
 
 def sotf(olds, news):
     out = np.empty_like(olds, dtype=object)
@@ -131,6 +137,12 @@ def apply_sticky_bounds(dna, bounds):
         if dna[i] > high: out[i] = high
         elif dna[i] < low: out[i] = low
     return out
+
+def bounds_as_mat(bounds):
+    bounds_mat = np.zeros((len(bounds),2))
+    for i,bound in enumerate(bounds):
+        bounds_mat[i,0], bounds_mat[i,1] = bound
+    return bounds_mat
 
 def lin_reduce(lims,n,n_max):
     # Linearly reduce with generations, e.g. inertia values
