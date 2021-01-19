@@ -24,5 +24,8 @@ setup(
     packages=['freelunch'],
     package_dir={'':'src'},
     include_package_data=False,
-    install_requires=["numpy"],
+    install_requires=[
+        "numpy",
+        "scipy"
+    ],
 )

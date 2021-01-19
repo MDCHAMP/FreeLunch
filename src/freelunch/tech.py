@@ -15,6 +15,10 @@ class BadObjectiveFunctionScores(Exception):
 class ZeroLengthSolutionError(Exception):
     '''Exception raised when an empty solution is passed to a benchmark'''
 
+class SolutionCollapseError(Exception):
+    '''Exception raised when all solutions are identical'''
+
+
 
 
 # %% Useful classes
@@ -49,7 +53,7 @@ class particle(solution):
 
     @fitness.setter
     def fitness(self, fitness):
-        if (fitness is not None) and ((self._fitness is None) or (fitness < self._fitness)):
+        if (fitness is not None) and ((self._fitness is None) or (fitness < self.best)):
             self.best = fitness
             self.best_pos = self.pos
         self._fitness = fitness
@@ -59,6 +63,24 @@ class particle(solution):
         sol.dna = self.best_pos
         sol.fitness = self.best
         return sol
+
+class krill(particle):
+
+    '''
+    I am a krill, a type of animal (maybe implemented later), and a type of solution
+
+    I am also basically just a particle...
+    '''
+
+    def __init__(self, pos=None, vel=None, motion=None, forage=None, fitness=None, best=None, best_pos=None):
+        super().__init__(pos, vel, fitness, best, best_pos)
+        self.motion = motion
+        self.forage = forage
+
+    
+
+
+
 
 class adaptable_parameter:
     '''
@@ -82,6 +104,7 @@ def compute_obj(pop, obj):
         sol.fitness = obj(sol.dna)
         if np.isnan(sol.fitness):
             sol.fitness = None
+    return pop
 
 def binary_crossover(sol1, sol2, p):
     out = np.empty_like(sol1)
@@ -91,6 +114,7 @@ def binary_crossover(sol1, sol2, p):
         else:
             out[i] = b
     return out
+
 
 def sotf(olds, news):
     out = np.empty_like(olds, dtype=object)
@@ -114,8 +138,15 @@ def apply_sticky_bounds(dna, bounds):
         elif dna[i] < low: out[i] = low
     return out
 
+def bounds_as_mat(bounds):
+    bounds_mat = np.zeros((len(bounds),2))
+    for i,bound in enumerate(bounds):
+        bounds_mat[i,0], bounds_mat[i,1] = bound
+    return bounds_mat
+
+def lin_reduce(lims,n,n_max):
+    # Linearly reduce with generations, e.g. inertia values
+    return lims[1] + (lims[0]-lims[1])*n/n_max
 
 
 
-# %%
-    

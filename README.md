@@ -18,6 +18,7 @@ Your favourite not in the list? Feel free to add it.
 - Differential evolution `freelunch.DE`
 - Simulated Annealing `freelunch.SA`
 - Particle Swarm `freelunch.PSO`
+- Krill Herd `freelunch.KrillHerd`
 
 --Coming soon to 0.1.0--
 
