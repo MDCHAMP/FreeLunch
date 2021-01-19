@@ -175,7 +175,7 @@ class KrillHerd(continuous_space_optimiser):
     }
     hyper_defaults = {
         'N':100,
-        'G':200,
+        'G':250,
         'Ct':0.5, # NOTE: in the paper this is chosen as a random number in (0,2]
         'Imotion':np.array([0.9, 0.1]), 
         'Iforage':np.array([0.9, 0.1]), 
