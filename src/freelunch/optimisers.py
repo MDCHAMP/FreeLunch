@@ -137,7 +137,7 @@ class PSO(continuous_space_optimiser):
             # Update global best
             self.g_best = self.best_particle(pop)
 
-        return [ p.as_sol() for p in pop ]
+        return sorted([ p.as_sol() for p in pop ], key=lambda p: p.fitness)
 
     
 
