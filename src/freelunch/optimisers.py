@@ -139,7 +139,7 @@ class PSO(continuous_space_optimiser):
             # Update global best
             self.g_best = self.best_particle(pop)
 
-        return [ p.as_sol() for p in pop ]
+        return sorted([ p.as_sol() for p in pop ],key=lambda x: x.fitness)
 
     
 class KrillHerd(continuous_space_optimiser):
@@ -398,5 +398,7 @@ class KrillHerd(continuous_space_optimiser):
                 pop[i].forage = forage
                 pop[i].fitness = self.obj(dna)
 
-        return [ p.as_sol() for p in pop ]
+        return sorted([ p.as_sol() for p in pop ],key=lambda x: x.fitness)
+
+        
 
