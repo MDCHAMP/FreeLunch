@@ -4,7 +4,7 @@ Main module definitions in here
 """
 import numpy as np
 from scipy.spatial.distance import pdist, cdist, squareform
-from abc import ABC, abstractmethod
+
 
 from freelunch import tech
 from freelunch.base import continuous_space_optimiser
