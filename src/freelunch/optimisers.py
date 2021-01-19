@@ -400,5 +400,3 @@ class KrillHerd(continuous_space_optimiser):
 
         return sorted([ p.as_sol() for p in pop ],key=lambda x: x.fitness)
 
-        
-
