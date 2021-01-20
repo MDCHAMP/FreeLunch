@@ -7,7 +7,7 @@ from scipy.spatial.distance import pdist, cdist, squareform
 
 from freelunch import tech, zoo
 from freelunch.base import continuous_space_optimiser
-from freelunch.darwin import DE_methods, update_strategy_ps, adaptable_normal_parameter
+from freelunch.darwin import DE_methods, update_strategy_ps, select_strategy, adaptable_normal_parameter
 
 
 
@@ -92,7 +92,7 @@ class SADE(continuous_space_optimiser):
             for i, sol in enumerate(pop):
                 # mutation
                 new = zoo.animal()
-                op = np.random.choice(ops, 1)[0] # Need to change this to pinwheel
+                op = select_strategy(ops)
                 new.dna = op(sol, pop=pop, F=F())
                 # crossover and apply bounds
                 new.dna = tech.binary_crossover(sol.dna, new.dna, Cr())
