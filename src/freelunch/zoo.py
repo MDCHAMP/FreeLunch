@@ -1,7 +1,5 @@
 '''
 New home for the zoo of optimisation creatures
-
-Existing classes will remain in tech.py for the time being but the idea that all should migrate into here before 0.1.0
 '''
 
 
@@ -16,6 +14,7 @@ class animal:
     def __init__(self, dna=None, fitness=None, best=None, best_pos=None):
         self.dna = dna
         self.fitness = fitness
+        self.tech = []
 
     @property
     def fitness(self):
@@ -27,19 +26,9 @@ class animal:
             self.best = fitness
             self.best_pos = self.dna
         self._fitness = fitness
-
-
-class adaptive_animal(animal):
-    '''
-    big brain time
-    '''
-
-    def __init__(self, dna=None, fitness=None):
-        self.dna = dna
-        self.fitness = fitness
-        self.tech = []
-
+    
     def on_win(self):
+        '''big brain time'''
         for t in self.tech:
             t.win()
         self.tech = []
@@ -77,7 +66,7 @@ class particle(animal):
 class krill(animal):
 
     '''
-    I am a krill, a type of animal (maybe implemented later), and a type of solution
+    I am a krill, a type of animal 
 
     I am also basically just a particle...
     '''

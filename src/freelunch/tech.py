@@ -49,14 +49,19 @@ def binary_crossover(sol1, sol2, p):
             out[i] = a
         else:
             out[i] = b
+    #Ensure at least one difference
+    jrand = np.random.randint(0, len(out))
+    out[jrand] = sol2[jrand]
     return out
 
 
 def sotf(olds, news):
     out = np.empty_like(olds, dtype=object)
     for old, new, i in zip(olds, news, range(len(out))):
+        print(old.dna, new.dna)
         if new.fitness < old.fitness:
             out[i] = new
+            new.on_win()
         elif old.fitness <= new.fitness:
             out[i] = old
         else:
@@ -65,7 +70,6 @@ def sotf(olds, news):
                     old.fitness, new.fitness
                 ))
     return out
-
 
 def apply_sticky_bounds(dna, bounds):
     out = dna[:]

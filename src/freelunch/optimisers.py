@@ -7,8 +7,8 @@ from scipy.spatial.distance import pdist, cdist, squareform
 
 from freelunch import tech, zoo
 from freelunch.base import continuous_space_optimiser
-from freelunch.darwin import DE_methods, update_strategy_ps, adaptable_normal_parameter
-from freelunch.zoo import animal, adaptive_animal
+from freelunch.darwin import DE_methods, update_strategy_ps, select_strategy, adaptable_normal_parameter
+
 
 
 class DE(continuous_space_optimiser):
@@ -44,8 +44,6 @@ class DE(continuous_space_optimiser):
                 trial_pop[i] = trial
             tech.compute_obj(trial_pop, self.obj)
             pop = tech.sotf(pop, trial_pop)
-            jrand = np.random.randint(0, self.hypers['N'])
-            pop[jrand] = trial_pop[jrand]
         return pop
 
     
@@ -93,8 +91,8 @@ class SADE(continuous_space_optimiser):
             trial_pop = np.empty_like(pop, dtype=object)
             for i, sol in enumerate(pop):
                 # mutation
-                new = adaptive_animal()
-                op = np.random.choice(ops, 1)[0] # Need to change this to pinwheel
+                new = zoo.animal()
+                op = select_strategy(ops)
                 new.dna = op(sol, pop=pop, F=F())
                 # crossover and apply bounds
                 new.dna = tech.binary_crossover(sol.dna, new.dna, Cr())
@@ -105,10 +103,7 @@ class SADE(continuous_space_optimiser):
             # compute objectives
             tech.compute_obj(trial_pop, self.obj)
             # adaptive sotf
-            pop = tech.adaptive_sotf(pop, trial_pop)
-            # guaranteed survivor
-            jrand = np.random.randint(0, self.hypers['N'])
-            pop[jrand] = trial_pop[jrand]
+            pop = tech.sotf(pop, trial_pop)
         return pop
 
     

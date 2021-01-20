@@ -1,8 +1,8 @@
 # FreeLunch - Meta-heuristic optimisation suite for python
 
 
-[![Build Status](https://travis-ci.com/MDCHAMP/FreeLunch.svg?branch=main)](https://travis-ci.com/MDCHAMP/FreeLunch) [![codecov](https://codecov.io/gh/MDCHAMP/FreeLunch/branch/main/graph/badge.svg)](https://codecov.io/gh/MDCHAMP/FreeLunch)
-
+[![Build Status](https://travis-ci.com/MDCHAMP/FreeLunch.svg?branch=main)](https://travis-ci.com/MDCHAMP/FreeLunch) [![codecov](https://codecov.io/gh/MDCHAMP/FreeLunch/branch/main/graph/badge.svg)](https://codecov.io/gh/MDCHAMP/FreeLunch) [![PyPI version](https://badge.fury.io/py/freelunch.svg)](https://badge.fury.io/py/freelunch)  
+![actions pytest](https://github.com/MDCHAMP/FreeLunch/workflows/actions%20pytest/badge.svg) ![actions code quality](https://github.com/MDCHAMP/FreeLunch/workflows/actions%20code%20quality/badge.svg)
 Basically a dump of useful / funny metaheuristics with a (hopefully) simple interface. 
 
 Feeling cute might add automatic benchmarking later idk.
@@ -19,10 +19,10 @@ Your favourite not in the list? Feel free to add it.
 - Simulated Annealing `freelunch.SA`
 - Particle Swarm `freelunch.PSO`
 - Krill Herd `freelunch.KrillHerd`
+- Self-adapting Differential Evolution `freelunch.SADE`
 
 --Coming soon to 0.1.0--
 
-- SADE
 - Quantum Bees
 - Grenade Explosion Method
 - The Penguin one

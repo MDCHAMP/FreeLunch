@@ -171,9 +171,8 @@ class DE_current_to_best_1(adaptable_search_operation):
 DE_methods = {x.name: x for x in [
     DE_rand_1, DE_rand_2, DE_best_1, DE_best_2, DE_current_to_best_1]}
 
+
 # API for probability update
-
-
 def update_strategy_ps(strats):
     hits = np.array([s.hits[-1] for s in strats])
     wins = np.array([s.wins[-1] for s in strats])
@@ -193,3 +192,10 @@ def update_strategy_ps(strats):
     ps = ps / n
     for strat, p in zip(strats, ps):
         strat.update(p)
+
+
+# API for strategy selection 
+def select_strategy(strats):
+    ps = [s.p[-1] for s in strats]
+    ps = ps/np.sum(ps)
+    return np.random.choice(strats, p=ps)
