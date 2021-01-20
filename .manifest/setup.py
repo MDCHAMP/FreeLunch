@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 
 # The text of the README file
-with open('README.md') as f:
+with open('.manifest/README.md') as f:
     rm = f.read()
 
 # This call to setup() does all the work
