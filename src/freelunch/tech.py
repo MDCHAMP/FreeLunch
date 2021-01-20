@@ -5,6 +5,7 @@ Standard / common techniques that are used in several optimisers are abstracted 
 # %% Imports
 
 import numpy as np
+from freelunch.zoo import animal
 
 
 # %% Custom exceptions
@@ -28,7 +29,7 @@ class SolutionCollapseError(Exception):
 def uniform_continuous_init(bounds, N):
     out = np.empty((N,), dtype=object)
     for i in range(N):
-        out[i] = solution(np.array([np.random.uniform(a, b)
+        out[i] = animal(np.array([np.random.uniform(a, b)
                                     for a, b in bounds]))
     return out
 

@@ -35,7 +35,7 @@ class DE(continuous_space_optimiser):
             trial_pop = np.empty_like(pop, dtype=object)
             for i, sol in enumerate(pop):
                 pts = np.random.choice(pop, 3)
-                trial = tech.solution()
+                trial = zoo.animal()
                 trial.dna = (pts[0].dna - pts[1].dna) + self.hypers['F'] * pts[2].dna
                 trial.dna = tech.binary_crossover(sol.dna, trial.dna, self.hypers['Cr'])
                 trial.dna = tech.apply_sticky_bounds(trial.dna, self.bounds)
@@ -258,7 +258,7 @@ class KrillHerd(continuous_space_optimiser):
         winner, loser = self.winners_and_losers(herd)
         spread = loser[0] - winner[0]
         if spread == 0:
-            raise tech.SolutionCollapseError
+            raise zoo.animalCollapseError
 
         # Alpha stores local [0] and target [1] for each krill 
         alpha = [np.zeros_like(herd[1]), np.zeros_like(herd[1])]
