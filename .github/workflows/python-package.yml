@@ -28,7 +28,7 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install flake8 pytest coverage
         pwd
-        ls
+        ls -a
         pip install -r /.manifest/requirements.txt
         pip install -e .
     - name: Lint with flake8
