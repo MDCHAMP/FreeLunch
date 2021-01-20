@@ -8,7 +8,7 @@ with open('README.md') as f:
 # This call to setup() does all the work
 setup(
     name="freelunch",
-    version="0.0.6",
+    version="0.0.7",
     description="Heuristic and meta-heuristic optimisation suite in Python",
     long_description=rm,
     long_description_content_type="text/markdown",
