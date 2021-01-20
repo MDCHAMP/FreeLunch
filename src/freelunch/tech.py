@@ -5,9 +5,8 @@ Standard / common techniques that are used in several optimisers are abstracted 
 # %% Imports
 
 import numpy as np
+from freelunch.zoo import animal
 
-
-from freelunch.zoo import animal, adaptive_animal
 
 # %% Custom exceptions
 
@@ -22,66 +21,6 @@ class ZeroLengthSolutionError(Exception):
 class SolutionCollapseError(Exception):
     '''Exception raised when all solutions are identical'''
 
-
-# %% Solution classes and derivatives
-
-class solution:
-    '''
-    Handy dandy common object for storing trial solutions / other interesting data
-    '''
-
-    def __init__(self, dna=None, fitness=None):
-        self.dna = dna
-        self.fitness = fitness
-
-
-class particle(solution):
-    '''
-    Want to store info on particles in a swarm? I got you bud
-    '''
-
-    def __init__(self, pos=None, vel=None, fitness=None, best=None, best_pos=None):
-        self.pos = pos
-        self.vel = vel
-        self._fitness = None
-        self.fitness = fitness
-        self.best = best
-        self.best_pos = best_pos
-
-    @property
-    def dna(self):
-        return self.pos
-
-    @property
-    def fitness(self):
-        return self._fitness
-
-    @fitness.setter
-    def fitness(self, fitness):
-        if (fitness is not None) and ((self._fitness is None) or (fitness < self.best)):
-            self.best = fitness
-            self.best_pos = self.pos
-        self._fitness = fitness
-
-    def as_sol(self):
-        sol = solution()
-        sol.dna = self.best_pos
-        sol.fitness = self.best
-        return sol
-
-
-class krill(particle):
-
-    '''
-    I am a krill, a type of animal (maybe implemented later), and a type of solution
-
-    I am also basically just a particle...
-    '''
-
-    def __init__(self, pos=None, vel=None, motion=None, forage=None, fitness=None, best=None, best_pos=None):
-        super().__init__(pos, vel, fitness, best, best_pos)
-        self.motion = motion
-        self.forage = forage
 
 
 
@@ -118,23 +57,6 @@ def sotf(olds, news):
     for old, new, i in zip(olds, news, range(len(out))):
         if new.fitness < old.fitness:
             out[i] = new
-        elif old.fitness <= new.fitness:
-            out[i] = old
-        else:
-            raise BadObjectiveFunctionScores(
-                'Winner could not be determined by comparing objective scores. scores:{} and {}'.format(
-                    old.fitness, new.fitness
-                ))
-    return out
-
-
-def adaptive_sotf(olds, news):
-    out = np.empty_like(olds, dtype=object)
-    for old, new, i in zip(olds, news, range(len(out))):
-        print(old.dna, new.dna)
-        if new.fitness < old.fitness:
-            out[i] = new
-            new.on_win()
         elif old.fitness <= new.fitness:
             out[i] = old
         else:

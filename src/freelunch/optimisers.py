@@ -1,15 +1,15 @@
 """
 Main module definitions in here
-
 """
 import numpy as np
 from scipy.spatial.distance import pdist, cdist, squareform
 
 
-from freelunch import tech
+from freelunch import tech, zoo
 from freelunch.base import continuous_space_optimiser
 from freelunch.darwin import DE_methods, update_strategy_ps, adaptable_normal_parameter
 from freelunch.zoo import animal, adaptive_animal
+
 
 class DE(continuous_space_optimiser):
     '''
@@ -37,7 +37,7 @@ class DE(continuous_space_optimiser):
             trial_pop = np.empty_like(pop, dtype=object)
             for i, sol in enumerate(pop):
                 pts = np.random.choice(pop, 3)
-                trial = tech.solution()
+                trial = zoo.animal()
                 trial.dna = (pts[0].dna - pts[1].dna) + self.hypers['F'] * pts[2].dna
                 trial.dna = tech.binary_crossover(sol.dna, trial.dna, self.hypers['Cr'])
                 trial.dna = tech.apply_sticky_bounds(trial.dna, self.bounds)
@@ -48,7 +48,7 @@ class DE(continuous_space_optimiser):
             pop[jrand] = trial_pop[jrand]
         return pop
 
-
+    
 class SADE(continuous_space_optimiser):
     '''
     Self-Adapting Differential evolution
@@ -111,6 +111,7 @@ class SADE(continuous_space_optimiser):
             pop[jrand] = trial_pop[jrand]
         return pop
 
+    
 
 class SA(continuous_space_optimiser):
     '''
@@ -152,7 +153,7 @@ class PSO(continuous_space_optimiser):
         # Function which initialises the swarm
         pop = np.empty((N,), dtype=object)
         for i in range(N):
-            pop[i] = tech.particle(np.array([np.random.uniform(a,b) for a, b in self.bounds]))
+            pop[i] = zoo.particle(np.array([np.random.uniform(a,b) for a, b in self.bounds]))
             pop[i].vel = np.squeeze((2*np.random.rand(self.bounds.shape[0],1)-1)*np.diff(self.bounds))
         return pop
 
@@ -175,7 +176,7 @@ class PSO(continuous_space_optimiser):
 
     def best_particle(self, pop):
         # Particles particles on the wall, who's the bestest of them all
-        best = tech.particle()
+        best = zoo.particle()
         loc = np.squeeze(np.where(pop==min(pop,key=lambda x: x.best)))
         best.fitness = pop[loc].best
         best.pos = pop[loc].best_pos
@@ -258,7 +259,7 @@ class KrillHerd(continuous_space_optimiser):
         # Function which initialises the krill randomly within the bounds 
         pop = np.empty((N,), dtype=object)
         for i in range(N):
-            pop[i] = tech.krill( \
+            pop[i] = zoo.krill( \
                 pos= np.array([np.random.uniform(a,b) for a, b in self.bounds]), \
                 motion= 0.01*np.random.rand(1,self.bounds.shape[0]), \
                 forage= 0.008*np.random.rand(1,self.bounds.shape[0]) + 0.002)
