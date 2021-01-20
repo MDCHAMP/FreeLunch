@@ -19,10 +19,10 @@ Your favourite not in the list? Feel free to add it.
 - Simulated Annealing `freelunch.SA`
 - Particle Swarm `freelunch.PSO`
 - Krill Herd `freelunch.KrillHerd`
+- Self-adapting Differential Evolution `freelunch.SADE`
 
 --Coming soon to 0.1.0--
 
-- SADE
 - Quantum Bees
 - Grenade Explosion Method
 - The Penguin one
