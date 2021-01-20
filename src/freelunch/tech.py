@@ -67,6 +67,22 @@ def sotf(olds, news):
     return out
 
 
+def adaptive_sotf(olds, news):
+    out = np.empty_like(olds, dtype=object)
+    for old, new, i in zip(olds, news, range(len(out))):
+        print(old.dna, new.dna)
+        if new.fitness < old.fitness:
+            out[i] = new
+            new.on_win()
+        elif old.fitness <= new.fitness:
+            out[i] = old
+        else:
+            raise BadObjectiveFunctionScores(
+                'Winner could not be determined by comparing objective scores. scores:{} and {}'.format(
+                    old.fitness, new.fitness
+                ))
+    return out
+
 def apply_sticky_bounds(dna, bounds):
     out = dna[:]
     for i, bound in enumerate(bounds):
