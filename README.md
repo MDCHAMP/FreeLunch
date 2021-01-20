@@ -1,7 +1,7 @@
 # FreeLunch - Meta-heuristic optimisation suite for python
 
 
-[![Build Status](https://travis-ci.com/MDCHAMP/FreeLunch.svg?branch=main)](https://travis-ci.com/MDCHAMP/FreeLunch) [![codecov](https://codecov.io/gh/MDCHAMP/FreeLunch/branch/main/graph/badge.svg)](https://codecov.io/gh/MDCHAMP/FreeLunch) [![PyPI version](https://badge.fury.io/py/freelunch.svg)](https://badge.fury.io/py/freelunch) ![CodeQL](https://github.com/MDCHAMP/FreeLunch/workflows/CodeQL/badge.svg)
+[![Build Status](https://travis-ci.com/MDCHAMP/FreeLunch.svg?branch=main)](https://travis-ci.com/MDCHAMP/FreeLunch) [![codecov](https://codecov.io/gh/MDCHAMP/FreeLunch/branch/main/graph/badge.svg)](https://codecov.io/gh/MDCHAMP/FreeLunch) [![PyPI version](https://badge.fury.io/py/freelunch.svg)](https://badge.fury.io/py/freelunch) ![CodeQL](https://github.com/MDCHAMP/FreeLunch/workflows/CodeQL/badge.svg) ![Test package](https://github.com/MDCHAMP/FreeLunch/workflows/Test%20package/badge.svg)
 
 Basically a dump of useful / funny metaheuristics with a (hopefully) simple interface. 
 
