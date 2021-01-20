@@ -196,5 +196,6 @@ def update_strategy_ps(strats):
 
 # API for strategy selection 
 def select_strategy(strats):
-    ps = [s.p for s in strats]
+    ps = [s.p[-1] for s in strats]
+    ps = ps/np.sum(ps)
     return np.random.choice(strats, p=ps)
