@@ -1,6 +1,5 @@
 """
 Main module definitions in here
-
 """
 import numpy as np
 from scipy.spatial.distance import pdist, cdist, squareform
@@ -8,6 +7,9 @@ from scipy.spatial.distance import pdist, cdist, squareform
 
 from freelunch import tech, zoo
 from freelunch.base import continuous_space_optimiser
+from freelunch.darwin import DE_methods, update_strategy_ps, adaptable_normal_parameter
+from freelunch.zoo import animal, adaptive_animal
+
 
 class DE(continuous_space_optimiser):
     '''
@@ -46,6 +48,70 @@ class DE(continuous_space_optimiser):
             pop[jrand] = trial_pop[jrand]
         return pop
 
+    
+class SADE(continuous_space_optimiser):
+    '''
+    Self-Adapting Differential evolution
+    '''
+    name = 'Self-Adapting Differential Evolution'
+    tags = ['continuous domain', 'population based', 'evolutionary', 'adaptive']
+    hyper_definitions = {
+        'N':'Population size (int)',
+        'G':'Number of generations (int)',
+        'F_u':'Mutation parameter initial mean (float in [0,2])',
+        'F_sig':'Mutation parameter initial standard deviation (float in [0,1])',
+        'Cr_u':'Crossover probability initial mean (float in [0,1])',
+        'Cr_sig':'Crossover probability initial standard deviation (float in [0,1])',
+        'Lp':'Learning period'
+    }
+    hyper_defaults = {
+        'N':100,
+        'G':100,
+        'F_u':0.5,
+        'F_sig':0.2,
+        'Cr_u':0.5,
+        'Cr_sig':0.2,
+        'Lp':10
+    }
+
+    def run(self):
+        #initial params and operations
+        F = adaptable_normal_parameter(self.hypers['F_u'], self.hypers['F_sig'])
+        Cr = adaptable_normal_parameter(self.hypers['Cr_u'], self.hypers['Cr_sig'])
+        ops = np.array([o() for o in DE_methods.values()])
+        #initial pop 
+        pop = tech.uniform_continuous_init(self.bounds, self.hypers['N'])
+        tech.compute_obj(pop, self.obj)
+        #main loop
+        for gen in range(self.hypers['G']):
+            # parameter update
+            if gen != 0 and gen%self.hypers['Lp']==0:
+                update_strategy_ps(ops)
+                F.update()
+                Cr.update()
+            #trial pop
+            trial_pop = np.empty_like(pop, dtype=object)
+            for i, sol in enumerate(pop):
+                # mutation
+                new = adaptive_animal()
+                op = np.random.choice(ops, 1)[0] # Need to change this to pinwheel
+                new.dna = op(sol, pop=pop, F=F())
+                # crossover and apply bounds
+                new.dna = tech.binary_crossover(sol.dna, new.dna, Cr())
+                new.dna = tech.apply_sticky_bounds(new.dna, self.bounds)
+                # Record adaptions
+                new.tech.extend([op, F, Cr])
+                trial_pop[i] = new
+            # compute objectives
+            tech.compute_obj(trial_pop, self.obj)
+            # adaptive sotf
+            pop = tech.adaptive_sotf(pop, trial_pop)
+            # guaranteed survivor
+            jrand = np.random.randint(0, self.hypers['N'])
+            pop[jrand] = trial_pop[jrand]
+        return pop
+
+    
 
 class SA(continuous_space_optimiser):
     '''
