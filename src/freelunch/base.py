@@ -27,7 +27,7 @@ class optimiser:
 
     def __call__(self, nruns=1, return_m=1, full_output=False):
         '''
-        api for running the optimisation
+        API for running the optimisation
         '''
         if self.obj is None:
             raise NotImplementedError('No optimiser selected')
@@ -57,21 +57,21 @@ class optimiser:
 
     def run(self):
         if self.obj is None:
-            raise NotImplementedError('No optimiser selected')
+            raise NotImplementedError('No objective function selected')
 
     def run_quick(self):
         if self.obj is None:
-            raise NotImplementedError('No optimiser selected')
+            raise NotImplementedError('No objective function selected')
 
 
 
 class continuous_space_optimiser(optimiser):
     '''
-    Base class for continous space optimisers i.e DE, PSO, SA etc.
+    Base class for continuous space optimisers i.e DE, PSO, SA etc.
     '''
 
 class discrete_space_optimiser(optimiser):
     '''
-    Base class for discrete space optimisers ie GA, GP etc.
+    Base class for discrete space optimisers i.e GA, GP etc.
     '''
 
