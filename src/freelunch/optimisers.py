@@ -44,8 +44,6 @@ class DE(continuous_space_optimiser):
                 trial_pop[i] = trial
             tech.compute_obj(trial_pop, self.obj)
             pop = tech.sotf(pop, trial_pop)
-            jrand = np.random.randint(0, self.hypers['N'])
-            pop[jrand] = trial_pop[jrand]
         return pop
 
     
@@ -105,10 +103,7 @@ class SADE(continuous_space_optimiser):
             # compute objectives
             tech.compute_obj(trial_pop, self.obj)
             # adaptive sotf
-            pop = tech.adaptive_sotf(pop, trial_pop)
-            # guaranteed survivor
-            jrand = np.random.randint(0, self.hypers['N'])
-            pop[jrand] = trial_pop[jrand]
+            pop = tech.sotf(pop, trial_pop)
         return pop
 
     
