@@ -7,6 +7,8 @@ Standard / common techniques that are used in several optimisers are abstracted 
 import numpy as np
 
 
+from freelunch.zoo import animal, adaptive_animal
+
 # %% Custom exceptions
 
 class BadObjectiveFunctionScores(Exception):
@@ -88,7 +90,7 @@ class krill(particle):
 def uniform_continuous_init(bounds, N):
     out = np.empty((N,), dtype=object)
     for i in range(N):
-        out[i] = solution(np.array([np.random.uniform(a, b)
+        out[i] = animal(np.array([np.random.uniform(a, b)
                                     for a, b in bounds]))
     return out
 
@@ -116,6 +118,23 @@ def sotf(olds, news):
     for old, new, i in zip(olds, news, range(len(out))):
         if new.fitness < old.fitness:
             out[i] = new
+        elif old.fitness <= new.fitness:
+            out[i] = old
+        else:
+            raise BadObjectiveFunctionScores(
+                'Winner could not be determined by comparing objective scores. scores:{} and {}'.format(
+                    old.fitness, new.fitness
+                ))
+    return out
+
+
+def adaptive_sotf(olds, news):
+    out = np.empty_like(olds, dtype=object)
+    for old, new, i in zip(olds, news, range(len(out))):
+        print(old.dna, new.dna)
+        if new.fitness < old.fitness:
+            out[i] = new
+            new.on_win()
         elif old.fitness <= new.fitness:
             out[i] = old
         else:
