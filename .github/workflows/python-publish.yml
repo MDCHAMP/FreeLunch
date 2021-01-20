@@ -27,5 +27,5 @@ jobs:
         TWINE_USERNAME: ${{ secrets.PYPIUSERNAME }}
         TWINE_PASSWORD: ${{ secrets.PYPIPASSWORD }}
       run: |
-        python setup.py sdist bdist_wheel
+        python .maifest/setup.py sdist bdist_wheel
         twine upload dist/*
