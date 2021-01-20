@@ -49,6 +49,9 @@ def binary_crossover(sol1, sol2, p):
             out[i] = a
         else:
             out[i] = b
+    #Ensure at least one difference
+    jrand = np.random.randint(0, len(out))
+    out[jrand] = sol2[jrand]
     return out
 
 
