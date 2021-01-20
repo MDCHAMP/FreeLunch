@@ -29,6 +29,27 @@ class animal:
         self._fitness = fitness
 
 
+class adaptive_animal(animal):
+    '''
+    big brain time
+    '''
+
+    def __init__(self, dna=None, fitness=None):
+        self.dna = dna
+        self.fitness = fitness
+        self.tech = []
+
+    def on_win(self):
+        for t in self.tech:
+            t.win()
+        self.tech = []
+
+
+# %% All that the light touches is our domain
+
+
+
+
 class particle(animal):
     '''
     Want to store info on particles in a swarm? I got you bud
