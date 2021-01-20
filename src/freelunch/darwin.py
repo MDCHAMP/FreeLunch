@@ -43,8 +43,8 @@ class normally_varying_parameter(parameter):
 
     def __init__(self, u, sig):
         self.u = u
-        self.sig = sig
-        self.value
+        self.sig = sig 
+        self.value = np.random.normal(self.u, self.sig)
 
     def op(self):
         self.value = np.random.normal(self.u, self.sig)
@@ -58,15 +58,16 @@ class adaptable_normal_parameter(normally_varying_parameter):
     '''
 
     def __init__(self, u, sig):
-        super().__init__(self, u, sig)
+        super().__init__(u, sig)
         self.wins = []
 
     def win(self):
-        self.hits.append(self.value)
+        self.wins.append(self.value)
 
     def update(self):
-        self.u = np.mean(self.hits)
-        self.sig = np.std(self.hits)
+        if len(self.wins) > 0:
+            self.u = np.mean(self.wins)
+            self.sig = np.std(self.wins)
         self.wins = []
 
 
@@ -87,15 +88,15 @@ class adaptable_search_operation():
         self.wins = [0]
         self.p = [1]
 
-    def op(self, *parents, pop=None):
+    def op(self, *parents, **hypers):
         return parents[0]
 
     def win(self):
-        self.wins[:-1] += 1
+        self.wins[-1] += 1
 
-    def __call__(self, *parents, pop=None):
+    def __call__(self, *parents, **hypers):
         self.hits[-1] += 1
-        return self.op(*parents, pop=None)
+        return self.op(*parents, **hypers)
 
     def update(self, p):
         self.hits.append(0)
@@ -111,9 +112,10 @@ class DE_rand_1(adaptable_search_operation):
     hypers = {'F': 0.5}
 
     def op(self, *parents, pop=None, F=hypers['F']):
-        a, b, c = np.random.choice(pop, 3)
+        idxs = np.random.randint(0, len(pop), 3)
+        a, b, c = pop[idxs]
         # Assumes numpy array vectorisation
-        return a + F * (b - c)
+        return a.dna+ F * (b.dna - c.dna)
 
 
 class DE_rand_2(adaptable_search_operation):
@@ -122,8 +124,9 @@ class DE_rand_2(adaptable_search_operation):
     hypers = {'F': 0.5}
 
     def op(self, *parents, pop=None, F=hypers['F']):
-        a, b, c, d, e = np.random.choice(pop, 5)
-        return a + F * (b - c) + F * (d - e)
+        idxs = np.random.randint(0, len(pop), 5)
+        a, b, c, d, e = pop[idxs]
+        return a.dna + F * (b.dna - c.dna) + F * (d.dna - e.dna)
 
 
 class DE_best_1(adaptable_search_operation):
@@ -132,10 +135,11 @@ class DE_best_1(adaptable_search_operation):
     hypers = {'F': 0.5}
 
     def op(self, *parents, pop=None, F=hypers['F']):
-        a, b = np.random.choice(pop, 2)
+        idxs = np.random.randint(0, len(pop), 2)
+        a, b = pop[idxs]
         best = min(pop, key=lambda x: x.fitness)
         # NOTE: This is a prime location to look for shitty bugs based on the use of min()
-        return best + F * (a - b)
+        return best.dna + F * (a.dna - b.dna)
 
 
 class DE_best_2(adaptable_search_operation):
@@ -144,21 +148,23 @@ class DE_best_2(adaptable_search_operation):
     hypers = {'F': 0.5}
 
     def op(self, *parents, pop=None, F=hypers['F']):
-        a, b, c, d = np.random.choice(pop, 4)
+        idxs = np.random.randint(0, len(pop), 4)
+        a, b, c, d = pop[idxs]
         best = min(pop, key=lambda x: x.fitness)
-        return best + F * (a - b) + F * (c - d)
+        return best.dna + F * (a.dna - b.dna) + F * (c.dna - d.dna)
 
 
 class DE_current_to_best_1(adaptable_search_operation):
     name = 'current/1/bin'
-    n_parents = 2
+    n_parents = 1
     hypers = {'F': 0.5}
 
     def op(self, *parents, pop=None, F=hypers['F']):
-        x = parents[:1]
-        a, b, c = np.random.choice(pop, 3)
+        x = parents[0]
+        idxs = np.random.randint(0, len(pop), 3)
+        a, b, c = pop[idxs] 
         best = min(pop, key=lambda x: x.fitness)
-        return x + F * (best - a) + F * (b - c)
+        return x.dna + F * (best.dna - a.dna) + F * (b.dna - c.dna)
 
 
 # Exportable dictionary
@@ -168,7 +174,7 @@ DE_methods = {x.name: x for x in [
 # API for probability update
 
 
-def update_strategy_p(strats):
+def update_strategy_ps(strats):
     hits = np.array([s.hits[-1] for s in strats])
     wins = np.array([s.wins[-1] for s in strats])
     total_hits = np.sum(hits)
