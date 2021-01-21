@@ -31,17 +31,25 @@ class DE(continuous_space_optimiser):
     }
 
     def run(self):
+        # initial population
         pop = tech.uniform_continuous_init(self.bounds, self.hypers['N'])
         tech.compute_obj(pop, self.obj)
+        # main loop
         for gen in range(self.hypers['G']):
+            #generate trial population
             trial_pop = np.empty_like(pop, dtype=object)
             for i, sol in enumerate(pop):
+                # sample parents
                 pts = np.random.choice(pop, 3)
+                # create offspring
                 trial = zoo.animal()
                 trial.dna = (pts[0].dna - pts[1].dna) + self.hypers['F'] * pts[2].dna
+                # binomial crossover
                 trial.dna = tech.binary_crossover(sol.dna, trial.dna, self.hypers['Cr'])
+                #apply bounds
                 trial.dna = tech.apply_sticky_bounds(trial.dna, self.bounds)
                 trial_pop[i] = trial
+            # sotf
             tech.compute_obj(trial_pop, self.obj)
             pop = tech.sotf(pop, trial_pop)
         return pop
