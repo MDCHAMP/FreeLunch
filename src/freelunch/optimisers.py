@@ -7,7 +7,7 @@ from scipy.spatial.distance import pdist, cdist, squareform
 
 from freelunch import tech, zoo
 from freelunch.base import continuous_space_optimiser
-from freelunch.darwin import DE_methods, update_strategy_ps, select_strategy, adaptable_normal_parameter
+from freelunch.darwin import DE_methods, update_strategy_ps, select_strategy, adaptable_normal_parameter, linearly_varying_parameter
 
 
 
@@ -114,7 +114,6 @@ class SADE(continuous_space_optimiser):
             pop = tech.sotf(pop, trial_pop)
         return pop
 
-    
 
 class SA(continuous_space_optimiser):
     '''
@@ -123,20 +122,60 @@ class SA(continuous_space_optimiser):
     name = 'Simulated Annealing'
     tags = ['Continuous domain', 'Annealing']
     hyper_definitions = {
+        'N':'number of (independent) runs',
         'K':'number of timesteps (int)',
-        'T':'Temperatures (np.ndarray, T.shape=(k,))',
-        'P':'Acceptance probability (P(e, e, T) -> bool)'
+        'T0':'Max Temperature (float)',
+    }
+    hyper_defaults = {  # Super simple and prescriptive for now. 
+        'N':100,
+        'K':1000,
+        'T0':50,
     }
 
+    def P(self, e_old, e_new, T): # i.e. M-H, Kirkpatrick et al.
+        if e_new < e_new: return 1
+        else: return np.exp(-(e_new - e_old)/ T)
+
+    def T(self, k): # logistic hardcoded for now
+        return self.hypers['T0']/np.log(k)
+
+    def neighbour(self, old): # gaussian perturbation with sticky bounds
+        new = zoo.animal()
+        new.dna = np.empty_like(old.dna)
+        idxs = np.random.choice(len(old.dna), 1, replace=False)
+        for i, u, bound in zip(idxs, old.dna, self.bounds):
+            sig = (bound[1] - bound[0]) / 10
+            new.dna[i] = np.random.normal(u, sig)
+        tech.apply_sticky_bounds(new.dna, self.bounds)
+        return new
+
     def run(self):
-        raise NotImplementedError
+        # initialise
+        old = tech.uniform_continuous_init(self.bounds, self.hypers['N'])
+        tech.compute_obj(old, self.obj)
+        best = min(old, key=lambda x: x.fitness)
+        # main loop
+        for k in range(self.hypers['K']):
+            #generate temperature
+            T = self.T(k+1)
+            new = np.empty_like(old)
+            for i, o in enumerate(old):
+                #generate neighbour
+                new[i] = self.neighbour(o)
+            tech.compute_obj(new, self.obj)
+            # selection with probability P
+            for i, o, n in zip(range(self.hypers['N']), old, new):
+                if self.P(o.fitness, n.fitness, T) >= np.random.uniform(0,1): 
+                    old[i] = new[i]
+                if n.fitness < best.fitness:
+                    best = n
+        return np.array([best])
 
 
 class PSO(continuous_space_optimiser):
     '''
     Base Class for Particle Swarm Optimisations
     '''
-
     name = 'Particle Swarm Optimisation'
     tags = ['Continuous domain', 'Particle swarm']
     hyper_definitions = {
