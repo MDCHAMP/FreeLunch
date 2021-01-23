@@ -4,10 +4,10 @@ Testing
 import pytest
 import numpy as np
 
-from freelunch import DE, SA, PSO, SADE, KrillHerd
+from freelunch import DE, SA, PSO, SADE, KrillHerd, SA
 from freelunch.benchmarks import ackley, exponential, happycat, periodic
 
-optimiser_classes = [DE, PSO, SADE, KrillHerd]
+optimiser_classes = [SA, DE, PSO, SADE, KrillHerd]
 benchmark_problems = [ackley, exponential, happycat, periodic]
 dims = [1,2,3,4]
 
