@@ -107,19 +107,6 @@ def compute_obj(pop, obj):
     return pop
 
 
-def binary_crossover(sol1, sol2, p):
-    out = np.empty_like(sol1)
-    for a, b, i in zip(sol1, sol2, range(len(sol1))):
-        if np.random.uniform(0, 1) < p:
-            out[i] = a
-        else:
-            out[i] = b
-    #Ensure at least one difference
-    jrand = np.random.randint(0, len(out))
-    out[jrand] = sol2[jrand]
-    return out
-
-
 def sotf(olds, news):
     out = np.empty_like(olds, dtype=object)
     for old, new, i in zip(olds, news, range(len(out))):

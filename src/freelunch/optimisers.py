@@ -5,9 +5,10 @@ import numpy as np
 from scipy.spatial.distance import pdist, cdist, squareform
 
 
-from freelunch import tech, zoo
+from freelunch import tech, zoo, darwin
 from freelunch.base import continuous_space_optimiser
-from freelunch.darwin import DE_methods, update_strategy_ps, select_strategy, adaptable_normal_parameter, linearly_varying_parameter
+from freelunch.darwin import DE_methods, update_strategy_ps, select_strategy
+from freelunch.tech import adaptable_normal_parameter, linearly_varying_parameter
 
 
 
@@ -32,6 +33,7 @@ class DE(continuous_space_optimiser):
 
     def run(self):
         # initial population
+        breeder = darwin.binary_crossover({'Cr':self.hypers['Cr']})
         pop = tech.uniform_continuous_init(self.bounds, self.hypers['N'])
         tech.compute_obj(pop, self.obj)
         # main loop
@@ -45,7 +47,7 @@ class DE(continuous_space_optimiser):
                 trial = zoo.animal()
                 trial.dna = (pts[0].dna - pts[1].dna) + self.hypers['F'] * pts[2].dna
                 # binomial crossover
-                trial.dna = tech.binary_crossover(sol.dna, trial.dna, self.hypers['Cr'])
+                trial.dna = breeder.breed(sol.dna, trial.dna)
                 #apply bounds
                 trial.dna = tech.apply_sticky_bounds(trial.dna, self.bounds)
                 trial_pop[i] = trial
@@ -82,6 +84,7 @@ class SADE(continuous_space_optimiser):
 
     def run(self):
         #initial params and operations
+        breeder = darwin.binary_crossover()
         F = adaptable_normal_parameter(self.hypers['F_u'], self.hypers['F_sig'])
         Cr = adaptable_normal_parameter(self.hypers['Cr_u'], self.hypers['Cr_sig'])
         ops = np.array([o() for o in DE_methods.values()])
@@ -103,7 +106,7 @@ class SADE(continuous_space_optimiser):
                 op = select_strategy(ops)
                 new.dna = op(sol, pop=pop, F=F())
                 # crossover and apply bounds
-                new.dna = tech.binary_crossover(sol.dna, new.dna, Cr())
+                new.dna = breeder.breed(sol.dna, new.dna, Cr())
                 new.dna = tech.apply_sticky_bounds(new.dna, self.bounds)
                 # Record adaptions
                 new.tech.extend([op, F, Cr])
@@ -441,6 +444,7 @@ class KrillHerd(continuous_space_optimiser):
 
     def run(self):
 
+        breeder = darwin.binary_crossover()    
         pop = self.init_pop(self.hypers['N'])
 
         # Compute first set of fitness
@@ -481,7 +485,7 @@ class KrillHerd(continuous_space_optimiser):
                 xover_herd = herd[1][np.random.randint(self.hypers['N'],size=(self.hypers['N'],)),:]
                 for i,h in enumerate(herd[1]):
                     # Implement 1-to-gbest X-over not 1-to-rand as in paper...
-                    xover_herd[i,:] = tech.binary_crossover(h,champion[1],crossover_prob[i])
+                    xover_herd[i,:] = breeder.breed(h,champion[1],crossover_prob[i])
                 current_herd = xover_herd
             else:
                 current_herd = herd[1]
@@ -490,6 +494,7 @@ class KrillHerd(continuous_space_optimiser):
             # Mutation
             if self.hypers['Mutate']:
                 mutate_prob = 0.05/Khat_best
+                # This is a hack should fix
                 mutate_prob[mutate_prob==np.Inf] = 0
                 inds = np.random.randint(self.hypers['N'],size=(self.hypers['N'],2))
                 mutates = np.random.rand(self.hypers['N'],self.obj.n) < mutate_prob[:,None]

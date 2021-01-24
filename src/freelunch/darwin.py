@@ -136,3 +136,39 @@ def select_strategy(strats):
     ps = [s.p[-1] for s in strats]
     ps = ps/np.sum(ps)
     return np.random.choice(strats, p=ps)
+
+
+# %% Crossover operations
+
+class Crossover():
+    ''' 
+    Generic crossover operation
+    '''
+
+    name='Crossover'
+    hypers={}
+
+    def __init__(self,hypers=hypers):
+        self.hypers = hypers
+
+    def breed(self, parent1, parent2):
+        raise NotImplementedError
+
+class binary_crossover(Crossover):
+
+    name='Binary Crossover'
+    hypers={
+        'Cr':0.2
+    }
+
+    def breed(self, parent1, parent2, p=hypers['Cr']):
+        out = np.empty_like(parent1)
+        for a, b, i in zip(parent1, parent2, range(len(parent1))):
+            if np.random.uniform(0, 1) < p:
+                out[i] = a
+            else:
+                out[i] = b
+        #Ensure at least one difference
+        jrand = np.random.randint(0, len(out))
+        out[jrand] = parent2[jrand]
+        return out
