@@ -22,6 +22,71 @@ class SolutionCollapseError(Exception):
     '''Exception raised when all solutions are identical'''
 
 
+# %% Parameter classes and derivatives
+
+class parameter:
+    '''
+    Boiler plate for parameter - 
+    idk as far as best practice is concerned, 
+    seems like nonsense to me.
+    '''
+
+    def __init__(self, value=None):
+        self.value = value
+
+    def __call__(self, *args):
+        return self.op()
+
+    def op(self):
+        return self.value
+
+
+class linearly_varying_parameter(parameter):
+
+    def __init__(self, a0, an, n):
+        self.a0 = a0
+        self.an = an
+        self.n = n
+        self.values = np.linspace(a0, an, n)
+
+    def op(self, k):
+        return self.values[k]
+
+
+class normally_varying_parameter(parameter):
+
+    def __init__(self, u, sig):
+        self.u = u
+        self.sig = sig 
+        self.value = np.random.normal(self.u, self.sig)
+
+    def op(self):
+        self.value = np.random.normal(self.u, self.sig)
+        return self.value
+
+
+class adaptable_normal_parameter(normally_varying_parameter):
+    '''
+    13th rule for life:
+    meta-something > something
+    '''
+
+    def __init__(self, u, sig):
+        super().__init__(u, sig)
+        self.wins = []
+
+    def win(self):
+        self.wins.append(self.value)
+
+    def update(self):
+        if len(self.wins) > 0:
+            self.u = np.mean(self.wins)
+            self.sig = np.std(self.wins)
+        self.wins = []
+
+
+
+
 
 
 # %% Common methods
