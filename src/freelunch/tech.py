@@ -92,3 +92,15 @@ def bounds_as_mat(bounds):
 def lin_reduce(lims, n, n_max):
     # Linearly reduce with generations, e.g. inertia values
     return lims[1] + (lims[0]-lims[1])*n/n_max
+
+
+def pdist(A,B=None):
+    '''
+    Pairwise Euclidean Distance inside array
+    '''
+    
+    if B is None:
+        B = A
+
+    return np.sqrt(np.sum((A[:,None]-B[None,:])**2,axis=-1))
+
