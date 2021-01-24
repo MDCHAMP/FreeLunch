@@ -44,7 +44,7 @@ class adaptable_search_operation():
 
 
 class DE_rand_1(adaptable_search_operation):
-    name = 'rand/1/bin'
+    name = 'rand/1'
     n_parents = 0
     hypers = {'F': 0.5}
 
@@ -56,7 +56,7 @@ class DE_rand_1(adaptable_search_operation):
 
 
 class DE_rand_2(adaptable_search_operation):
-    name = 'rand/2/bin'
+    name = 'rand/2'
     n_parents = 0
     hypers = {'F': 0.5}
 
@@ -67,7 +67,7 @@ class DE_rand_2(adaptable_search_operation):
 
 
 class DE_best_1(adaptable_search_operation):
-    name = 'best/1/bin'
+    name = 'best/1'
     n_parents = 0
     hypers = {'F': 0.5}
 
@@ -80,7 +80,7 @@ class DE_best_1(adaptable_search_operation):
 
 
 class DE_best_2(adaptable_search_operation):
-    name = 'best/2/bin'
+    name = 'best/2'
     n_parents = 0
     hypers = {'F': 0.5}
 
@@ -92,7 +92,7 @@ class DE_best_2(adaptable_search_operation):
 
 
 class DE_current_to_best_1(adaptable_search_operation):
-    name = 'current/1/bin'
+    name = 'current/1'
     n_parents = 1
     hypers = {'F': 0.5}
 
