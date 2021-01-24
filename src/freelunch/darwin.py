@@ -105,8 +105,7 @@ class DE_current_to_best_1(adaptable_search_operation):
 
 
 # Exportable dictionary
-DE_methods = {x.name: x for x in [
-    DE_rand_1, DE_rand_2, DE_best_1, DE_best_2, DE_current_to_best_1]}
+DE_methods = {x.name: x for x in adaptable_search_operation.__subclasses__()}
 
 
 # API for probability update
