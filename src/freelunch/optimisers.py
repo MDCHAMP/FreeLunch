@@ -19,18 +19,23 @@ class DE(continuous_space_optimiser):
         'N':'Population size (int)',
         'G':'Number of generations (int)',
         'F':'Mutation parameter (float in [0,1])',
-        'Cr':'Crossover probability (float in [0,1])'
+        'Cr':'Crossover probability (float in [0,1])',
+        'Mut':'Mutation Strategy (str or adaptable_search_operation)',
+        'XOver':'Crossover Strategy (str or Crossover)'
     }
     hyper_defaults = {
         'N':100,
         'G':100,
         'F':0.5,
-        'Cr':0.2
+        'Cr':0.2,
+        'Mut':'DE/rand/1',
+        'XOver':'binary'
     }
 
     def run(self):
         # initial population
-        breeder = darwin.binary_crossover({'Cr':self.hypers['Cr']})
+        mutator = darwin.parse_adaptable_search(self.hypers['Mut'])
+        breeder = darwin.parse_crossover(self.hypers['XOver'])({'Cr':self.hypers['Cr']})
         pop = tech.uniform_continuous_init(self.bounds, self.hypers['N'])
         tech.compute_obj(pop, self.obj)
         # main loop
@@ -42,7 +47,8 @@ class DE(continuous_space_optimiser):
                 pts = np.random.choice(pop, 3)
                 # create offspring
                 trial = zoo.animal()
-                trial.dna = (pts[0].dna - pts[1].dna) + self.hypers['F'] * pts[2].dna
+                #trial.dna = (pts[0].dna - pts[1].dna) + self.hypers['F'] * pts[2].dna
+                trial.dna = mutator.op(sol,pop=pop)
                 # binomial crossover
                 trial.dna = breeder.breed(sol.dna, trial.dna)
                 #apply bounds
@@ -310,7 +316,7 @@ class KrillHerd(continuous_space_optimiser):
         'Nmax': 'Maximum induced speed in the paper somewhat confusingly (float64)',
         'Vf':'Foraging speed (float64)',
         'Dmax':'Maximum diffusion speed in [0.002,0.010] (float64)',
-        'Crossover':'Implement crossover (bool)',
+        'Crossover':'Implement crossover (None or str or Crossover)',
         'Mutate':'Implement mutation (bool)',
         'Mu':'Mutation mixing parameter in (0,1) (float64)'
     }
@@ -324,7 +330,7 @@ class KrillHerd(continuous_space_optimiser):
         'Nmax':0.01, 
         'Vf':0.02, 
         'Dmax':0.005, # NOTE: in the paper this is chosen as a random number in [0.002,0.010]
-        'Crossover':True,
+        'Crossover':'binary',
         'Mutate':True,
         'Mu':0.5
     }
@@ -473,7 +479,8 @@ class KrillHerd(continuous_space_optimiser):
 
     def run(self):
 
-        breeder = darwin.binary_crossover()    
+        if self.hypers['Crossover'] is not None:
+            breeder = darwin.parse_crossover(self.hypers['Crossover'])()
         pop = self.init_pop(self.hypers['N'])
 
         # Compute first set of fitness
@@ -509,7 +516,7 @@ class KrillHerd(continuous_space_optimiser):
             champion = self.all_time_champion(pop)
 
             # Crossover
-            if self.hypers['Crossover']:
+            if self.hypers['Crossover'] is not None:
                 crossover_prob = 0.2*Khat_best
                 xover_herd = herd[1][np.random.randint(self.hypers['N'],size=(self.hypers['N'],)),:]
                 for i,h in enumerate(herd[1]):
@@ -522,9 +529,9 @@ class KrillHerd(continuous_space_optimiser):
                 
             # Mutation
             if self.hypers['Mutate']:
-                mutate_prob = 0.05/Khat_best
-                # This is a hack should fix
-                mutate_prob[mutate_prob==np.Inf] = 0
+                mutate_prob = Khat_best
+                mutate_prob[np.where(Khat_best != 0)] = 0.05/Khat_best[np.where(Khat_best != 0)]
+
                 inds = np.random.randint(self.hypers['N'],size=(self.hypers['N'],2))
                 mutates = np.random.rand(self.hypers['N'],self.obj.n) < mutate_prob[:,None]
                 mutant_dna = champion[1] + self.hypers['Mu']*(herd[1][inds[:,0],:]-herd[1][inds[:,1],:])

@@ -105,7 +105,6 @@ class DE_current_1(adaptable_search_operation):
 
 
 
-
 # %% Crossover operations
 
 class Crossover():
@@ -122,7 +121,7 @@ class Crossover():
     def breed(self, parent1, parent2):
         raise NotImplementedError
 
-class binary_crossover(Crossover):
+class XOver_binary(Crossover):
 
     name='Binary Crossover'
     hypers={
@@ -140,3 +139,38 @@ class binary_crossover(Crossover):
         jrand = np.random.randint(0, len(out))
         out[jrand] = parent2[jrand]
         return out
+
+
+
+# %% Module Functions
+
+
+# All DE mutation methods defined prior to this
+def parse_adaptable_search(op):
+    '''
+    Parsing different search operations as strings or handles
+    '''
+    if isinstance(op, adaptable_search_operation):
+        return op
+    elif isinstance(op, str):
+        op = op.replace('/','_')
+        if op.startswith('DE_'):
+            return globals()[op]
+        else:
+            return globals()["DE_"+op]
+
+
+# All DE mutation methods defined prior to this
+def parse_crossover(op):
+    '''
+    Parsing different search operations as strings or handles
+    '''
+    if isinstance(op, Crossover):
+        return op
+    elif isinstance(op, str):
+        op = op.replace('/','_')
+        if op.startswith('XOver_'):
+            return globals()[op]
+        else:
+            return globals()["XOver_"+op]
+
