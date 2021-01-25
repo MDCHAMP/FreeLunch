@@ -3,9 +3,9 @@ Main module definitions in here
 """
 import numpy as np
 
-from freelunch import tech, zoo
+from freelunch import tech, zoo, darwin
 from freelunch.base import continuous_space_optimiser
-from freelunch.darwin import DE_methods, update_strategy_ps, select_strategy, adaptable_normal_parameter, linearly_varying_parameter
+from freelunch.tech import adaptable_normal_parameter, linearly_varying_parameter
 
 
 
@@ -19,17 +19,23 @@ class DE(continuous_space_optimiser):
         'N':'Population size (int)',
         'G':'Number of generations (int)',
         'F':'Mutation parameter (float in [0,1])',
-        'Cr':'Crossover probability (float in [0,1])'
+        'Cr':'Crossover probability (float in [0,1])',
+        'Mut':'Mutation Strategy (str or adaptable_search_operation)',
+        'XOver':'Crossover Strategy (str or Crossover)'
     }
     hyper_defaults = {
         'N':100,
         'G':100,
         'F':0.5,
-        'Cr':0.2
+        'Cr':0.2,
+        'Mut':'DE/rand/1',
+        'XOver':'binary'
     }
 
     def run(self):
         # initial population
+        mutator = darwin.parse_adaptable_search(self.hypers['Mut'])
+        breeder = darwin.parse_crossover(self.hypers['XOver'])({'Cr':self.hypers['Cr']})
         pop = tech.uniform_continuous_init(self.bounds, self.hypers['N'])
         tech.compute_obj(pop, self.obj)
         # main loop
@@ -41,9 +47,10 @@ class DE(continuous_space_optimiser):
                 pts = np.random.choice(pop, 3)
                 # create offspring
                 trial = zoo.animal()
-                trial.dna = (pts[0].dna - pts[1].dna) + self.hypers['F'] * pts[2].dna
+                #trial.dna = (pts[0].dna - pts[1].dna) + self.hypers['F'] * pts[2].dna
+                trial.dna = mutator.op(sol,pop=pop)
                 # binomial crossover
-                trial.dna = tech.binary_crossover(sol.dna, trial.dna, self.hypers['Cr'])
+                trial.dna = breeder.breed(sol.dna, trial.dna)
                 #apply bounds
                 trial.dna = tech.apply_sticky_bounds(trial.dna, self.bounds)
                 trial_pop[i] = trial
@@ -66,7 +73,8 @@ class SADE(continuous_space_optimiser):
         'F_sig':'Mutation parameter initial standard deviation (float in [0,1])',
         'Cr_u':'Crossover probability initial mean (float in [0,1])',
         'Cr_sig':'Crossover probability initial standard deviation (float in [0,1])',
-        'Lp':'Learning period'
+        'Lp':'Learning period',
+        'XOver':'Crossover Strategy (str or Crossover)'
     }
     hyper_defaults = {
         'N':100,
@@ -75,14 +83,48 @@ class SADE(continuous_space_optimiser):
         'F_sig':0.2,
         'Cr_u':0.5,
         'Cr_sig':0.2,
-        'Lp':10
+        'Lp':10,
+        'XOver':'binary'
     }
+
+    # Exportable dictionary
+    DE_methods = [x() for x in darwin.adaptable_search_operation.__subclasses__()]
+
+
+    # API for probability update
+    def update_strategy_ps(self,strats):
+        hits = np.array([s.hits[-1] for s in strats])
+        wins = np.array([s.wins[-1] for s in strats])
+        total_hits = np.sum(hits)
+        total_wins = np.sum(wins)
+        ps = np.zeros_like(hits)
+        # update model
+        # prevent zero division with a bit of fun bias!!
+        dem = np.sum(wins * (hits + wins)) + 1
+        for i, h, w in zip(range(len(ps)), hits, wins):
+            num = h * (total_hits + total_wins)
+            ps[i] = num / dem
+        # normalise
+        n = np.sum(ps)
+        if n == 0:
+            ps += 1
+        ps = ps / n
+        for strat, p in zip(strats, ps):
+            strat.update(p)
+
+
+    # API for strategy selection 
+    def select_strategy(self,strats):
+        ps = [s.p[-1] for s in strats]
+        ps = ps/np.sum(ps)
+        return np.random.choice(strats, p=ps)
 
     def run(self):
         #initial params and operations
+        breeder = darwin.parse_crossover(self.hypers['XOver'])()
         F = adaptable_normal_parameter(self.hypers['F_u'], self.hypers['F_sig'])
         Cr = adaptable_normal_parameter(self.hypers['Cr_u'], self.hypers['Cr_sig'])
-        ops = np.array([o() for o in DE_methods.values()])
+        ops = self.DE_methods
         #initial pop 
         pop = tech.uniform_continuous_init(self.bounds, self.hypers['N'])
         tech.compute_obj(pop, self.obj)
@@ -90,7 +132,7 @@ class SADE(continuous_space_optimiser):
         for gen in range(self.hypers['G']):
             # parameter update
             if gen != 0 and gen%self.hypers['Lp']==0:
-                update_strategy_ps(ops)
+                self.update_strategy_ps(ops)
                 F.update()
                 Cr.update()
             #trial pop
@@ -98,10 +140,10 @@ class SADE(continuous_space_optimiser):
             for i, sol in enumerate(pop):
                 # mutation
                 new = zoo.animal()
-                op = select_strategy(ops)
+                op = self.select_strategy(ops)
                 new.dna = op(sol, pop=pop, F=F())
                 # crossover and apply bounds
-                new.dna = tech.binary_crossover(sol.dna, new.dna, Cr())
+                new.dna = breeder.breed(sol.dna, new.dna, Cr())
                 new.dna = tech.apply_sticky_bounds(new.dna, self.bounds)
                 # Record adaptions
                 new.tech.extend([op, F, Cr])
@@ -276,7 +318,7 @@ class KrillHerd(continuous_space_optimiser):
         'Nmax': 'Maximum induced speed in the paper somewhat confusingly (float64)',
         'Vf':'Foraging speed (float64)',
         'Dmax':'Maximum diffusion speed in [0.002,0.010] (float64)',
-        'Crossover':'Implement crossover (bool)',
+        'Crossover':'Implement crossover (None or str or Crossover)',
         'Mutate':'Implement mutation (bool)',
         'Mu':'Mutation mixing parameter in (0,1) (float64)'
     }
@@ -290,7 +332,7 @@ class KrillHerd(continuous_space_optimiser):
         'Nmax':0.01, 
         'Vf':0.02, 
         'Dmax':0.005, # NOTE: in the paper this is chosen as a random number in [0.002,0.010]
-        'Crossover':True,
+        'Crossover':'binary',
         'Mutate':True,
         'Mu':0.5
     }
@@ -439,6 +481,8 @@ class KrillHerd(continuous_space_optimiser):
 
     def run(self):
 
+        if self.hypers['Crossover'] is not None:
+            breeder = darwin.parse_crossover(self.hypers['Crossover'])()
         pop = self.init_pop(self.hypers['N'])
 
         # Compute first set of fitness
@@ -474,12 +518,12 @@ class KrillHerd(continuous_space_optimiser):
             champion = self.all_time_champion(pop)
 
             # Crossover
-            if self.hypers['Crossover']:
+            if self.hypers['Crossover'] is not None:
                 crossover_prob = 0.2*Khat_best
                 xover_herd = herd[1][np.random.randint(self.hypers['N'],size=(self.hypers['N'],)),:]
                 for i,h in enumerate(herd[1]):
                     # Implement 1-to-gbest X-over not 1-to-rand as in paper...
-                    xover_herd[i,:] = tech.binary_crossover(h,champion[1],crossover_prob[i])
+                    xover_herd[i,:] = breeder.breed(h,champion[1],crossover_prob[i])
                 current_herd = xover_herd
             else:
                 current_herd = herd[1]
@@ -487,8 +531,9 @@ class KrillHerd(continuous_space_optimiser):
                 
             # Mutation
             if self.hypers['Mutate']:
-                mutate_prob = 0.05/Khat_best
-                mutate_prob[mutate_prob==np.Inf] = 0
+                mutate_prob = Khat_best
+                mutate_prob[np.where(Khat_best != 0)] = 0.05/Khat_best[np.where(Khat_best != 0)]
+
                 inds = np.random.randint(self.hypers['N'],size=(self.hypers['N'],2))
                 mutates = np.random.rand(self.hypers['N'],self.obj.n) < mutate_prob[:,None]
                 mutant_dna = champion[1] + self.hypers['Mu']*(herd[1][inds[:,0],:]-herd[1][inds[:,1],:])
