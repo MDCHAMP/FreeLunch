@@ -73,7 +73,8 @@ class SADE(continuous_space_optimiser):
         'F_sig':'Mutation parameter initial standard deviation (float in [0,1])',
         'Cr_u':'Crossover probability initial mean (float in [0,1])',
         'Cr_sig':'Crossover probability initial standard deviation (float in [0,1])',
-        'Lp':'Learning period'
+        'Lp':'Learning period',
+        'XOver':'Crossover Strategy (str or Crossover)'
     }
     hyper_defaults = {
         'N':100,
@@ -82,7 +83,8 @@ class SADE(continuous_space_optimiser):
         'F_sig':0.2,
         'Cr_u':0.5,
         'Cr_sig':0.2,
-        'Lp':10
+        'Lp':10,
+        'XOver':'binary'
     }
 
     # Exportable dictionary
@@ -119,7 +121,7 @@ class SADE(continuous_space_optimiser):
 
     def run(self):
         #initial params and operations
-        breeder = darwin.binary_crossover()
+        breeder = darwin.parse_crossover(self.hypers['XOver'])()
         F = adaptable_normal_parameter(self.hypers['F_u'], self.hypers['F_sig'])
         Cr = adaptable_normal_parameter(self.hypers['Cr_u'], self.hypers['Cr_sig'])
         ops = self.DE_methods
