@@ -104,37 +104,6 @@ class DE_current_to_best_1(adaptable_search_operation):
         return x.dna + F * (best.dna - a.dna) + F * (b.dna - c.dna)
 
 
-# Exportable dictionary
-DE_methods = {x.name: x for x in adaptable_search_operation.__subclasses__()}
-
-
-# API for probability update
-def update_strategy_ps(strats):
-    hits = np.array([s.hits[-1] for s in strats])
-    wins = np.array([s.wins[-1] for s in strats])
-    total_hits = np.sum(hits)
-    total_wins = np.sum(wins)
-    ps = np.zeros_like(hits)
-    # update model
-    # prevent zero division with a bit of fun bias!!
-    dem = np.sum(wins * (hits + wins)) + 1
-    for i, h, w in zip(range(len(ps)), hits, wins):
-        num = h * (total_hits + total_wins)
-        ps[i] = num / dem
-    # normalise
-    n = np.sum(ps)
-    if n == 0:
-        ps += 1
-    ps = ps / n
-    for strat, p in zip(strats, ps):
-        strat.update(p)
-
-
-# API for strategy selection 
-def select_strategy(strats):
-    ps = [s.p[-1] for s in strats]
-    ps = ps/np.sum(ps)
-    return np.random.choice(strats, p=ps)
 
 
 # %% Crossover operations

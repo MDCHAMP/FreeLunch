@@ -5,7 +5,6 @@ import numpy as np
 
 from freelunch import tech, zoo, darwin
 from freelunch.base import continuous_space_optimiser
-from freelunch.darwin import DE_methods, update_strategy_ps, select_strategy
 from freelunch.tech import adaptable_normal_parameter, linearly_varying_parameter
 
 
@@ -80,12 +79,44 @@ class SADE(continuous_space_optimiser):
         'Lp':10
     }
 
+    # Exportable dictionary
+    DE_methods = [x() for x in darwin.adaptable_search_operation.__subclasses__()]
+
+
+    # API for probability update
+    def update_strategy_ps(self,strats):
+        hits = np.array([s.hits[-1] for s in strats])
+        wins = np.array([s.wins[-1] for s in strats])
+        total_hits = np.sum(hits)
+        total_wins = np.sum(wins)
+        ps = np.zeros_like(hits)
+        # update model
+        # prevent zero division with a bit of fun bias!!
+        dem = np.sum(wins * (hits + wins)) + 1
+        for i, h, w in zip(range(len(ps)), hits, wins):
+            num = h * (total_hits + total_wins)
+            ps[i] = num / dem
+        # normalise
+        n = np.sum(ps)
+        if n == 0:
+            ps += 1
+        ps = ps / n
+        for strat, p in zip(strats, ps):
+            strat.update(p)
+
+
+    # API for strategy selection 
+    def select_strategy(self,strats):
+        ps = [s.p[-1] for s in strats]
+        ps = ps/np.sum(ps)
+        return np.random.choice(strats, p=ps)
+
     def run(self):
         #initial params and operations
         breeder = darwin.binary_crossover()
         F = adaptable_normal_parameter(self.hypers['F_u'], self.hypers['F_sig'])
         Cr = adaptable_normal_parameter(self.hypers['Cr_u'], self.hypers['Cr_sig'])
-        ops = np.array([o() for o in DE_methods.values()])
+        ops = self.DE_methods
         #initial pop 
         pop = tech.uniform_continuous_init(self.bounds, self.hypers['N'])
         tech.compute_obj(pop, self.obj)
@@ -93,7 +124,7 @@ class SADE(continuous_space_optimiser):
         for gen in range(self.hypers['G']):
             # parameter update
             if gen != 0 and gen%self.hypers['Lp']==0:
-                update_strategy_ps(ops)
+                self.update_strategy_ps(ops)
                 F.update()
                 Cr.update()
             #trial pop
@@ -101,7 +132,7 @@ class SADE(continuous_space_optimiser):
             for i, sol in enumerate(pop):
                 # mutation
                 new = zoo.animal()
-                op = select_strategy(ops)
+                op = self.select_strategy(ops)
                 new.dna = op(sol, pop=pop, F=F())
                 # crossover and apply bounds
                 new.dna = breeder.breed(sol.dna, new.dna, Cr())
