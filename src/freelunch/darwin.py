@@ -91,7 +91,7 @@ class DE_best_2(adaptable_search_operation):
         return best.dna + F * (a.dna - b.dna) + F * (c.dna - d.dna)
 
 
-class DE_current_to_best_1(adaptable_search_operation):
+class DE_current_1(adaptable_search_operation):
     name = 'current/1'
     n_parents = 1
     hypers = {'F': 0.5}
