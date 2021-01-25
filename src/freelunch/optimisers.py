@@ -2,8 +2,6 @@
 Main module definitions in here
 """
 import numpy as np
-from scipy.spatial.distance import pdist, cdist, squareform
-
 
 from freelunch import tech, zoo, darwin
 from freelunch.base import continuous_space_optimiser
@@ -360,7 +358,7 @@ class KrillHerd(continuous_space_optimiser):
     def local_motion(self,herd,gen):
 
         # pairwise distances between krill
-        dists = squareform(pdist(herd[1]), 'euclidean')
+        dists = tech.pdist(herd[1])
 
         # Who's my neighbour
         sense_dist = np.sum(dists,axis=1)/5/self.hypers['N']
@@ -405,7 +403,7 @@ class KrillHerd(continuous_space_optimiser):
         Xfood = np.average(herd[1],weights=1/herd[0],axis=0)
         Kfood = self.obj(Xfood)
 
-        Xhat_food = (Xfood - herd[1]) / ( cdist( herd[1], Xfood[:,None].T, 'euclidean') + self.hypers['eps'] )
+        Xhat_food = (Xfood - herd[1]) / ( tech.pdist( herd[1], Xfood[None,:]) + self.hypers['eps'] )
         Khat_food = (herd[0] - Kfood) / spread
 
         # Exploration/exploitation coefficient
@@ -421,7 +419,7 @@ class KrillHerd(continuous_space_optimiser):
             herd_best[1][i,:] = krill.best_pos
 
         # Xhat and Khat against best previous positions
-        Xhat_best = (Xfood - herd_best[1]) / ( cdist( herd_best[1], Xfood[:,None].T, 'euclidean') + self.hypers['eps'] )
+        Xhat_best = (Xfood - herd_best[1]) / ( tech.pdist( herd_best[1], Xfood[None,:]) + self.hypers['eps'] )
         Khat_best = (herd_best[0] - Kfood) / spread
 
         # Beta best
