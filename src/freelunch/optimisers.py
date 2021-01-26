@@ -34,8 +34,8 @@ class DE(continuous_space_optimiser):
 
     def run(self):
         # initial population
-        mutator = darwin.parse_adaptable_search(self.hypers['Mut'])
-        breeder = darwin.parse_crossover(self.hypers['XOver'])({'Cr':self.hypers['Cr']})
+        mutator = self.parse_adaptable_search(self.hypers['Mut'])
+        breeder = self.parse_crossover(self.hypers['XOver'])({'Cr':self.hypers['Cr']})
         pop = tech.uniform_continuous_init(self.bounds, self.hypers['N'])
         tech.compute_obj(pop, self.obj)
         # main loop
@@ -121,7 +121,7 @@ class SADE(continuous_space_optimiser):
 
     def run(self):
         #initial params and operations
-        breeder = darwin.parse_crossover(self.hypers['XOver'])()
+        breeder = self.parse_crossover(self.hypers['XOver'])()
         F = adaptable_normal_parameter(self.hypers['F_u'], self.hypers['F_sig'])
         Cr = adaptable_normal_parameter(self.hypers['Cr_u'], self.hypers['Cr_sig'])
         ops = self.DE_methods
@@ -482,7 +482,7 @@ class KrillHerd(continuous_space_optimiser):
     def run(self):
 
         if self.hypers['Crossover'] is not None:
-            breeder = darwin.parse_crossover(self.hypers['Crossover'])()
+            breeder = self.parse_crossover(self.hypers['Crossover'])()
         pop = self.init_pop(self.hypers['N'])
 
         # Compute first set of fitness
