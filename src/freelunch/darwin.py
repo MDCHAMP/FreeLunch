@@ -140,37 +140,3 @@ class XOver_binary(Crossover):
         out[jrand] = parent2[jrand]
         return out
 
-
-
-# %% Module Functions
-
-
-# All DE mutation methods defined prior to this
-def parse_adaptable_search(op):
-    '''
-    Parsing different search operations as strings or handles
-    '''
-    if isinstance(op, adaptable_search_operation):
-        return op
-    elif isinstance(op, str):
-        op = op.replace('/','_')
-        if op.startswith('DE_'):
-            return globals()[op]
-        else:
-            return globals()["DE_"+op]
-
-
-# All DE mutation methods defined prior to this
-def parse_crossover(op):
-    '''
-    Parsing different search operations as strings or handles
-    '''
-    if isinstance(op, Crossover):
-        return op
-    elif isinstance(op, str):
-        op = op.replace('/','_')
-        if op.startswith('XOver_'):
-            return globals()[op]
-        else:
-            return globals()["XOver_"+op]
-

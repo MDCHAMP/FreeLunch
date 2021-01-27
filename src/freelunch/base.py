@@ -3,6 +3,7 @@ Base classes for optimisers
 
 '''
 import numpy as np
+from freelunch import darwin
 
 
 class optimiser:
@@ -62,6 +63,35 @@ class optimiser:
     def run_quick(self):
         if self.obj is None:
             raise NotImplementedError('No objective function selected')
+
+    def parse_adaptable_search(self,op):
+        '''
+        Parsing different search operations as strings or handles
+        '''
+        if isinstance(op, darwin.adaptable_search_operation):
+            return op
+        elif isinstance(op, str):
+            op = op.replace('/','_')
+            if op.startswith('DE_'):
+                return getattr(darwin,op)
+            else:
+                return getattr(darwin,"DE_"+op)
+
+
+    def parse_crossover(self,op):
+        '''
+        Parsing different crossover as strings or handles
+        '''
+        if isinstance(op, darwin.Crossover):
+            return op
+        elif isinstance(op, str):
+            op = op.replace('/','_')
+            if op.startswith('XOver_'):
+                return getattr(darwin,op)
+            else:
+                return getattr(darwin,"XOver_"+op)
+
+
 
 
 
