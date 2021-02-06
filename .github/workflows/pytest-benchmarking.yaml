@@ -23,6 +23,11 @@ jobs:
         fetch-depth: 2
         python-version: ${{ matrix.python-version }}
     
+    - name: checkout repo
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 2
+
     - name: install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -31,10 +36,7 @@ jobs:
         pip install -e .
     
     - name: benchmark previous commit and compare
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 2
-    - run: |
+      run: |
         git checkout HEAD^
         coverage run -m pytest --benchmark-only --benchmark-save=GH_actions 
         git checkout HEAD 
