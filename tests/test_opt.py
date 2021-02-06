@@ -5,12 +5,23 @@ import pytest
 import numpy as np
 np.random.seed(100)
 
+
 from freelunch import DE, SA, PSO, SADE, KrillHerd, SA
+from freelunch.base import optimiser
 from freelunch.benchmarks import ackley, exponential, happycat, periodic
 
 optimiser_classes = [SA, DE, PSO, SADE, KrillHerd]
 benchmark_problems = [ackley, exponential, happycat, periodic]
 dims = [1,2,3,4]
+
+
+def test_base_optimiser():
+	opt = optimiser()
+	with pytest.raises(NotImplementedError):
+		opt()
+	opt.can_run_quick = True
+	opt.obj = lambda x:x
+	opt(nruns=2)
 
 @pytest.mark.parametrize('opt', optimiser_classes)
 def test_instancing_defaults(opt):
