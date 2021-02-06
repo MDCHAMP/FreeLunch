@@ -37,5 +37,6 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest, benchmark and submit coverage to codecov.io
       run: |
-        coverage run -m pytest --benchmark-save=_GH_actions --benchmark-compare --benchmark-compare-fail=min:5%
+        coverage run -m pytest --benchmark-save=GH_actions 
+# --benchmark-compare --benchmark-compare-fail=min:5%
         bash <(curl -s https://codecov.io/bash)
