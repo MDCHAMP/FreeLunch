@@ -20,6 +20,7 @@ jobs:
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
+        fetch-depth: 2
         python-version: ${{ matrix.python-version }}
     
     - name: Install dependencies
@@ -28,8 +29,13 @@ jobs:
         python -m pip install flake8 pytest coverage
         pip install -r .manifest/requirements.txt
         pip install -e .
-        
-    - name: Test with pytest-benchmark
+    
+    - name: Benchmark previous commit
+     run: |
+        git checkout main^
+        coverage run -m pytest --benchmark-only --benchmark-save=GH_actions 
+
+    - name: Compare benchmark with current commit
       run: |
+        git checkout main 
         coverage run -m pytest --benchmark-only --benchmark-save=GH_actions --benchmark-compare --benchmark-compare-fail=min:5%
-        bash <(curl -s https://codecov.io/bash)
