@@ -132,3 +132,7 @@ dmypy.json
 #vscode
 *.vscode
 *.code-workspace
+
+
+# profiling 
+prof/*
