@@ -138,4 +138,4 @@ dmypy.json
 prof/*
 
 # Benchmark data
-#*/Windows-CPython-3.8-64bit/*
+*/benchmarks
