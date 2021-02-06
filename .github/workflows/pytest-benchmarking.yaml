@@ -31,11 +31,17 @@ jobs:
         pip install -e .
     
     - name: benchmark previous commit
+      uses: actions/setup-python@v2
+      with:
+        fetch-depth: 2
       run: |
         git checkout HEAD^
         coverage run -m pytest --benchmark-only --benchmark-save=GH_actions 
 
     - name: Compare benchmark with current commit
+      uses: actions/setup-python@v2
+      with:
+        fetch-depth: 2
       run: |
         git checkout HEAD 
         coverage run -m pytest --benchmark-only --benchmark-save=GH_actions --benchmark-compare --benchmark-compare-fail=min:5%
