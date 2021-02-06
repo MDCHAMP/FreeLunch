@@ -31,7 +31,7 @@ jobs:
         pip install -e .
     
     - name: benchmark previous commit and compare
-      uses: actions/setup-python@v2
+      uses: actions/checkout@v2
       with:
         fetch-depth: 2
     - run: |
