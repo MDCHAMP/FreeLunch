@@ -32,10 +32,10 @@ jobs:
     
     - name: Benchmark previous commit
      run: |
-        git checkout main^
+        git checkout HEAD^
         coverage run -m pytest --benchmark-only --benchmark-save=GH_actions 
 
     - name: Compare benchmark with current commit
       run: |
-        git checkout main 
+        git checkout HEAD 
         coverage run -m pytest --benchmark-only --benchmark-save=GH_actions --benchmark-compare --benchmark-compare-fail=min:5%
