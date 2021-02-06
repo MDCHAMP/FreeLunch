@@ -36,7 +36,11 @@ class optimiser:
         if nruns == 1 and return_m == 1 and not full_output and self.can_run_quick:
             return self.run_quick()
         if nruns > 1:
-            sols = np.concatenate([self.run() for i in range(nruns)])
+            runs = [self.run() for i in range(nruns)]
+            if all([r == None for r in runs]):
+                print('No solutions returned, is this an instance of the base class?')
+                return np.array([])
+            sols = np.concatenate(runs)
         else: 
             sols = self.run()
         sols = sorted(sols, key=lambda x: x.fitness)
