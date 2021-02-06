@@ -37,7 +37,7 @@ jobs:
     - name: benchmark previous commit and compare
       run: |
         git checkout HEAD^
-        coverage run -m pytest --benchmark-only --benchmark-autosave
+        py.test --benchmark-only --benchmark-autosave
         git checkout - 
-        coverage run -m pytest --benchmark-only --benchmark-autosave --benchmark-compare --benchmark-compare-fail=mean:5%
+        py.test --benchmark-only --benchmark-autosave --benchmark-compare --benchmark-compare-fail=mean:20%
 
