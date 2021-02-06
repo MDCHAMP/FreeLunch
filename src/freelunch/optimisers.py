@@ -145,7 +145,7 @@ class SA(continuous_space_optimiser):
     }
     hyper_defaults = {  # Super simple and prescriptive for now. 
         'N':100,
-        'K':1000,
+        'K':1500,
         'T0':50,
     }
 
@@ -172,7 +172,7 @@ class SA(continuous_space_optimiser):
         tech.compute_obj(old, self.obj)
         best = min(old, key=lambda x: x.fitness)
         # main loop
-        for k in range(self.hypers['K']):
+        for k in range(1, self.hypers['K']):
             #generate temperature
             T = self.T(k+1)
             new = np.empty_like(old)
@@ -286,8 +286,8 @@ class KrillHerd(continuous_space_optimiser):
         'Mu':'Mutation mixing parameter in (0,1) (float64)'
     }
     hyper_defaults = {
-        'N':100,
-        'G':250,
+        'N':120,
+        'G':300,
         'Ct':0.5, # NOTE: in the paper this is chosen as a random number in (0,2]
         'Imotion':np.array([0.9, 0.1]), 
         'Iforage':np.array([0.9, 0.1]), 

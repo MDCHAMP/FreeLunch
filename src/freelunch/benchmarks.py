@@ -38,7 +38,7 @@ class ackley(benchmark):
     default_bounds = lambda self:np.array([[-10, 10]]*self.n)
     rtn_optimum = lambda self:np.array([0]*self.n)
     f0 = 0
-    tol = 10**-3
+    tol = 10**-2
 
     a,b,c = 20, 0.2, 2*np.pi
     def obj(self, dna):
