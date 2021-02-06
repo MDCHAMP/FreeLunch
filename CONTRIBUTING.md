@@ -7,7 +7,7 @@ If you would like to contribute to freelunch please consider looking through the
 If there is a specific algorithm/benchmark that you have in mind then please fork the repo and raise a PR. 
 
 #### Design philosophy
-- [Unga bunga python go brrrrr]https://xkcd.com/1513/
+- [Unga bunga python go brrrrr](https://xkcd.com/1513/)
 - All inputs / outputs should be `JSON` friendly (for serialisation) .
 - `optimiser.run` should be implemented with a similar abstraction level to the algorithm table in the original paper 
 - Default hyperparameters should guarantee minimal benchmark performance.
