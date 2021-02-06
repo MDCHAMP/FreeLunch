@@ -1,49 +1,42 @@
 '''
 
-Evolution is LIT - Darwin, one can only presume
+Evolution is LIT 
+
+    - Darwin, one can only presume
 
 '''
 
 
 import numpy as np
 
+from freelunch.adaptable import adaptable_method
+from freelunch.tech import BadObjectiveFunctionScores
 
-# %% Search operation classes and derivatives
 
-class adaptable_search_operation():
+# %% Base class
+
+
+class genetic_operation(adaptable_method):
     '''
-    Base class for methods that are selected as part of an adaptive scheme
-    Default behaviour is straight up reproduction yo
+    Base class for anything that happens while listening to Barry white...
     '''
-    name = 'Default adaptive search operation'
-    n_parents = 1
+    type = None
+    name = 'genetic operation'
     hypers = {}
 
     def __init__(self, hypers=hypers):
+        super().__init__()
         self.hypers = hypers
-        self.hits = [0]
-        self.wins = [0]
-        self.p = [1]
 
     def op(self, *parents, **hypers):
-        return parents[0]
-
-    def win(self):
-        self.wins[-1] += 1
-
-    def __call__(self, *parents, **hypers):
-        self.hits[-1] += 1
-        return self.op(*parents, **hypers)
-
-    def update(self, p):
-        self.hits.append(0)
-        self.wins.append(0)
-        self.p.append(p)
-
-# Continuous sexual reproduction methods *Barry White starts playing*
+        raise NotImplementedError 
 
 
-class DE_rand_1(adaptable_search_operation):
+# %% Search operations
+    
+
+class rand_1(genetic_operation):
+    type = 'mutation'
     name = 'rand/1'
     n_parents = 0
     hypers = {'F': 0.5}
@@ -55,7 +48,8 @@ class DE_rand_1(adaptable_search_operation):
         return a.dna+ F * (b.dna - c.dna)
 
 
-class DE_rand_2(adaptable_search_operation):
+class rand_2(genetic_operation):
+    type = 'mutation'
     name = 'rand/2'
     n_parents = 0
     hypers = {'F': 0.5}
@@ -66,7 +60,8 @@ class DE_rand_2(adaptable_search_operation):
         return a.dna + F * (b.dna - c.dna) + F * (d.dna - e.dna)
 
 
-class DE_best_1(adaptable_search_operation):
+class best_1(genetic_operation):
+    type = 'mutation'
     name = 'best/1'
     n_parents = 0
     hypers = {'F': 0.5}
@@ -75,11 +70,11 @@ class DE_best_1(adaptable_search_operation):
         idxs = np.random.randint(0, len(pop), 2)
         a, b = pop[idxs]
         best = min(pop, key=lambda x: x.fitness)
-        # NOTE: This is a prime location to look for shitty bugs based on the use of min()
         return best.dna + F * (a.dna - b.dna)
 
 
-class DE_best_2(adaptable_search_operation):
+class best_2(genetic_operation):
+    type = 'mutation'
     name = 'best/2'
     n_parents = 0
     hypers = {'F': 0.5}
@@ -91,7 +86,8 @@ class DE_best_2(adaptable_search_operation):
         return best.dna + F * (a.dna - b.dna) + F * (c.dna - d.dna)
 
 
-class DE_current_1(adaptable_search_operation):
+class current_1(genetic_operation):
+    type = 'mutation'
     name = 'current/1'
     n_parents = 1
     hypers = {'F': 0.5}
@@ -107,36 +103,76 @@ class DE_current_1(adaptable_search_operation):
 
 # %% Crossover operations
 
-class Crossover():
-    ''' 
-    Generic crossover operation
-    '''
 
-    name='Crossover'
-    hypers={}
+class binary_crossover(genetic_operation):
+    type = 'crossover'
+    name='binary crossover'
+    hypers={'Cr':0.2}
 
-    def __init__(self,hypers=hypers):
-        self.hypers = hypers
-
-    def breed(self, parent1, parent2):
-        raise NotImplementedError
-
-class XOver_binary(Crossover):
-
-    name='Binary Crossover'
-    hypers={
-        'Cr':0.2
-    }
-
-    def breed(self, parent1, parent2, p=hypers['Cr']):
+    def op(self, parent1, parent2, Cr=hypers['Cr']):
         out = np.empty_like(parent1)
         for a, b, i in zip(parent1, parent2, range(len(parent1))):
-            if np.random.uniform(0, 1) < p:
+            if np.random.uniform(0, 1) < Cr:
                 out[i] = a
             else:
                 out[i] = b
-        #Ensure at least one difference
-        jrand = np.random.randint(0, len(out))
+        jrand = np.random.randint(0, len(out)) #Ensure at least one difference
         out[jrand] = parent2[jrand]
         return out
 
+
+# %% Selection operations
+
+
+class binary_tournament(genetic_operation):
+    '''
+    2 - tournament selection
+    '''
+    type = 'selection'
+    name = 'binary tournament'
+    hypers={}
+
+    def op(self, olds, news):
+        out = np.empty_like(olds, dtype=object)
+        for old, new, i in zip(olds, news, range(len(out))):
+            if new.fitness < old.fitness:
+                out[i] = new
+                new.on_win()
+            elif old.fitness <= new.fitness:
+                out[i] = old
+            else:
+                raise BadObjectiveFunctionScores(
+                    'Winner could not be determined by comparing objective scores. scores:{} and {}'.format(
+                        old.fitness, new.fitness
+                    ))
+        return out
+
+
+class k_tournament(genetic_operation):
+    '''
+    k - tournament selection
+    '''
+    type = 'selection'
+    name = 'k-tournament'
+    hypers={}
+
+    def __init__(self, k=2, hypers={}):
+        super().__init__(hypers=hypers)
+        self.k = 2
+        self.name = str(k)+'-tournament selection'
+
+    def op(self, olds, news):
+        out = np.empty_like(olds, dtype=object)
+        for old, new, i in zip(olds, news, range(len(out))):
+            print(old.dna, new.dna)
+            if new.fitness < old.fitness:
+                out[i] = new
+                new.on_win()
+            elif old.fitness <= new.fitness:
+                out[i] = old
+            else:
+                raise BadObjectiveFunctionScores(
+                    'Winner could not be determined by comparing objective scores. scores:{} and {}'.format(
+                        old.fitness, new.fitness
+                    ))
+        return out
