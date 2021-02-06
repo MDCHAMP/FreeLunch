@@ -34,7 +34,7 @@ class ackley(benchmark):
     '''
     ackely function in n dimensions
     '''
-
+    [1 for i in range(10000)]
     default_bounds = lambda self:np.array([[-10, 10]]*self.n)
     rtn_optimum = lambda self:np.array([0]*self.n)
     f0 = 0
