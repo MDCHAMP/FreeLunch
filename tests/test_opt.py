@@ -3,6 +3,7 @@ Testing
 '''
 import pytest
 import numpy as np
+np.random.seed(100)
 
 from freelunch import DE, SA, PSO, SADE, KrillHerd, SA
 from freelunch.benchmarks import ackley, exponential, happycat, periodic
@@ -28,7 +29,7 @@ def test_true_optima(obj, n):
 @pytest.mark.parametrize('n', dims)
 def test_run_opt_with_defualts(opt, obj, n):
 	o = obj(n)
-	np.random.seed(1)
+
 	out = opt(obj=o, bounds=o.bounds)(full_output=True)
 	assert type(out) is dict # returns dict
 	assert all(x<=y for x, y in zip(out['scores'], out['scores'][1:])) # scores are ordered

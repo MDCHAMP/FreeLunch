@@ -30,7 +30,11 @@ class animal:
     def on_win(self):
         '''big brain time'''
         for t in self.tech:
-            t.win()
+            if isinstance(t, tuple):
+                t, v, = t
+                t.win(v)
+            else:
+                t.win()
         self.tech = []
 
 

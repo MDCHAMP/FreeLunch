@@ -2,8 +2,10 @@
 Base classes for optimisers
 
 '''
+from os import error
 import numpy as np
 from freelunch import darwin
+from freelunch.adaptable import adaptable_set
 
 
 class optimiser:
@@ -23,8 +25,7 @@ class optimiser:
         self.hypers = dict(self.hyper_defaults, **hypers) # Hyperparamters/ methods (dictionary of )
         self.obj = obj # Objective function
         self.bounds = bounds # Bounds / constraints
-        self.nfe = 0
-
+        self.nfe = 0 # TODO: wrap obj so that these are counted automatically
 
     def __call__(self, nruns=1, return_m=1, full_output=False):
         '''
@@ -64,36 +65,21 @@ class optimiser:
         if self.obj is None:
             raise NotImplementedError('No objective function selected')
 
-    def parse_adaptable_search(self,op):
-        '''
-        Parsing different search operations as strings or handles
-        '''
-        if isinstance(op, darwin.adaptable_search_operation):
-            return op
+    def parse_hyper(self, op):
+        if isinstance(op, list): # top 10 recursive gamer moments
+            strats = [self.parse_hyper(strat) for strat in op]
+            return adaptable_set(strats)
+        elif isinstance(op, darwin.genetic_operation):
+            return op()
         elif isinstance(op, str):
-            op = op.replace('/','_')
-            if op.startswith('DE_'):
-                return getattr(darwin,op)
-            else:
-                return getattr(darwin,"DE_"+op)
+            try:
+                op = getattr(darwin,op)
+                return op()
+            except AttributeError:
+                raise AttributeError # TODO handle this properly
 
 
-    def parse_crossover(self,op):
-        '''
-        Parsing different crossover as strings or handles
-        '''
-        if isinstance(op, darwin.Crossover):
-            return op
-        elif isinstance(op, str):
-            op = op.replace('/','_')
-            if op.startswith('XOver_'):
-                return getattr(darwin,op)
-            else:
-                return getattr(darwin,"XOver_"+op)
-
-
-
-
+# Subclasses for granularity
 
 class continuous_space_optimiser(optimiser):
     '''

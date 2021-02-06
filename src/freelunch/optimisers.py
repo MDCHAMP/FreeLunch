@@ -3,10 +3,12 @@ Main module definitions in here
 """
 import numpy as np
 
-from freelunch import tech, zoo, darwin
+from freelunch import tech, zoo
 from freelunch.base import continuous_space_optimiser
-from freelunch.tech import adaptable_normal_parameter, linearly_varying_parameter
+from freelunch.adaptable import normally_varying_parameter
 
+
+# %% Optimisation classes
 
 
 class DE(continuous_space_optimiser):
@@ -20,22 +22,27 @@ class DE(continuous_space_optimiser):
         'G':'Number of generations (int)',
         'F':'Mutation parameter (float in [0,1])',
         'Cr':'Crossover probability (float in [0,1])',
-        'Mut':'Mutation Strategy (str or adaptable_search_operation)',
-        'XOver':'Crossover Strategy (str or Crossover)'
+        'mutation':'Mutation method (str, see docs for options)',
+        'crossover':'Crossover method (str, see docs for options)',
+        'selection':'Selection method (str, see docs for options)'
     }
     hyper_defaults = {
         'N':100,
         'G':100,
         'F':0.5,
         'Cr':0.2,
-        'Mut':'DE/rand/1',
-        'XOver':'binary'
+        'mutation':'rand_1',
+        'crossover':'binary_crossover',
+        'selection':'binary_tournament'
     }
 
     def run(self):
-        # initial population
-        mutator = self.parse_adaptable_search(self.hypers['Mut'])
-        breeder = self.parse_crossover(self.hypers['XOver'])({'Cr':self.hypers['Cr']})
+        # Parse hyperparameter
+        mutator = self.parse_hyper(self.hypers['mutation'])
+        breeder = self.parse_hyper(self.hypers['crossover'])
+        # and the crowd says bo...                                           <-- Funniest joke in repo
+        selector = self.parse_hyper(self.hypers['selection'])
+        # initial pop
         pop = tech.uniform_continuous_init(self.bounds, self.hypers['N'])
         tech.compute_obj(pop, self.obj)
         # main loop
@@ -43,20 +50,17 @@ class DE(continuous_space_optimiser):
             #generate trial population
             trial_pop = np.empty_like(pop, dtype=object)
             for i, sol in enumerate(pop):
-                # sample parents
-                pts = np.random.choice(pop, 3)
-                # create offspring
+                # Mutation operation
                 trial = zoo.animal()
-                #trial.dna = (pts[0].dna - pts[1].dna) + self.hypers['F'] * pts[2].dna
-                trial.dna = mutator.op(sol,pop=pop)
-                # binomial crossover
-                trial.dna = breeder.breed(sol.dna, trial.dna)
+                trial.dna = mutator(sol, pop=pop, F=self.hypers['F'])
+                # Crossover operation
+                trial.dna = breeder(sol.dna, trial.dna, Cr=self.hypers['Cr'])
                 #apply bounds
                 trial.dna = tech.apply_sticky_bounds(trial.dna, self.bounds)
                 trial_pop[i] = trial
-            # sotf
+            # Selection operation
             tech.compute_obj(trial_pop, self.obj)
-            pop = tech.sotf(pop, trial_pop)
+            pop = selector(pop, trial_pop)
         return pop
 
     
@@ -74,84 +78,57 @@ class SADE(continuous_space_optimiser):
         'Cr_u':'Crossover probability initial mean (float in [0,1])',
         'Cr_sig':'Crossover probability initial standard deviation (float in [0,1])',
         'Lp':'Learning period',
-        'XOver':'Crossover Strategy (str or Crossover)'
+        'mutation':'Mutation method (str, see docs for options)',
+        'crossover':'Crossover method (str, see docs for options)',
+        'selection':'Selection method (str, see docs for options)'
     }
     hyper_defaults = {
         'N':100,
         'G':100,
         'F_u':0.5,
         'F_sig':0.2,
-        'Cr_u':0.5,
-        'Cr_sig':0.2,
+        'Cr_u':0.2,
+        'Cr_sig':0.1,
         'Lp':10,
-        'XOver':'binary'
+        'mutation':['rand_1', 'rand_2', 'best_1', 'best_2', 'current_1'],
+        'crossover':'binary_crossover',
+        'selection':'binary_tournament'
     }
-
-    # Exportable dictionary
-    DE_methods = [x() for x in darwin.adaptable_search_operation.__subclasses__()]
-
-
-    # API for probability update
-    def update_strategy_ps(self,strats):
-        hits = np.array([s.hits[-1] for s in strats])
-        wins = np.array([s.wins[-1] for s in strats])
-        total_hits = np.sum(hits)
-        total_wins = np.sum(wins)
-        ps = np.zeros_like(hits)
-        # update model
-        # prevent zero division with a bit of fun bias!!
-        dem = np.sum(wins * (hits + wins)) + 1
-        for i, h, w in zip(range(len(ps)), hits, wins):
-            num = h * (total_hits + total_wins)
-            ps[i] = num / dem
-        # normalise
-        n = np.sum(ps)
-        if n == 0:
-            ps += 1
-        ps = ps / n
-        for strat, p in zip(strats, ps):
-            strat.update(p)
-
-
-    # API for strategy selection 
-    def select_strategy(self,strats):
-        ps = [s.p[-1] for s in strats]
-        ps = ps/np.sum(ps)
-        return np.random.choice(strats, p=ps)
 
     def run(self):
         #initial params and operations
-        breeder = self.parse_crossover(self.hypers['XOver'])()
-        F = adaptable_normal_parameter(self.hypers['F_u'], self.hypers['F_sig'])
-        Cr = adaptable_normal_parameter(self.hypers['Cr_u'], self.hypers['Cr_sig'])
-        ops = self.DE_methods
+        mutators = self.parse_hyper(self.hypers['mutation'])
+        breeder = self.parse_hyper(self.hypers['crossover'])
+        selector = self.parse_hyper(self.hypers['selection'])
+        F = normally_varying_parameter(self.hypers['F_u'], self.hypers['F_sig'])
+        Cr = normally_varying_parameter(self.hypers['Cr_u'], self.hypers['Cr_sig'])
         #initial pop 
         pop = tech.uniform_continuous_init(self.bounds, self.hypers['N'])
         tech.compute_obj(pop, self.obj)
         #main loop
         for gen in range(self.hypers['G']):
-            # parameter update
-            if gen != 0 and gen%self.hypers['Lp']==0:
-                self.update_strategy_ps(ops)
+            # adaptable parameters/ methods update
+            if gen > 0 and gen%self.hypers['Lp']==0:
+                mutators.update_strategy_ps()
                 F.update()
                 Cr.update()
-            #trial pop
+            # trial pop
             trial_pop = np.empty_like(pop, dtype=object)
             for i, sol in enumerate(pop):
                 # mutation
                 new = zoo.animal()
-                op = self.select_strategy(ops)
-                new.dna = op(sol, pop=pop, F=F())
-                # crossover and apply bounds
-                new.dna = breeder.breed(sol.dna, new.dna, Cr())
+                mutator = mutators.select_strategy()
+                new.dna = mutator(sol, pop=pop, F=F())
+                # crossover
+                new.dna = breeder(sol.dna, new.dna, Cr())
+                # apply bounds
                 new.dna = tech.apply_sticky_bounds(new.dna, self.bounds)
-                # Record adaptions
-                new.tech.extend([op, F, Cr])
+                # Record methods used to produce new individual
+                new.tech.extend([mutator, F.now(), Cr.now()])
                 trial_pop[i] = new
-            # compute objectives
+            # Selection operation
             tech.compute_obj(trial_pop, self.obj)
-            # adaptive sotf
-            pop = tech.sotf(pop, trial_pop)
+            pop = selector(pop, trial_pop)
         return pop
 
 
@@ -241,7 +218,6 @@ class PSO(continuous_space_optimiser):
 
     def move_swarm(self, pop, gen):
         # Basic particle swarm move
-
         inertia = self.hypers['I'][1]-(self.hypers['I'][1]-self.hypers['I'][0])*gen/self.hypers['G']
         # This loop is slow, should vectorise at some point
         for p in pop:
@@ -266,46 +242,33 @@ class PSO(continuous_space_optimiser):
 
     # Generic PSO run routine
     def run(self):
-
         # Initialise the swarm
         pop = self.init_pop(self.hypers['N'])
-
         # Test Initial Population
         self.test_pop(pop)
         self.g_best = self.best_particle(pop)
-
         # Main loop
         for gen in range(self.hypers['G']):
-
             # Propagate the swarm
             pop = self.move_swarm(pop,gen)
-
             # Test new swarm locations
             self.test_pop(pop)
-
             # Particle class updates best previous position
             # Update global best
             self.g_best = self.best_particle(pop)
-
-
-        return sorted([ p.as_sol() for p in pop ],key=lambda x: x.fitness)
+        return pop
 
     
 class KrillHerd(continuous_space_optimiser):
     '''
     Krill Herd Optimisation
-
     Krill move based on three things:
         1) Induced motion
         2) Foraging
         3) Random Physical Diffusion
-    
     dX/dt = N + F + D
-
     Gandomi, Amir Hossein, and Amir Hossein Alavi. "Krill herd: a new bio-inspired optimization algorithm." Communications in nonlinear science and numerical simulation 17.12 (2012): 4831-4845.
-
     '''
-
     name = 'Krill Herd'
     tags = ['Continuous domain', 'Animal', 'Krill Herd']
     hyper_definitions = {
@@ -332,7 +295,7 @@ class KrillHerd(continuous_space_optimiser):
         'Nmax':0.01, 
         'Vf':0.02, 
         'Dmax':0.005, # NOTE: in the paper this is chosen as a random number in [0.002,0.010]
-        'Crossover':'binary',
+        'Crossover':'binary_crossover',
         'Mutate':True,
         'Mu':0.5
     }
@@ -347,26 +310,20 @@ class KrillHerd(continuous_space_optimiser):
                 forage= 0.008*np.random.rand(1,self.bounds.shape[0]) + 0.002)
         return pop
         
-
     def get_herd(self,pop):
         '''
         It is more convenient to work with matrix representations of the krill
         '''
-
         vals = np.zeros(self.hypers['N'])
         locs = np.zeros((self.hypers['N'],self.obj.n))
         motion = np.zeros((self.hypers['N'],self.obj.n))
         forage = np.zeros((self.hypers['N'],self.obj.n))
-
         for i,krill in enumerate(pop):
             vals[i] = krill.fitness
             locs[i,:] = krill.pos
             motion[i,:] = krill.motion
             forage[i,:] = krill.forage
-
         return [vals,locs,motion,forage]
-
-
 
     def winners_and_losers(self,herd):
         '''
@@ -374,7 +331,6 @@ class KrillHerd(continuous_space_optimiser):
         '''
         win_idx = np.argmin(herd[0])
         lose_idx = np.argmax(herd[0])
-        
         # Winner and loser are tuples of best/worst (fitness,location)
         winner = (herd[0][win_idx], herd[1][win_idx,:])
         loser = (herd[0][lose_idx], herd[1][lose_idx,:])
@@ -395,22 +351,17 @@ class KrillHerd(continuous_space_optimiser):
         return (best,best_pos)
 
     def local_motion(self,herd,gen):
-
         # pairwise distances between krill
         dists = tech.pdist(herd[1])
-
         # Who's my neighbour
         sense_dist = np.sum(dists,axis=1)/5/self.hypers['N']
         neighbours = dists <= sense_dist
-
         winner, loser = self.winners_and_losers(herd)
         spread = loser[0] - winner[0]
         if spread == 0:
             raise tech.SolutionCollapseError
-
         # Alpha stores local [0] and target [1] for each krill 
         alpha = [np.zeros_like(herd[1]), np.zeros_like(herd[1])]
-
         # Alpha local, the effect of the neighbours
         for i in range(dists.shape[0]):
             Khat = (herd[0][i] - herd[0][neighbours[i,:]]) / spread
@@ -431,123 +382,88 @@ class KrillHerd(continuous_space_optimiser):
         inertia  = tech.lin_reduce(self.hypers['Imotion'],gen,self.hypers['G']) 
         return self.hypers['Nmax']*alpha + inertia*herd[2], Kbest
         
-
     def foraging(self,herd,gen,pop):
-
         winner, loser = self.winners_and_losers(herd)
         spread = loser[0] - winner[0]
-
         # Tasty food at the centre of mass but how good is it
         #Xfood = (np.sum(herd[1]/herd[0][:,None], axis=0) / np.sum(1/herd[0]))[:,None].T
         Xfood = np.average(herd[1],weights=1/herd[0],axis=0)
         Kfood = self.obj(Xfood)
-
         Xhat_food = (Xfood - herd[1]) / ( tech.pdist( herd[1], Xfood[None,:]) + self.hypers['eps'] )
         Khat_food = (herd[0] - Kfood) / spread
-
         # Exploration/exploitation coefficient
         Cfood = 2*(1 - gen / self.hypers['G'])
-
         # Beta food
         beta_food = Cfood * Xhat_food * Khat_food[:,None]
-
         # Get best previous locations from population
         herd_best = [np.zeros_like(herd[0]), np.zeros_like(herd[1])]
         for i,krill in enumerate(pop):
             herd_best[0][i] = krill.best
             herd_best[1][i,:] = krill.best_pos
-
         # Xhat and Khat against best previous positions
         Xhat_best = (Xfood - herd_best[1]) / ( tech.pdist( herd_best[1], Xfood[None,:]) + self.hypers['eps'] )
         Khat_best = (herd_best[0] - Kfood) / spread
-
         # Beta best
         beta_best = Khat_best[:,None]*Xhat_best
-    
         beta = beta_food + beta_best
-
         # Foraging motion
         inertia = tech.lin_reduce(self.hypers['Iforage'],gen,self.hypers['G']) 
         return self.hypers['Vf']*beta + inertia*herd[3]
 
-
     def random_diffusion(self,gen):
-
         delta = 2*np.random.rand(self.hypers['N'],self.obj.n) - 1
-
         return self.hypers['Dmax']*( 1 - gen/self.hypers['G'])*delta
-        
-
 
     def run(self):
-
         if self.hypers['Crossover'] is not None:
-            breeder = self.parse_crossover(self.hypers['Crossover'])()
+            breeder = self.parse_hyper(self.hypers['Crossover'])
         pop = self.init_pop(self.hypers['N'])
-
         # Compute first set of fitness
         pop = tech.compute_obj(pop, self.obj)
-  
-
         # Determine time step as in paper
         if self.bounds is None:
             dt = 10 # If no bounds set use default
         else:
             bounds = tech.bounds_as_mat(self.bounds)
             dt = self.hypers['Ct']*np.sum(bounds[:,1]-bounds[:,0])
-
-
         # Main loop 
         for gen in range(self.hypers['G']):
-
             herd = self.get_herd(pop)
-
             # Induced motion, following the crowd
             N, Khat_best = self.local_motion(herd,gen)
-
             # Foraging motion
             F = self.foraging(herd,gen,pop)
-
             # Random diffusion
             D = self.random_diffusion(gen)
-
             # Total Velocity
             V = N + F + D
-
             # Genetic operations
             champion = self.all_time_champion(pop)
-
             # Crossover
             if self.hypers['Crossover'] is not None:
                 crossover_prob = 0.2*Khat_best
                 xover_herd = herd[1][np.random.randint(self.hypers['N'],size=(self.hypers['N'],)),:]
                 for i,h in enumerate(herd[1]):
                     # Implement 1-to-gbest X-over not 1-to-rand as in paper...
-                    xover_herd[i,:] = breeder.breed(h,champion[1],crossover_prob[i])
+                    xover_herd[i,:] = breeder(h,champion[1],crossover_prob[i])
                 current_herd = xover_herd
             else:
                 current_herd = herd[1]
-
-                
             # Mutation
             if self.hypers['Mutate']:
                 mutate_prob = Khat_best
                 mutate_prob[np.where(Khat_best != 0)] = 0.05/Khat_best[np.where(Khat_best != 0)]
-
                 inds = np.random.randint(self.hypers['N'],size=(self.hypers['N'],2))
                 mutates = np.random.rand(self.hypers['N'],self.obj.n) < mutate_prob[:,None]
                 mutant_dna = champion[1] + self.hypers['Mu']*(herd[1][inds[:,0],:]-herd[1][inds[:,1],:])
                 current_herd[mutates] = mutant_dna[mutates]
-
             # Move the herd
             new_pos = current_herd + dt*V
-
             # Compute objectives and update the herd
             for i,(dna,motion,forage) in enumerate(zip(new_pos,N,F)):
                 pop[i].pos = dna
                 pop[i].motion = motion
                 pop[i].forage = forage
                 pop[i].fitness = self.obj(dna)
-
-        return sorted([ p.as_sol() for p in pop ],key=lambda x: x.fitness)
+        return pop
 
