@@ -39,5 +39,5 @@ jobs:
         git checkout HEAD^
         coverage run -m pytest --benchmark-only --benchmark-autosave
         git checkout - 
-        coverage run -m pytest --benchmark-only --benchmark-autosave --benchmark-compare --benchmark-compare-fail=min:5%
+        coverage run -m pytest --benchmark-only --benchmark-autosave --benchmark-compare --benchmark-compare-fail=mean:5%
 
