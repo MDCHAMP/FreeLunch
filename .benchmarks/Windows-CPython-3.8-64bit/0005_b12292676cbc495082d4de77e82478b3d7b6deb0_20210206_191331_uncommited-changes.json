@@ -1,0 +1,182 @@
+{
+    "machine_info": {
+        "node": "DELL43V1RQ2",
+        "processor": "Intel64 Family 6 Model 158 Stepping 9, GenuineIntel",
+        "machine": "AMD64",
+        "python_compiler": "MSC v.1916 64 bit (AMD64)",
+        "python_implementation": "CPython",
+        "python_implementation_version": "3.8.5",
+        "python_version": "3.8.5",
+        "python_build": [
+            "default",
+            "Sep  3 2020 21:29:08"
+        ],
+        "release": "10",
+        "system": "Windows",
+        "cpu": {
+            "vendor_id": "unknown",
+            "hardware": "unknown",
+            "brand": "unknown"
+        }
+    },
+    "commit_info": {
+        "id": "b12292676cbc495082d4de77e82478b3d7b6deb0",
+        "time": "2021-02-06T18:58:25+00:00",
+        "author_time": "2021-02-06T18:58:25+00:00",
+        "dirty": true,
+        "project": "opt2",
+        "branch": "main"
+    },
+    "benchmarks": [
+        {
+            "group": "Benchmarks",
+            "name": "test_bench_benchmarks[ackley]",
+            "fullname": "tests/test_opt.py::test_bench_benchmarks[ackley]",
+            "params": {
+                "obj": "UNSERIALIZABLE[<class 'freelunch.benchmarks.ackley'>]"
+            },
+            "param": "ackley",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 1.7399999999945237e-05,
+                "max": 0.00017580000000005924,
+                "mean": 2.204799015586401e-05,
+                "stddev": 1.0707933524695574e-05,
+                "rounds": 8533,
+                "median": 1.8300000000248673e-05,
+                "iqr": 3.5000000000451337e-06,
+                "q1": 1.7999999999851468e-05,
+                "q3": 2.1499999999896602e-05,
+                "iqr_outliers": 1007,
+                "stddev_outliers": 800,
+                "outliers": "800;1007",
+                "ld15iqr": 1.7399999999945237e-05,
+                "hd15iqr": 2.689999999994086e-05,
+                "ops": 45355.60805908807,
+                "total": 0.18813549999998758,
+                "iterations": 1
+            }
+        },
+        {
+            "group": "Benchmarks",
+            "name": "test_bench_benchmarks[exponential]",
+            "fullname": "tests/test_opt.py::test_bench_benchmarks[exponential]",
+            "params": {
+                "obj": "UNSERIALIZABLE[<class 'freelunch.benchmarks.exponential'>]"
+            },
+            "param": "exponential",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 7.799999999669183e-06,
+                "max": 0.00015750000000025466,
+                "mean": 1.0740563046715923e-05,
+                "stddev": 5.903498654150351e-06,
+                "rounds": 26179,
+                "median": 9.600000000276054e-06,
+                "iqr": 1.8000000006068717e-06,
+                "q1": 8.299999999739072e-06,
+                "q3": 1.0100000000345943e-05,
+                "iqr_outliers": 2896,
+                "stddev_outliers": 2165,
+                "outliers": "2165;2896",
+                "ld15iqr": 7.799999999669183e-06,
+                "hd15iqr": 1.2899999999760325e-05,
+                "ops": 93104.98859794543,
+                "total": 0.28117719999997615,
+                "iterations": 1
+            }
+        },
+        {
+            "group": "Benchmarks",
+            "name": "test_bench_benchmarks[happycat]",
+            "fullname": "tests/test_opt.py::test_bench_benchmarks[happycat]",
+            "params": {
+                "obj": "UNSERIALIZABLE[<class 'freelunch.benchmarks.happycat'>]"
+            },
+            "param": "happycat",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 1.369999999933924e-05,
+                "max": 0.0001456000000006341,
+                "mean": 1.7675342130985254e-05,
+                "stddev": 1.0045066871454068e-05,
+                "rounds": 8184,
+                "median": 1.4400000000414082e-05,
+                "iqr": 5.999999999062311e-07,
+                "q1": 1.4100000000460966e-05,
+                "q3": 1.4700000000367197e-05,
+                "iqr_outliers": 1553,
+                "stddev_outliers": 872,
+                "outliers": "872;1553",
+                "ld15iqr": 1.369999999933924e-05,
+                "hd15iqr": 1.5699999999618797e-05,
+                "ops": 56575.99115136665,
+                "total": 0.14465499999998332,
+                "iterations": 1
+            }
+        },
+        {
+            "group": "Benchmarks",
+            "name": "test_bench_benchmarks[periodic]",
+            "fullname": "tests/test_opt.py::test_bench_benchmarks[periodic]",
+            "params": {
+                "obj": "UNSERIALIZABLE[<class 'freelunch.benchmarks.periodic'>]"
+            },
+            "param": "periodic",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 1.2199999999573663e-05,
+                "max": 0.0002716999999998748,
+                "mean": 1.5736771115558972e-05,
+                "stddev": 9.016318656098742e-06,
+                "rounds": 16978,
+                "median": 1.2800000000368073e-05,
+                "iqr": 7.000000001866624e-07,
+                "q1": 1.259999999980721e-05,
+                "q3": 1.3299999999993872e-05,
+                "iqr_outliers": 3371,
+                "stddev_outliers": 1756,
+                "outliers": "1756;3371",
+                "ld15iqr": 1.2199999999573663e-05,
+                "hd15iqr": 1.4399999999525903e-05,
+                "ops": 63545.43715840782,
+                "total": 0.26717889999996025,
+                "iterations": 1
+            }
+        }
+    ],
+    "datetime": "2021-02-06T19:13:36.930495",
+    "version": "3.2.3"
+}
