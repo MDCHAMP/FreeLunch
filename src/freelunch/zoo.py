@@ -2,7 +2,7 @@
 New home for the zoo of optimisation creatures
 '''
 
-
+import numpy as np
 
 # %% Base class
 
@@ -68,7 +68,6 @@ class particle(animal):
 
 
 class krill(animal):
-
     '''
     I am a krill, a type of animal 
 
@@ -94,3 +93,20 @@ class krill(animal):
         sol.dna = self.best_pos
         sol.fitness = self.best
         return sol
+
+
+class shrapnel(animal):
+    '''
+    Coins in the sofa
+    '''
+
+class grenade(animal):
+    '''
+    If you knew we were sentient, maybe you would think twice before tossing one uphill?
+    '''
+
+    def detonate(self, Le, p):
+        s = shrapnel()
+        rm = np.random.uniform(0,1, size = len(self.dna))
+        s.dna = self.dna + (np.sign(rm) * Le * abs(rm)**p)
+        return s 
