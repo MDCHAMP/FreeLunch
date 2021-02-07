@@ -53,6 +53,16 @@ def apply_sticky_bounds(dna, bounds):
     return out
 
 
+def apply_grenade_bounds(dna, bounds):
+    in_bounds = [a<=low and a>=high for (a, (low, high)) in zip(dna, bounds)]
+    if not all(in_bounds):
+        x = dna[:]
+        B = x / max(x)
+        return x + np.random.uniform(0,1) * (B - x) 
+    else:
+        return dna
+
+
 def bounds_as_mat(bounds):
     bounds_mat = np.zeros((len(bounds), 2))
     for i, bound in enumerate(bounds):
