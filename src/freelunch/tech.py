@@ -75,6 +75,18 @@ def lin_reduce(lims, n, n_max):
     return lims[1] + (lims[0]-lims[1])*n/n_max
 
 
+def scale_obj(obj, bounds, u=0, d=2):
+    # affine scaling of obj function
+    us = np.array([(high + low)/2 for low, high in bounds])
+    ds = np.array([high - low for low, high in bounds])
+    def obj_scaled(x):
+        x_scaled = (x - us) / ds
+        return obj(x_scaled)
+    def unscaler(x_scaled):
+        return (x_scaled * ds) + us
+    return obj_scaled, unscaler
+
+    
 def pdist(A, B=None):
     '''
     Pairwise Euclidean Distance inside array
