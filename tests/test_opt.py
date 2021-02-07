@@ -6,11 +6,12 @@ import numpy as np
 np.random.seed(100)
 
 
-from freelunch import DE, SA, PSO, SADE, KrillHerd, SA
+from freelunch import DE, SA, PSO, SADE, KrillHerd, SA, GrenadeExplosion
 from freelunch.base import optimiser
 from freelunch.benchmarks import ackley, exponential, happycat, periodic
 
-optimiser_classes = [SA, DE, PSO, SADE, KrillHerd]
+#optimiser_classes = [SA, DE, PSO, SADE, KrillHerd, GrenadeExplosion]
+optimiser_classes = [GrenadeExplosion]
 benchmark_problems = [ackley, exponential, happycat, periodic]
 dims = [1,2,3,4]
 
