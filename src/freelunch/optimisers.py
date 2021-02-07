@@ -5,7 +5,7 @@ import numpy as np
 
 from freelunch import tech, zoo
 from freelunch.base import continuous_space_optimiser
-from freelunch.adaptable import normally_varying_parameter
+from freelunch.adaptable import linearly_varying_parameter, normally_varying_parameter
 
 
 # %% Optimisation classes
@@ -468,34 +468,74 @@ class KrillHerd(continuous_space_optimiser):
         return pop
 
 
-    class GrenadeExplosion(continuous_space_optimiser):
-        '''
-        Grenade explosion method
-        '''
-        name = 'Grenade explosion method'
-        tags = ['continuous domain', 'population based', 'kaboom']
-        hyper_definitions = {
-            'Ng':'Number of grenades (int)',
-            'Nq':'Number of shrapnel pieces / grenade (int)',
-            'G':'Generations (float)',
-            'Le0':'Initial explosion scale (float [0,1])',
-            'Rt0':'Initial grenade spacing (float [0,1]',
-            'Rrd':'R decay parameter (float [0,1])',
-            'm0':'Initial exponent value',
-            'mN':'Final exponent value',
-            'Tw':'P(shrapnel collision) (float (0, 1))'
-        }
-        hyper_defaults = {
-            'Ng':5,
-            'Nq':20,
-            'G':100,
-            'Le0':2,
-            'Rt0':1,
-            'Rrd':400,
-            'm0':0.1,
-            'mN':0.2,
-            'Tw':0.7,
-        }
+class GrenadeExplosion(continuous_space_optimiser):
+    '''
+    Grenade explosion method
+    '''
+    name = 'Grenade explosion method'
+    tags = ['continuous domain', 'population based', 'kaboom']
+    hyper_definitions = {
+        'Ng':'Number of grenades (int)',
+        'Nq':'Number of shrapnel pieces / grenade (int)',
+        'G':'Generations (float)',
+        'Le0':'Initial explosion scale (float [0,1])',
+        'Rt0':'Initial grenade spacing (float [0,1]',
+        'Rrd':'R decay parameter (float [0,1])',
+        'm0':'Initial exponent value',
+        'mN':'Final exponent value',
+        'Tw':'P(shrapnel collision) (float (0, 1))'
+    }
+    hyper_defaults = {
+        'Ng':2,
+        'Nq':20,
+        'G':100,
+        'Le0':2,
+        'Rt0':1,
+        'Rrd':400,
+        'm0':0.1,
+        'mN':0.2,
+        'Tw':0.7,
+    }
 
-        def run(self):
-            return 
+    def run(self):
+        # set up parameters
+        m = linearly_varying_parameter(self.hypers['m0'], self.hypers['mN'], self.hypers['G'])
+        # scale problem to [-1,1]^n
+        self.obj_scaled, unscaler = tech.scale_obj(self.obj, self.bounds)
+        self.bounds_scaled = np.array([[-1, 1] for i in self.bounds])
+        # initial grenades
+        grenades = tech.uniform_continuous_init_shy(self.bounds_scaled, 
+                                                    self.hypers['Ng'], 
+                                                    creature=zoo.grenade,
+                                                    r=self.hypers['Rt0'])
+        tech.compute_obj(grenades, self.obj_scaled)          
+        # Main loop
+        for gen in range(self.hypers['G']):
+            # Sort grenades
+            grenades = sorted(grenades, key=lambda x: x.fitness)
+            # Update hyperparameters
+            m_i = m(gen)
+            Rt = self.hypers['Rt0'] / self.hypers['Rrd']**(gen / self.hypers['G'])
+            Le = self.hypers['Le0']**m_i * Rt**(1-m_i)
+            p = max(1, len(self.bounds) * (np.log(Rt / Le) / np.log(self.hypers['Tw']))) 
+            # Detonate grenades
+            for i, grenade in enumerate(grenades):
+                other_nades = np.array(grenades)[np.arange(self.hypers['Ng'])!=i]
+                valid_shrapnel = []
+                while len(valid_shrapnel) < self.hypers['Nq']:
+                    shrapnel = grenade.detonate(Le, p)
+                    shrapnel.dna = tech.apply_grenade_bounds(shrapnel.dna, self.bounds_scaled)
+                    # check the shrapnel is in a valid location
+                    if np.all([np.linalg.norm(shrapnel.dna - g.dna)<Rt for g in other_nades]):
+                        valid_shrapnel.append(shrapnel)
+                # compute objective and sort shrapnel
+                tech.compute_obj(valid_shrapnel, self.obj_scaled)
+                valid_shrapnel = sorted(valid_shrapnel, key=lambda x: x.fitness)
+                # If any of the shrapnel is better then current grenade then throw a grenade there
+                if valid_shrapnel[0].fitness < grenade.fitness:
+                    grenade.dna = valid_shrapnel[0].dna
+                    grenade.fitness = valid_shrapnel[0].fitness
+        # descale grenades
+        for g in grenades:
+            g.dna = unscaler(g.dna)
+        return grenades
