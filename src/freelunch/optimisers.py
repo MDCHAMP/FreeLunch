@@ -467,3 +467,18 @@ class KrillHerd(continuous_space_optimiser):
                 pop[i].fitness = self.obj(dna)
         return pop
 
+    class GrenadeExplosion(continuous_space_optimiser):
+        '''
+        Grenade explosion method
+        '''
+        name = 'Grenade explosion method'
+        tags = ['continuous domain', 'population based', 'kaboom']
+        hyper_definitions = {
+            '':''
+        }
+        hyper_defaults = {
+            '':1
+        }
+
+        def run(self):
+            return 
