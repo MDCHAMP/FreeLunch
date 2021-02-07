@@ -467,3 +467,18 @@ class KrillHerd(continuous_space_optimiser):
                 pop[i].fitness = self.obj(dna)
         return pop
 
+    class PeSOA(continuous_space_optimiser):
+        '''
+        Penguins Search
+        '''
+        name = 'Penguins Search'
+        tags = ['continuous domain', 'population based', 'icy']
+        hyper_definitions = {
+            '':''
+        }
+        hyper_defaults = {
+            '':1
+        }
+
+        def run(self):
+            return 
