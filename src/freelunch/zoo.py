@@ -105,15 +105,8 @@ class grenade(animal):
     If you knew we were sentient, maybe you would think twice before tossing one uphill?
     '''
 
-    def __init__(self, position, radius):
-        super().__init__()
-        self.position = position
-        self.position = radius
-
-    def detonate(self, Nq, Le, p):
-        fragments = np.empty((Nq,), dtype=object)
-        for i in range(Nq):
-            rm = np.random.uniform(0,1, size = len(self.position))
-            loc = self.position + np.sign(rm) * Le * abs(rm)**p
-            fragments[i] = shrapnel(dna=loc)
-        return fragments
+    def detonate(self, Le, p):
+        s = shrapnel()
+        rm = np.random.uniform(0,1, size = len(self.dna))
+        s.dna = self.dna + np.sign(rm) * Le * abs(rm)**p
+        return s 
