@@ -96,7 +96,7 @@ def lin_reduce(lims, n, n_max):
 def scale_obj(obj, bounds, u=0, d=2):
     # affine scaling of obj function
     us = np.array([(high + low)/2 for low, high in bounds])
-    ds = np.array([high - low for low, high in bounds])
+    ds = np.array([(high - low)/2 for low, high in bounds])
     def obj_scaled(x):
         x_scaled = (x - us) / ds
         return obj(x_scaled)

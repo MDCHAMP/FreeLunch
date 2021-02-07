@@ -480,20 +480,20 @@ class GrenadeExplosion(continuous_space_optimiser):
         'G':'Generations (float)',
         'Le0':'Initial explosion scale (float [0,1])',
         'Rt0':'Initial grenade spacing (float [0,1]',
-        'Rrd':'R decay parameter (float [0,1])',
+        'Rrd':'R decay parameter (float)',
         'm0':'Initial exponent value',
         'mN':'Final exponent value',
         'Tw':'P(shrapnel collision) (float (0, 1))'
     }
     hyper_defaults = {
         'Ng':2,
-        'Nq':20,
+        'Nq':5,
         'G':100,
-        'Le0':2,
+        'Le0':1,
         'Rt0':1,
-        'Rrd':400,
-        'm0':0.1,
-        'mN':0.2,
+        'Rrd':10,
+        'm0':0.2,
+        'mN':0.1,
         'Tw':0.7,
     }
 
@@ -526,7 +526,7 @@ class GrenadeExplosion(continuous_space_optimiser):
                     shrapnel = grenade.detonate(Le, p)
                     shrapnel.dna = tech.apply_grenade_bounds(shrapnel.dna, self.bounds_scaled)
                     # check the shrapnel is in a valid location
-                    if np.all([np.linalg.norm(shrapnel.dna - g.dna)<Rt for g in other_nades]):
+                    if np.all([np.linalg.norm(shrapnel.dna - g.dna)>Rt for g in other_nades]):
                         valid_shrapnel.append(shrapnel)
                 # compute objective and sort shrapnel
                 tech.compute_obj(valid_shrapnel, self.obj_scaled)
@@ -538,4 +538,5 @@ class GrenadeExplosion(continuous_space_optimiser):
         # descale grenades
         for g in grenades:
             g.dna = unscaler(g.dna)
+        tech.compute_obj(grenades, self.obj)
         return grenades

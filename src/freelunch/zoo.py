@@ -108,5 +108,5 @@ class grenade(animal):
     def detonate(self, Le, p):
         s = shrapnel()
         rm = np.random.uniform(0,1, size = len(self.dna))
-        s.dna = self.dna + np.sign(rm) * Le * abs(rm)**p
+        s.dna = self.dna + (np.sign(rm) * Le * abs(rm)**p)
         return s 
