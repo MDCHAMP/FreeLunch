@@ -28,6 +28,15 @@ def test_instancing_defaults(opt):
 	o = opt()
 	assert o.hypers == opt.hyper_defaults
 
+
+@pytest.mark.parametrize('n', [1,2,3,4,5])
+def test_mruns(n):
+	o = ackley(1)
+	out = DE(obj=o, bounds=o.bounds)(nruns=n, full_output=True)
+	assert type(out) is dict # returns dict
+	assert all(x<=y for x, y in zip(out['scores'], out['scores'][1:])) # scores are ordered
+
+
 @pytest.mark.parametrize('obj', benchmark_problems)
 @pytest.mark.parametrize('n', dims)
 def test_true_optima(obj, n):

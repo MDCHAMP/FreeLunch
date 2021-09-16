@@ -37,7 +37,7 @@ class optimiser:
             return self.run_quick()
         if nruns > 1:
             runs = [self.run() for i in range(nruns)]
-            if all([r == None for r in runs]):
+            if all([r is None for r in runs]):
                 print('No solutions returned, is this an instance of the base class?')
                 return np.array([])
             sols = np.concatenate(runs)
