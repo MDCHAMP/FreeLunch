@@ -31,6 +31,12 @@ def test_instancing_defaults(opt):
 
 
 @pytest.mark.parametrize('n', [1,3,5])
+def test_nfe(n):
+	o = ackley(1)
+	out = DE(obj=o, bounds=o.bounds)(nruns=n, full_output=True)
+	assert out['nfe'] == (out['hypers']['G'] + 1) * out['hypers']['N'] * n 
+
+@pytest.mark.parametrize('n', [1,3,5])
 def test_mruns(n):
 	o = ackley(1)
 	out = DE(obj=o, bounds=o.bounds)(nruns=n, full_output=True)

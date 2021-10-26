@@ -23,9 +23,9 @@ class optimiser:
         Unlikely to instance the base class but idk what else goes here
         '''
         self.hypers = dict(self.hyper_defaults, **hypers) # Hyperparamters/ methods (dictionary of )
-        self.obj = obj # Objective function
         self.bounds = bounds # Bounds / constraints
-        self.nfe = 0 # TODO: wrap obj so that these are counted automatically
+        self.nfe = 0
+        self.obj = self.wrap_obj_with_nfe(obj) # Objective function 
 
     def __call__(self, nruns=1, return_m=1, full_output=False):
         '''
@@ -82,6 +82,11 @@ class optimiser:
             except AttributeError:
                 raise AttributeError # TODO handle this properly
 
+    def wrap_obj_with_nfe(self, obj):
+        def w_obj(vec):
+            self.nfe +=1
+            return obj(vec)
+        return w_obj
 
 # Subclasses for granularity
 
