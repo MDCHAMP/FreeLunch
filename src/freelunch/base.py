@@ -83,8 +83,10 @@ class optimiser:
                 raise AttributeError # TODO handle this properly
 
     def wrap_obj_with_nfe(self, obj):
+        if obj is None: return None
         def w_obj(vec):
             self.nfe +=1
+            # TODO: inf, nan and None handling 
             return obj(vec)
         return w_obj
 
