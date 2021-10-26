@@ -286,7 +286,7 @@ class KrillHerd(continuous_space_optimiser):
         'Mu':'Mutation mixing parameter in (0,1) (float64)'
     }
     hyper_defaults = {
-        'N':120,
+        'N':150,
         'G':300,
         'Ct':0.5, # NOTE: in the paper this is chosen as a random number in (0,2]
         'Imotion':np.array([0.9, 0.1]), 
