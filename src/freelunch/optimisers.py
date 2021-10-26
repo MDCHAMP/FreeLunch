@@ -150,7 +150,8 @@ class SA(continuous_space_optimiser):
     }
 
     def P(self, e_old, e_new, T): # i.e. M-H, Kirkpatrick et al.
-        if e_new < e_new: return 1
+        if e_new is None: e_new = e_old+1 # Clumsy but works 
+        if e_new < e_old: return 1
         else: return np.exp(-(e_new - e_old)/ T)
 
     def T(self, k): # logistic hardcoded for now
