@@ -23,7 +23,7 @@ class optimiser:
         Unlikely to instance the base class but idk what else goes here
         '''
         self.hypers = dict(self.hyper_defaults, **hypers) # Hyperparamters/ methods (dictionary of )
-        self.bounds = bounds # Bounds / constraints
+        self.bounds = np.array(bounds) # Bounds / constraints
         self.nfe = 0
         self.obj = self.wrap_obj_with_nfe(obj) # Objective function 
 
@@ -86,8 +86,11 @@ class optimiser:
         if obj is None: return None
         def w_obj(vec):
             self.nfe +=1
-            # TODO: inf, nan and None handling 
-            return obj(vec)
+            fit = obj(vec)
+            try:
+                return float(fit)
+            except(ValueError, TypeError):
+                return None
         return w_obj
 
 # Subclasses for granularity
