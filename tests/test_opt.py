@@ -27,7 +27,6 @@ def test_base_optimiser():
 	opt.obj = lambda x:x
 	opt(nruns=2)
 
-@pytest.mark.skip(reason="Objective sanitation needs propper handling")
 def test_naughty_objective():
 	out = DE(obj=naughty_objective, bounds=[[-1, 1]])(nruns=1, full_output=True)
 

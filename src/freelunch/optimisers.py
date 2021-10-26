@@ -185,7 +185,7 @@ class SA(continuous_space_optimiser):
             for i, o, n in zip(range(self.hypers['N']), old, new):
                 if self.P(o.fitness, n.fitness, T) >= np.random.uniform(0,1): 
                     old[i] = new[i]
-                if n.fitness < best.fitness:
+                if n < best:
                     best = n
         return np.array([best])
 
