@@ -37,8 +37,6 @@ def uniform_continuous_init(bounds, N, creature=animal):
 def compute_obj(pop, obj):
     for sol in pop:
         sol.fitness = obj(sol.dna)
-        if np.isnan(sol.fitness):
-            sol.fitness = None
     return pop
 
 
