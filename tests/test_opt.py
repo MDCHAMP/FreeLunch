@@ -13,7 +13,10 @@ from freelunch.benchmarks import ackley, exponential, happycat, periodic
 
 optimiser_classes = [SA, DE, PSO, SADE, KrillHerd]
 benchmark_problems = [ackley, exponential, happycat, periodic]
-dims = [1,2,3,4]
+dims = [1,2,3]
+
+def naughty_objective(dna):
+	return np.random.choice([np.nan, np.inf, None, dna, 'im not a valid score'])
 
 
 def test_base_optimiser():
@@ -23,6 +26,10 @@ def test_base_optimiser():
 	opt.can_run_quick = True
 	opt.obj = lambda x:x
 	opt(nruns=2)
+
+@pytest.mark.skip(reason="Objective sanitation needs propper handling")
+def test_naughty_objective():
+	out = DE(obj=naughty_objective, bounds=[[-1, 1]])(nruns=1, full_output=True)
 
 @pytest.mark.parametrize('opt', optimiser_classes)
 def test_instancing_defaults(opt):
@@ -48,7 +55,7 @@ def test_can_json(n):
 	o = ackley(1)
 	out = DE(obj=o, bounds=o.bounds)(nruns=n, full_output=True)
 	s = json.dumps(out)
-
+ 
 @pytest.mark.parametrize('obj', benchmark_problems)
 @pytest.mark.parametrize('n', dims)
 def test_true_optima(obj, n):
