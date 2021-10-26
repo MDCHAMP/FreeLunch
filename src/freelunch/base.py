@@ -50,10 +50,10 @@ class optimiser:
             out = {
                 'optimiser':self.name,
                 'hypers':self.hypers,
-                'bounds':self.bounds,
+                'bounds':self.bounds.tolist(),
                 'nruns':nruns,
                 'nfe':self.nfe,
-                'solutions':[sol.dna for sol in sols],
+                'solutions':[sol.dna.tolist() for sol in sols],
                 'scores':[sol.fitness for sol in sols]
             }
             return out

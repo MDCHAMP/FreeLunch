@@ -3,6 +3,7 @@ Testing
 '''
 import pytest
 import numpy as np
+import json
 np.random.seed(100)
 
 
@@ -29,13 +30,18 @@ def test_instancing_defaults(opt):
 	assert o.hypers == opt.hyper_defaults
 
 
-@pytest.mark.parametrize('n', [1,2,3,4,5])
+@pytest.mark.parametrize('n', [1,2,3,4,5,10])
 def test_mruns(n):
 	o = ackley(1)
 	out = DE(obj=o, bounds=o.bounds)(nruns=n, full_output=True)
 	assert type(out) is dict # returns dict
 	assert all(x<=y for x, y in zip(out['scores'], out['scores'][1:])) # scores are ordered
 
+@pytest.mark.parametrize('n', [1,5])
+def test_can_json(n):
+	o = ackley(1)
+	out = DE(obj=o, bounds=o.bounds)(nruns=n, full_output=True)
+	s = json.dumps(out)
 
 @pytest.mark.parametrize('obj', benchmark_problems)
 @pytest.mark.parametrize('n', dims)
