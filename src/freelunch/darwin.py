@@ -10,7 +10,7 @@ Evolution is LIT
 import numpy as np
 
 from freelunch.adaptable import adaptable_method
-from freelunch.tech import BadObjectiveFunctionScores
+from freelunch.util import BadObjectiveFunctionScores
 
 
 # %% Base class

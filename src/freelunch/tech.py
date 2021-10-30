@@ -7,20 +7,6 @@ Standard / common techniques that are used in several optimisers are abstracted 
 import numpy as np
 from freelunch.zoo import animal
 
-# %% Custom exceptions
-
-
-class BadObjectiveFunctionScores(Exception):
-    '''Exception raised when both objective score comparisons evaluate false'''
-
-
-class ZeroLengthSolutionError(Exception):
-    '''Exception raised when an empty solution is passed to a benchmark'''
-
-
-class SolutionCollapseError(Exception):
-    '''Exception raised when all solutions are identical'''
-
 
 # %% Common methods
 
@@ -70,3 +56,4 @@ def pdist(A, B=None):
     if B is None:
         B = A
     return np.sqrt(np.sum((A[:, None]-B[None, :])**2, axis=-1))
+

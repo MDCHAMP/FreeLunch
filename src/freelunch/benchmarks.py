@@ -3,7 +3,7 @@ Benchmarks for testing / comparisons
 '''
 
 import numpy as np
-from freelunch.tech import ZeroLengthSolutionError
+from freelunch.util import ZeroLengthSolutionError
 
 # %%
 
