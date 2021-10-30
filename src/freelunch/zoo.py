@@ -37,7 +37,18 @@ class animal:
                 t.win()
         self.tech = []
 
-
+    def __lt__(self, other):
+        '''overlaod the < operator for convenient handling of tournament selction in the presence onf nonetype fitnesses'''
+        if self.fitness is None:
+            if other.fitness is None:
+                # ? what to do here
+                return False
+            return False # Other has lower fitness
+        elif other.fitness is None:
+            return True # We have the lower fitness            
+        else:
+            return self.fitness < other.fitness
+        
 # %% All that the light touches is our domain
 
 

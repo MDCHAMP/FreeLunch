@@ -8,7 +8,7 @@ with open('README.md') as f:
 # This call to setup() does all the work
 setup(
     name="freelunch",
-    version="0.0.8",
+    version="0.0.11",
     description="Heuristic and meta-heuristic optimisation suite in Python",
     long_description=rm,
     long_description_content_type="text/markdown",
@@ -18,7 +18,8 @@ setup(
     license="MIT",
     classifiers=[
         "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3.4+",
+        "Programming Language :: Python :: 3",
+        "Intended Audience :: Science/Research",
     ],
     packages=['freelunch'],
     package_dir={'':'src'},

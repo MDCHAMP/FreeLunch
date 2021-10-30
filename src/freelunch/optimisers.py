@@ -145,12 +145,13 @@ class SA(continuous_space_optimiser):
     }
     hyper_defaults = {  # Super simple and prescriptive for now. 
         'N':100,
-        'K':1000,
+        'K':1500,
         'T0':50,
     }
 
     def P(self, e_old, e_new, T): # i.e. M-H, Kirkpatrick et al.
-        if e_new < e_new: return 1
+        if e_new is None: e_new = e_old+1 # Clumsy but works 
+        if e_new < e_old: return 1
         else: return np.exp(-(e_new - e_old)/ T)
 
     def T(self, k): # logistic hardcoded for now
@@ -172,7 +173,7 @@ class SA(continuous_space_optimiser):
         tech.compute_obj(old, self.obj)
         best = min(old, key=lambda x: x.fitness)
         # main loop
-        for k in range(self.hypers['K']):
+        for k in range(1, self.hypers['K']):
             #generate temperature
             T = self.T(k+1)
             new = np.empty_like(old)
@@ -184,7 +185,7 @@ class SA(continuous_space_optimiser):
             for i, o, n in zip(range(self.hypers['N']), old, new):
                 if self.P(o.fitness, n.fitness, T) >= np.random.uniform(0,1): 
                     old[i] = new[i]
-                if n.fitness < best.fitness:
+                if n < best:
                     best = n
         return np.array([best])
 
@@ -286,8 +287,8 @@ class KrillHerd(continuous_space_optimiser):
         'Mu':'Mutation mixing parameter in (0,1) (float64)'
     }
     hyper_defaults = {
-        'N':100,
-        'G':250,
+        'N':150,
+        'G':300,
         'Ct':0.5, # NOTE: in the paper this is chosen as a random number in (0,2]
         'Imotion':np.array([0.9, 0.1]), 
         'Iforage':np.array([0.9, 0.1]), 
@@ -314,10 +315,11 @@ class KrillHerd(continuous_space_optimiser):
         '''
         It is more convenient to work with matrix representations of the krill
         '''
+        D = len(self.bounds)
         vals = np.zeros(self.hypers['N'])
-        locs = np.zeros((self.hypers['N'],self.obj.n))
-        motion = np.zeros((self.hypers['N'],self.obj.n))
-        forage = np.zeros((self.hypers['N'],self.obj.n))
+        locs = np.zeros((self.hypers['N'],D))
+        motion = np.zeros((self.hypers['N'],D))
+        forage = np.zeros((self.hypers['N'],D))
         for i,krill in enumerate(pop):
             vals[i] = krill.fitness
             locs[i,:] = krill.pos
@@ -411,7 +413,7 @@ class KrillHerd(continuous_space_optimiser):
         return self.hypers['Vf']*beta + inertia*herd[3]
 
     def random_diffusion(self,gen):
-        delta = 2*np.random.rand(self.hypers['N'],self.obj.n) - 1
+        delta = 2*np.random.rand(self.hypers['N'],len(self.bounds)) - 1
         return self.hypers['Dmax']*( 1 - gen/self.hypers['G'])*delta
 
     def run(self):
@@ -454,7 +456,7 @@ class KrillHerd(continuous_space_optimiser):
                 mutate_prob = Khat_best
                 mutate_prob[np.where(Khat_best != 0)] = 0.05/Khat_best[np.where(Khat_best != 0)]
                 inds = np.random.randint(self.hypers['N'],size=(self.hypers['N'],2))
-                mutates = np.random.rand(self.hypers['N'],self.obj.n) < mutate_prob[:,None]
+                mutates = np.random.rand(self.hypers['N'],len(self.bounds)) < mutate_prob[:,None]
                 mutant_dna = champion[1] + self.hypers['Mu']*(herd[1][inds[:,0],:]-herd[1][inds[:,1],:])
                 current_herd[mutates] = mutant_dna[mutates]
             # Move the herd

@@ -137,4 +137,7 @@ dmypy.json
 .gitattributes
 
 # profiling 
-prof/*
+prof/
+
+# Benchmark data
+*/benchmarks

@@ -22,22 +22,21 @@ class SolutionCollapseError(Exception):
     '''Exception raised when all solutions are identical'''
 
 
-
 # %% Common methods
 
-def uniform_continuous_init(bounds, N):
+def uniform_continuous_init(bounds, N, creature=animal):
     out = np.empty((N,), dtype=object)
     for i in range(N):
-        out[i] = animal(np.array([np.random.uniform(a, b)
-                                    for a, b in bounds]))
+        adam = creature()
+        adam.dna = np.array([np.random.uniform(a, b)
+                             for a, b in bounds])
+        out[i] = adam
     return out
 
 
 def compute_obj(pop, obj):
     for sol in pop:
         sol.fitness = obj(sol.dna)
-        if np.isnan(sol.fitness):
-            sol.fitness = None
     return pop
 
 
@@ -64,10 +63,10 @@ def lin_reduce(lims, n, n_max):
     return lims[1] + (lims[0]-lims[1])*n/n_max
 
 
-def pdist(A,B=None):
+def pdist(A, B=None):
     '''
     Pairwise Euclidean Distance inside array
     '''
-    if B is None: B = A
-    return np.sqrt(np.sum((A[:,None]-B[None,:])**2,axis=-1))
-
+    if B is None:
+        B = A
+    return np.sqrt(np.sum((A[:, None]-B[None, :])**2, axis=-1))

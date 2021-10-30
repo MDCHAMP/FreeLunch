@@ -135,44 +135,9 @@ class binary_tournament(genetic_operation):
     def op(self, olds, news):
         out = np.empty_like(olds, dtype=object)
         for old, new, i in zip(olds, news, range(len(out))):
-            if new.fitness < old.fitness:
+            if new < old:
                 out[i] = new
                 new.on_win()
-            elif old.fitness <= new.fitness:
-                out[i] = old
             else:
-                raise BadObjectiveFunctionScores(
-                    'Winner could not be determined by comparing objective scores. scores:{} and {}'.format(
-                        old.fitness, new.fitness
-                    ))
-        return out
-
-
-class k_tournament(genetic_operation):
-    '''
-    k - tournament selection
-    '''
-    type = 'selection'
-    name = 'k-tournament'
-    hypers={}
-
-    def __init__(self, k=2, hypers={}):
-        super().__init__(hypers=hypers)
-        self.k = 2
-        self.name = str(k)+'-tournament selection'
-
-    def op(self, olds, news):
-        out = np.empty_like(olds, dtype=object)
-        for old, new, i in zip(olds, news, range(len(out))):
-            print(old.dna, new.dna)
-            if new.fitness < old.fitness:
-                out[i] = new
-                new.on_win()
-            elif old.fitness <= new.fitness:
                 out[i] = old
-            else:
-                raise BadObjectiveFunctionScores(
-                    'Winner could not be determined by comparing objective scores. scores:{} and {}'.format(
-                        old.fitness, new.fitness
-                    ))
         return out

@@ -23,9 +23,9 @@ class optimiser:
         Unlikely to instance the base class but idk what else goes here
         '''
         self.hypers = dict(self.hyper_defaults, **hypers) # Hyperparamters/ methods (dictionary of )
-        self.obj = obj # Objective function
-        self.bounds = bounds # Bounds / constraints
-        self.nfe = 0 # TODO: wrap obj so that these are counted automatically
+        self.bounds = np.array(bounds) # Bounds / constraints
+        self.nfe = 0
+        self.obj = self.wrap_obj_with_nfe(obj) # Objective function 
 
     def __call__(self, nruns=1, return_m=1, full_output=False):
         '''
@@ -36,7 +36,11 @@ class optimiser:
         if nruns == 1 and return_m == 1 and not full_output and self.can_run_quick:
             return self.run_quick()
         if nruns > 1:
-            sols = np.concatenate([self.run() for i in range(nruns)])
+            runs = [self.run() for i in range(nruns)]
+            if all([r is None for r in runs]):
+                print('No solutions returned, is this an instance of the base class?')
+                return np.array([])
+            sols = np.concatenate(runs)
         else: 
             sols = self.run()
         sols = sorted(sols, key=lambda x: x.fitness)
@@ -46,10 +50,10 @@ class optimiser:
             out = {
                 'optimiser':self.name,
                 'hypers':self.hypers,
-                'bounds':self.bounds,
+                'bounds':self.bounds.tolist(),
                 'nruns':nruns,
                 'nfe':self.nfe,
-                'solutions':[sol.dna for sol in sols],
+                'solutions':[sol.dna.tolist() for sol in sols],
                 'scores':[sol.fitness for sol in sols]
             }
             return out
@@ -78,6 +82,16 @@ class optimiser:
             except AttributeError:
                 raise AttributeError # TODO handle this properly
 
+    def wrap_obj_with_nfe(self, obj):
+        if obj is None: return None
+        def w_obj(vec):
+            self.nfe +=1
+            fit = obj(vec)
+            try:
+                return float(fit)
+            except(ValueError, TypeError):
+                return None
+        return w_obj
 
 # Subclasses for granularity
 
