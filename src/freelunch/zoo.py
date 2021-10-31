@@ -81,6 +81,21 @@ class animal:
             return False # We have the lower fitness            
         else:
             return self.fitness > other.fitness
+
+    def __eq__(self, o: object) -> bool:
+        # Not the same class
+        if type(self) != type(o):
+            return False
+        # Get user attributes from self and o
+        us = {k: v for k, v in self.__dict__.items()}
+        them = {k: v for k, v in o.__dict__.items()}
+
+        for k in us.keys():
+            if np.any(us[k] != them[k]):
+                return False
+        
+        # If not false must be true
+        return True
     
     def as_sol(self):
         return animal(dna=self.best_pos, fitness=self.best)
@@ -94,15 +109,8 @@ class particle(animal):
 
     def __init__(self, pos=None, vel=None, fitness=None, best=None, best_pos=None):
         
-        self.best = best
-        self.best_pos = best_pos
-        
-        self.pos = pos
+        super().__init__(dna=pos, fitness=fitness, best=best, best_pos=best_pos)
         self.vel = vel
-
-        self._fitness = None
-        self.fitness = fitness
-
 
     
     def move(self, pos, vel, fitness):
@@ -137,14 +145,7 @@ class krill(particle):
 
     def __init__(self, pos=None, vel=None, fitness=None, best=None, best_pos=None, motion=None, forage=None):
         
-        self.best = best
-        self.best_pos = best_pos
-
-        self.pos = pos
-        self.vel = vel
-        self._fitness = None
-        self.fitness = fitness
+        super().__init__(pos=pos, vel=vel, fitness=fitness, best=best, best_pos=best_pos)
 
         self.motion = motion
         self.forage = forage
-
