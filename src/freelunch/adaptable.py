@@ -133,8 +133,8 @@ class normally_varying_parameter(adaptable_parameter):
         return self.value
 
     def update(self):  # fit normal distribution to successful parameters
-        u = np.mean(self.win_values)
-        std = max(np.std(self.win_values), 10**-3)
+        u = self.u if len(self.win_values) == 0 else np.mean(self.win_values)
+        std = self.std if len(self.win_values) == 0 else max(np.std(self.win_values), 10**-3)
         if not np.isnan(u):
             self.u = u 
         else:

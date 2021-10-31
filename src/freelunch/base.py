@@ -31,10 +31,11 @@ class optimiser:
         '''
         API for running the optimisation
         '''
-        if self.obj is None:
+        if self.obj is None: # pragma: no cover
             raise NotImplementedError('No optimiser selected')
         if nruns == 1 and return_m == 1 and not full_output and self.can_run_quick:
-            return self.run_quick()
+            # This should be covered in tests but is not implemented anywhere...
+            return self.run_quick() 
         if nruns > 1:
             runs = [self.run() for i in range(nruns)]
             sols = np.concatenate(runs)
