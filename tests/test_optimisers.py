@@ -50,11 +50,23 @@ def test_run(opt,n,d):
 
 @pytest.mark.parametrize('opt', optimiser_classes)
 @pytest.mark.parametrize('d', [1,3,5])
-def test_run_one(opt,d):
+def test_run_one(opt,n,d):
     o = exponential(d)
     hypers = set_testing_hypers(opt)
     out = opt(obj=o, bounds=o.bounds, hypers=hypers)(full_output=True)
     assert(len(out['solutions'])==hypers['N'])
+
+
+@pytest.mark.parametrize('opt', optimiser_classes)
+@pytest.mark.parametrize('n', [1,3])
+@pytest.mark.parametrize('m', [1,3])
+@pytest.mark.parametrize('d', [1,5])
+def test_run_not_full(opt,n,m,d):
+    o = exponential(d)
+    hypers = set_testing_hypers(opt)
+    out = opt(obj=o, bounds=o.bounds, hypers=hypers)(nruns=n, return_m=m, full_output=False)
+    assert(len(out)==m)
+    assert([(len(s) == d) for s in out])
 
 @pytest.mark.parametrize('opt', optimiser_classes)
 @pytest.mark.parametrize('n', [1,3])
