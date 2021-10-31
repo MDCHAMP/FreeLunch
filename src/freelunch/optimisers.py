@@ -187,7 +187,7 @@ class SA(continuous_space_optimiser):
                     old[i] = new[i]
                 if n < best:
                     best = n
-        return new #np.array([best])
+        return new
 
 
 class PSO(continuous_space_optimiser):

@@ -30,6 +30,8 @@ class adaptable_method():
         self.hits.append(0)
         self.wins.append(0)
 
+    def op(self,*parents, **hypers):
+        raise NotImplementedError
 
 class adaptable_set():
     '''
@@ -134,9 +136,13 @@ class normally_varying_parameter(adaptable_parameter):
         u = np.mean(self.win_values)
         std = max(np.std(self.win_values), 10**-3)
         if not np.isnan(u):
-            self.u = u
+            self.u = u 
+        else:
+            raise ValueError # Stop don't just stay still
         if not np.isnan(std):
             self.std = std
+        else:
+            raise ValueError # Stop don't just stay still
         self.win_values = [] # Not storing all winning parameters at the moment
         self.wins.append(0)
         self.hits.append(0)

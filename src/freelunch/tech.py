@@ -49,7 +49,11 @@ def bounds_as_mat(bounds):
 
 def lin_reduce(lims, n, n_max):
     # Linearly reduce with generations, e.g. inertia values
-    if lims[1] < lims[0]: lims.reverse()
+    if lims[1] < lims[0]: 
+        if isinstance(lims,list):
+            lims.reverse()
+        else:
+            np.flip(lims)
     return lims[1] + (lims[0]-lims[1])*n/n_max
 
 
