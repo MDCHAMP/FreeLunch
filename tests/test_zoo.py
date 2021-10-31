@@ -38,9 +38,6 @@ def test_animal():
     assert(np.all(friend.best_pos == location_2))
     assert(friend.best == 0)
 
-    with pytest.raises(ValueError):
-        friend.move(location_3,None)
-    
     with pytest.raises(ValueError):    
         friend.move(location_3, np.inf)
 
@@ -105,9 +102,6 @@ def test_particle(creature):
     assert(friend.fitness == 10)
     assert(np.all(friend.best_pos == location_2))
     assert(friend.best == 0)
-
-    with pytest.raises(ValueError):
-        friend.move(location_3,vel, None)
     
     with pytest.raises(ValueError):    
         friend.move(location_3, vel, np.inf)

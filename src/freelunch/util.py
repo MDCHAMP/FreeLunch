@@ -22,7 +22,9 @@ class InvalidSolutionUpdate(Exception):
 
 def real_finite(a):
 
-    if not isinstance(a, float) and not isinstance(a,int):
+    if a is None:
+        return
+    elif not isinstance(a, float) and not isinstance(a,int):
         raise ValueError
     elif not np.isreal(a):
         raise ValueError

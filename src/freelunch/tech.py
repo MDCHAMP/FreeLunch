@@ -38,14 +38,18 @@ def apply_sticky_bounds(dna, bounds):
 
 
 def bounds_as_mat(bounds):
-    bounds_mat = np.zeros((len(bounds), 2))
-    for i, bound in enumerate(bounds):
-        bounds_mat[i, 0], bounds_mat[i, 1] = bound
-    return bounds_mat
+    # bounds_mat = np.zeros((len(bounds), 2))
+    # for i, bound in enumerate(bounds):
+    #     bounds_mat[i, 0], bounds_mat[i, 1] = bound
+    # return bounds_mat
+
+    # MDCHAMP am I missing something here TR
+    return np.array(bounds)
 
 
 def lin_reduce(lims, n, n_max):
     # Linearly reduce with generations, e.g. inertia values
+    if lims[1] < lims[0]: lims.reverse()
     return lims[1] + (lims[0]-lims[1])*n/n_max
 
 

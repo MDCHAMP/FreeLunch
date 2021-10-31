@@ -121,8 +121,10 @@ class particle(animal):
     @property
     def dna(self):
         return self.pos
-
-        
+    
+    @dna.setter
+    def dna(self, dna):
+        self.pos = dna       
 
 
 class krill(particle):
