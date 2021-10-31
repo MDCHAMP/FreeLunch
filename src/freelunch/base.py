@@ -59,11 +59,11 @@ class optimiser:
     def __repr__(self):
         return self.name + ' optimisation object'    
 
-    def run(self):
+    def run(self): # pragma: no cover
         if self.obj is None:
             raise NotImplementedError('No objective function selected')
 
-    def run_quick(self):
+    def run_quick(self): # pragma: no cover
         if self.obj is None:
             raise NotImplementedError('No objective function selected')
 
@@ -71,13 +71,13 @@ class optimiser:
         if isinstance(op, list): # top 10 recursive gamer moments
             strats = [self.parse_hyper(strat) for strat in op]
             return adaptable_set(strats)
-        elif isinstance(op, darwin.genetic_operation):
+        elif issubclass(op, darwin.genetic_operation):
             return op()
         elif isinstance(op, str):
             try:
                 op = getattr(darwin,op)
                 return op()
-            except AttributeError:
+            except AttributeError: # pragma: no cover
                 raise AttributeError # TODO handle this properly
 
     def wrap_obj_with_nfe(self, obj):
@@ -87,7 +87,7 @@ class optimiser:
             fit = obj(vec)
             try:
                 return float(fit)
-            except(ValueError, TypeError):
+            except(ValueError, TypeError): # pragma: no cover
                 return None
         return w_obj
 
