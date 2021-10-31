@@ -50,7 +50,7 @@ def test_run(opt,n,d):
 
 @pytest.mark.parametrize('opt', optimiser_classes)
 @pytest.mark.parametrize('d', [1,3,5])
-def test_run_one(opt,n,d):
+def test_run_one(opt,d):
     o = exponential(d)
     hypers = set_testing_hypers(opt)
     out = opt(obj=o, bounds=o.bounds, hypers=hypers)(full_output=True)
