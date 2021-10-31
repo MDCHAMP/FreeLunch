@@ -71,7 +71,7 @@ class optimiser:
         if isinstance(op, list): # top 10 recursive gamer moments
             strats = [self.parse_hyper(strat) for strat in op]
             return adaptable_set(strats)
-        elif issubclass(op, darwin.genetic_operation):
+        elif isinstance(op,type) and issubclass(op, darwin.genetic_operation):
             return op()
         elif isinstance(op, str):
             try:
