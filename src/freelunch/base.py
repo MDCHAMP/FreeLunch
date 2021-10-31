@@ -47,9 +47,10 @@ class optimiser:
         if not full_output:
             return np.array([sol.dna for sol in sols[:return_m]])
         else:
+            json_hypers = {k: v.tolist() if isinstance(v, np.ndarray) else v for k,v in self.hypers.items() }
             out = {
                 'optimiser':self.name,
-                'hypers':self.hypers,
+                'hypers':json_hypers,
                 'bounds':self.bounds.tolist(),
                 'nruns':nruns,
                 'nfe':self.nfe,
@@ -92,6 +93,7 @@ class optimiser:
             except(ValueError, TypeError):
                 return None
         return w_obj
+
 
 # Subclasses for granularity
 
