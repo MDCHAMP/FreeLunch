@@ -461,6 +461,7 @@ class KrillHerd(continuous_space_optimiser):
                 current_herd[mutates] = mutant_dna[mutates]
             # Move the herd
             new_pos = current_herd + dt*V
+            new_pos = np.array([tech.apply_sticky_bounds(k, self.bounds) for k in new_pos])
             # Compute objectives and update the herd
             for i,(dna,motion,forage) in enumerate(zip(new_pos,N,F)):
                 pop[i].pos = dna

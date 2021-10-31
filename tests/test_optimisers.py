@@ -45,7 +45,11 @@ def test_run(opt,n,d):
     hypers = set_testing_hypers(opt)
     out = opt(obj=o, bounds=o.bounds, hypers=hypers)(nruns=n, full_output=True)
     assert(len(out['solutions'])==n*hypers['N'])
-    assert all(x<=y for x, y in zip(out['scores'], out['scores'][1:])) # scores are ordered
+    assert(all(x<=y for x, y in zip(out['scores'], out['scores'][1:]))) # scores are ordered
+    for o in out['solutions']:
+        for i,v in enumerate(o):
+            assert(v > out['bounds'][i][0])
+            assert(v < out['bounds'][i][1])
 
 
 @pytest.mark.parametrize('opt', optimiser_classes)
@@ -75,3 +79,8 @@ def test_can_json(opt,n):
     hypers = set_testing_hypers(opt)
     out = opt(obj=o, bounds=o.bounds, hypers=hypers)(nruns=n, full_output=True)
     s = json.dumps(out)
+
+@pytest.mark.parametrize('opt', optimiser_classes)
+def test_repr(opt):
+    rep = opt().__repr__()
+    assert(rep == (opt.name + ' optimisation object'))

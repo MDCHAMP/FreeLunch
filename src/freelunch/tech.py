@@ -27,13 +27,14 @@ def compute_obj(pop, obj):
 
 
 def apply_sticky_bounds(dna, bounds):
+    eps = 1e-12
     out = dna[:]
     for i, bound in enumerate(bounds):
         low, high = bound
         if dna[i] > high:
-            out[i] = high
+            out[i] = high - eps
         elif dna[i] < low:
-            out[i] = low
+            out[i] = low + eps
     return out
 
 
