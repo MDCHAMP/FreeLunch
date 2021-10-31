@@ -47,12 +47,13 @@ def test_compute_obj():
 def test_sticky_bounds():
 
     bounds = [[-1,1],[-2,2]]
+    eps = 1e-12
 
     assert(np.all(apply_sticky_bounds([0.5,1.2],bounds) == [0.5,1.2]))
-    assert(np.all(apply_sticky_bounds([-2,1.2],bounds) == [-1,1.2]))
-    assert(np.all(apply_sticky_bounds([0.5,2.2],bounds) == [0.5,2]))
-    assert(np.all(apply_sticky_bounds([-1.5,2.2],bounds) == [-1,2]))
-    assert(np.all(apply_sticky_bounds([1.5,-2.2],bounds) == [1,-2]))
+    assert(np.all(apply_sticky_bounds([-2,1.2],bounds) == [-1+eps,1.2]))
+    assert(np.all(apply_sticky_bounds([0.5,2.2],bounds) == [0.5,2-eps]))
+    assert(np.all(apply_sticky_bounds([-1.5,2.2],bounds) == [-1+eps,2-eps]))
+    assert(np.all(apply_sticky_bounds([1.5,-2.2],bounds) == [1-eps,-2+eps]))
 
 def test_bounds_as_mat():
     
