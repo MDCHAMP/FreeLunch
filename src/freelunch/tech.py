@@ -65,4 +65,3 @@ def pdist(A, B=None):
     if B is None:
         B = A
     return np.sqrt(np.sum((A[:, None]-B[None, :])**2, axis=-1))
-
