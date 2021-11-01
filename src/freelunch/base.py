@@ -84,8 +84,9 @@ class optimiser:
             self.nfe +=1
             fit = obj(vec)
             try:
+                if np.isnan(fit): return None
                 return float(fit)
-            except(ValueError, TypeError): #TODO test
+            except(ValueError, TypeError):
                 return None
         return w_obj
 
