@@ -23,9 +23,9 @@ class optimiser:
         Unlikely to instance the base class but idk what else goes here
         '''
         self.hypers = dict(self.hyper_defaults, **hypers) # Hyperparamters/ methods (dictionary of )
-        self.obj = obj # Objective function
-        self.bounds = bounds # Bounds / constraints
-        self.nfe = 0 # TODO: wrap obj so that these are counted automatically
+        self.bounds = np.array(bounds) # Bounds / constraints
+        self.nfe = 0
+        self.obj = self.wrap_obj_with_nfe(obj) # Objective function 
 
     def __call__(self, nruns=1, return_m=1, full_output=False):
         '''
@@ -33,13 +33,8 @@ class optimiser:
         '''
         if self.obj is None:
             raise NotImplementedError('No optimiser selected')
-        if nruns == 1 and return_m == 1 and not full_output and self.can_run_quick:
-            return self.run_quick()
         if nruns > 1:
             runs = [self.run() for i in range(nruns)]
-            if all([r == None for r in runs]):
-                print('No solutions returned, is this an instance of the base class?')
-                return np.array([])
             sols = np.concatenate(runs)
         else: 
             sols = self.run()
@@ -47,13 +42,14 @@ class optimiser:
         if not full_output:
             return np.array([sol.dna for sol in sols[:return_m]])
         else:
+            json_hypers = {k: v.tolist() if isinstance(v, np.ndarray) else v for k,v in self.hypers.items() }
             out = {
                 'optimiser':self.name,
-                'hypers':self.hypers,
-                'bounds':self.bounds,
+                'hypers':json_hypers,
+                'bounds':self.bounds.tolist(),
                 'nruns':nruns,
                 'nfe':self.nfe,
-                'solutions':[sol.dna for sol in sols],
+                'solutions':[sol.dna.tolist() for sol in sols],
                 'scores':[sol.fitness for sol in sols]
             }
             return out
@@ -73,15 +69,26 @@ class optimiser:
         if isinstance(op, list): # top 10 recursive gamer moments
             strats = [self.parse_hyper(strat) for strat in op]
             return adaptable_set(strats)
-        elif isinstance(op, darwin.genetic_operation):
+        elif isinstance(op,type) and issubclass(op, darwin.genetic_operation):
             return op()
         elif isinstance(op, str):
             try:
                 op = getattr(darwin,op)
                 return op()
             except AttributeError:
-                raise AttributeError # TODO handle this properly
+                raise AttributeError('Method not recognised, refer to docs for list of implemented methods') # TODO test
 
+    def wrap_obj_with_nfe(self, obj):
+        if obj is None: return None
+        def w_obj(vec):
+            self.nfe +=1
+            fit = obj(vec)
+            try:
+                if np.isnan(fit): return None
+                return float(fit)
+            except(ValueError, TypeError):
+                return None
+        return w_obj
 
 # Subclasses for granularity
 

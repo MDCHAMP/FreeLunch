@@ -3,7 +3,7 @@ Main module definitions in here
 """
 import numpy as np
 
-from freelunch import tech, zoo
+from freelunch import tech, zoo, util
 from freelunch.base import continuous_space_optimiser
 from freelunch.adaptable import linearly_varying_parameter, normally_varying_parameter
 
@@ -150,7 +150,8 @@ class SA(continuous_space_optimiser):
     }
 
     def P(self, e_old, e_new, T): # i.e. M-H, Kirkpatrick et al.
-        if e_new < e_new: return 1
+        if e_new is None: e_new = e_old+1 # Clumsy but works 
+        if e_new < e_old: return 1
         else: return np.exp(-(e_new - e_old)/ T)
 
     def T(self, k): # logistic hardcoded for now
@@ -184,9 +185,12 @@ class SA(continuous_space_optimiser):
             for i, o, n in zip(range(self.hypers['N']), old, new):
                 if self.P(o.fitness, n.fitness, T) >= np.random.uniform(0,1): 
                     old[i] = new[i]
-                if n.fitness < best.fitness:
+                if n < best:
                     best = n
-        return np.array([best])
+        # This is subtle, best is not neccesarily in new... 
+        final_pop = sorted(old, key=lambda x:x.fitness)
+        final_pop[-1] = best # replace worst of new pop with best sol
+        return final_pop
 
 
 class PSO(continuous_space_optimiser):
@@ -286,7 +290,7 @@ class KrillHerd(continuous_space_optimiser):
         'Mu':'Mutation mixing parameter in (0,1) (float64)'
     }
     hyper_defaults = {
-        'N':120,
+        'N':150,
         'G':300,
         'Ct':0.5, # NOTE: in the paper this is chosen as a random number in (0,2]
         'Imotion':np.array([0.9, 0.1]), 
@@ -314,10 +318,11 @@ class KrillHerd(continuous_space_optimiser):
         '''
         It is more convenient to work with matrix representations of the krill
         '''
+        D = len(self.bounds)
         vals = np.zeros(self.hypers['N'])
-        locs = np.zeros((self.hypers['N'],self.obj.n))
-        motion = np.zeros((self.hypers['N'],self.obj.n))
-        forage = np.zeros((self.hypers['N'],self.obj.n))
+        locs = np.zeros((self.hypers['N'],D))
+        motion = np.zeros((self.hypers['N'],D))
+        forage = np.zeros((self.hypers['N'],D))
         for i,krill in enumerate(pop):
             vals[i] = krill.fitness
             locs[i,:] = krill.pos
@@ -359,7 +364,7 @@ class KrillHerd(continuous_space_optimiser):
         winner, loser = self.winners_and_losers(herd)
         spread = loser[0] - winner[0]
         if spread == 0:
-            raise tech.SolutionCollapseError
+            raise util.SolutionCollapseError #TODO should be a warning
         # Alpha stores local [0] and target [1] for each krill 
         alpha = [np.zeros_like(herd[1]), np.zeros_like(herd[1])]
         # Alpha local, the effect of the neighbours
@@ -411,7 +416,7 @@ class KrillHerd(continuous_space_optimiser):
         return self.hypers['Vf']*beta + inertia*herd[3]
 
     def random_diffusion(self,gen):
-        delta = 2*np.random.rand(self.hypers['N'],self.obj.n) - 1
+        delta = 2*np.random.rand(self.hypers['N'],len(self.bounds)) - 1
         return self.hypers['Dmax']*( 1 - gen/self.hypers['G'])*delta
 
     def run(self):
@@ -454,11 +459,12 @@ class KrillHerd(continuous_space_optimiser):
                 mutate_prob = Khat_best
                 mutate_prob[np.where(Khat_best != 0)] = 0.05/Khat_best[np.where(Khat_best != 0)]
                 inds = np.random.randint(self.hypers['N'],size=(self.hypers['N'],2))
-                mutates = np.random.rand(self.hypers['N'],self.obj.n) < mutate_prob[:,None]
+                mutates = np.random.rand(self.hypers['N'],len(self.bounds)) < mutate_prob[:,None]
                 mutant_dna = champion[1] + self.hypers['Mu']*(herd[1][inds[:,0],:]-herd[1][inds[:,1],:])
                 current_herd[mutates] = mutant_dna[mutates]
             # Move the herd
             new_pos = current_herd + dt*V
+            new_pos = np.array([tech.apply_sticky_bounds(k, self.bounds) for k in new_pos])
             # Compute objectives and update the herd
             for i,(dna,motion,forage) in enumerate(zip(new_pos,N,F)):
                 pop[i].pos = dna

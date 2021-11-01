@@ -10,7 +10,7 @@ Evolution is LIT
 import numpy as np
 
 from freelunch.adaptable import adaptable_method
-from freelunch.tech import BadObjectiveFunctionScores
+from freelunch.util import BadObjectiveFunctionScores
 
 
 # %% Base class
@@ -135,14 +135,9 @@ class binary_tournament(genetic_operation):
     def op(self, olds, news):
         out = np.empty_like(olds, dtype=object)
         for old, new, i in zip(olds, news, range(len(out))):
-            if new.fitness < old.fitness:
+            if new < old:
                 out[i] = new
                 new.on_win()
-            elif old.fitness <= new.fitness:
-                out[i] = old
             else:
-                raise BadObjectiveFunctionScores(
-                    'Winner could not be determined by comparing objective scores. scores:{} and {}'.format(
-                        old.fitness, new.fitness
-                    ))
+                out[i] = old
         return out
