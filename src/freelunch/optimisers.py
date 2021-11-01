@@ -485,7 +485,7 @@ class GrenadeExplosion(continuous_space_optimiser):
         'Nq':'Number of shrapnel pieces / grenade (int)',
         'G':'Generations (float)',
         'Le0':'Initial explosion scale (float [0,1])',
-        'Rt0':'Initial grenade spacing (float [0,1]',
+        'Rt0':'Initial grenade spacing (float [0,1])',
         'Rrd':'R decay parameter (float)',
         'm0':'Initial exponent value',
         'mN':'Final exponent value',

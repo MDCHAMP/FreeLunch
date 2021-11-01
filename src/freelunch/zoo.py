@@ -150,15 +150,7 @@ class krill(particle):
         self.motion = motion
         self.forage = forage
 
-    @property
-    def dna(self):
-        return self.pos
 
-    def as_sol(self):
-        sol = animal()
-        sol.dna = self.best_pos
-        sol.fitness = self.best
-        return sol
 
 
 class shrapnel(animal):
