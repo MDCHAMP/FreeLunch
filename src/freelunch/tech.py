@@ -39,13 +39,17 @@ def apply_sticky_bounds(dna, bounds):
 
 
 def bounds_as_mat(bounds):
-    # bounds_mat = np.zeros((len(bounds), 2))
-    # for i, bound in enumerate(bounds):
-    #     bounds_mat[i, 0], bounds_mat[i, 1] = bound
-    # return bounds_mat
+    bounds_mat = np.zeros((len(bounds), 2))
+    for i, bound in enumerate(bounds):
+        bounds_mat[i, 0], bounds_mat[i, 1] = bound
+    return bounds_mat
 
     # MDCHAMP am I missing something here TR
-    return np.array(bounds)
+    # @TR I think naievely calling the constructor on nested iterables is deprecieated iirc and might 
+    # not behave like we would expect 
+    # i.e np.array([np.array([0, 1, ..]), np.array([0, 1, ...])]) =/= np.array([[0,1,...], [0,1,...]]) 
+    # The above would fail a structural equality test for example and report different dtypes. 
+    # return np.array(bounds)
 
 
 def lin_reduce(lims, n, n_max):
