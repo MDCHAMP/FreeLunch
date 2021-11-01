@@ -105,6 +105,7 @@ class adaptable_parameter():
     def win(self, v):
         '''adaptable parameters store successful values'''
         self.win_values.append(v)
+        self.wins[-1] += 1
 
 
 class linearly_varying_parameter(adaptable_parameter):
