@@ -7,7 +7,10 @@ import numpy as np
 np.random.seed(100)
 
 from freelunch.adaptable import *
+from freelunch.optimisers import SADE
+from freelunch.benchmarks import ackley
 
+# Methods
 
 def test_adaptable_method():
     m = adaptable_method()
@@ -24,9 +27,15 @@ def test_adaptable_method():
 
 
 def test_adaptable_set():
-    a = adaptable_set()
-    # TODO proper testing
+    # TODO proper testing for now just run SADE with low LP
+    opt = SADE(ackley(1), bounds=[[-1, 1]])
+    opt.hypers['N'] = 4
+    opt.hypers['G'] = 12
+    opt.hypers['Lp'] = 3
+    opt()
 
+
+# Parmaters
 
 def test_lin_varying():
     p = linearly_varying_parameter(0, 1, 100)
