@@ -92,8 +92,7 @@ print(opt.hypers)
 Run by calling the instance. To return the best solution only:
 
 ```python
-quick_result = opt() # Calls optimiser.run_quick() if it exists which can be faster
-                     # This can be checked with class.can_run_quick = bool
+quick_result = opt()
 ```
 
 To return optimum after `nruns`:

@@ -31,11 +31,8 @@ class optimiser:
         '''
         API for running the optimisation
         '''
-        if self.obj is None: # pragma: no cover
+        if self.obj is None:
             raise NotImplementedError('No optimiser selected')
-        if nruns == 1 and return_m == 1 and not full_output and self.can_run_quick:
-            # This should be covered in tests but is not implemented anywhere...
-            return self.run_quick() 
         if nruns > 1:
             runs = [self.run() for i in range(nruns)]
             sols = np.concatenate(runs)
@@ -60,11 +57,11 @@ class optimiser:
     def __repr__(self):
         return self.name + ' optimisation object'    
 
-    def run(self): # pragma: no cover
+    def run(self):
         if self.obj is None:
             raise NotImplementedError('No objective function selected')
 
-    def run_quick(self): # pragma: no cover
+    def run_quick(self):
         if self.obj is None:
             raise NotImplementedError('No objective function selected')
 
@@ -78,8 +75,8 @@ class optimiser:
             try:
                 op = getattr(darwin,op)
                 return op()
-            except AttributeError: # pragma: no cover
-                raise AttributeError # TODO handle this properly
+            except AttributeError:
+                raise AttributeError('Method not recognised, refer to docs for list of implemented methods') # TODO test
 
     def wrap_obj_with_nfe(self, obj):
         if obj is None: return None
@@ -88,10 +85,9 @@ class optimiser:
             fit = obj(vec)
             try:
                 return float(fit)
-            except(ValueError, TypeError): # pragma: no cover
+            except(ValueError, TypeError): #TODO test
                 return None
         return w_obj
-
 
 # Subclasses for granularity
 
