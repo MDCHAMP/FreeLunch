@@ -187,7 +187,10 @@ class SA(continuous_space_optimiser):
                     old[i] = new[i]
                 if n < best:
                     best = n
-        return new
+        # This is subtle, best is not neccesarily in new... 
+        final_pop = sorted(old, key=lambda x:x.fitness)
+        final_pop[-1] = best # replace worst of new pop with best sol
+        return final_pop
 
 
 class PSO(continuous_space_optimiser):
@@ -361,7 +364,7 @@ class KrillHerd(continuous_space_optimiser):
         winner, loser = self.winners_and_losers(herd)
         spread = loser[0] - winner[0]
         if spread == 0:
-            raise util.SolutionCollapseError
+            raise util.SolutionCollapseError #TODO should be a warning
         # Alpha stores local [0] and target [1] for each krill 
         alpha = [np.zeros_like(herd[1]), np.zeros_like(herd[1])]
         # Alpha local, the effect of the neighbours
