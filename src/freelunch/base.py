@@ -33,13 +33,8 @@ class optimiser:
         '''
         if self.obj is None:
             raise NotImplementedError('No optimiser selected')
-        if nruns == 1 and return_m == 1 and not full_output and self.can_run_quick:
-            return self.run_quick()
         if nruns > 1:
             runs = [self.run() for i in range(nruns)]
-            if all([r is None for r in runs]):
-                print('No solutions returned, is this an instance of the base class?')
-                return np.array([])
             sols = np.concatenate(runs)
         else: 
             sols = self.run()
@@ -47,9 +42,10 @@ class optimiser:
         if not full_output:
             return np.array([sol.dna for sol in sols[:return_m]])
         else:
+            json_hypers = {k: v.tolist() if isinstance(v, np.ndarray) else v for k,v in self.hypers.items() }
             out = {
                 'optimiser':self.name,
-                'hypers':self.hypers,
+                'hypers':json_hypers,
                 'bounds':self.bounds.tolist(),
                 'nruns':nruns,
                 'nfe':self.nfe,
@@ -73,14 +69,14 @@ class optimiser:
         if isinstance(op, list): # top 10 recursive gamer moments
             strats = [self.parse_hyper(strat) for strat in op]
             return adaptable_set(strats)
-        elif isinstance(op, darwin.genetic_operation):
+        elif isinstance(op,type) and issubclass(op, darwin.genetic_operation):
             return op()
         elif isinstance(op, str):
             try:
                 op = getattr(darwin,op)
                 return op()
             except AttributeError:
-                raise AttributeError # TODO handle this properly
+                raise AttributeError('Method not recognised, refer to docs for list of implemented methods') # TODO test
 
     def wrap_obj_with_nfe(self, obj):
         if obj is None: return None
@@ -88,6 +84,7 @@ class optimiser:
             self.nfe +=1
             fit = obj(vec)
             try:
+                if np.isnan(fit): return None
                 return float(fit)
             except(ValueError, TypeError):
                 return None

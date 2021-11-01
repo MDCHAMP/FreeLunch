@@ -34,5 +34,5 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest, benchmark and submit coverage to codecov.io
       run: |
-        coverage run -m pytest --benchmark-disable
+        coverage run -m pytest --benchmark-skip
         bash <(curl -s https://codecov.io/bash)

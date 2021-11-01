@@ -30,6 +30,8 @@ class adaptable_method():
         self.hits.append(0)
         self.wins.append(0)
 
+    def op(self,*parents, **hypers):
+        raise NotImplementedError
 
 class adaptable_set():
     '''
@@ -103,6 +105,7 @@ class adaptable_parameter():
     def win(self, v):
         '''adaptable parameters store successful values'''
         self.win_values.append(v)
+        self.wins[-1] += 1
 
 
 class linearly_varying_parameter(adaptable_parameter):
@@ -131,12 +134,16 @@ class normally_varying_parameter(adaptable_parameter):
         return self.value
 
     def update(self):  # fit normal distribution to successful parameters
-        u = np.mean(self.win_values)
-        std = max(np.std(self.win_values), 10**-3)
+        u = self.u if len(self.win_values) == 0 else np.mean(self.win_values)
+        std = self.std if len(self.win_values) == 0 else max(np.std(self.win_values), 10**-3)
         if not np.isnan(u):
-            self.u = u
+            self.u = u 
+        else:
+            raise ValueError # Stop don't just stay still
         if not np.isnan(std):
             self.std = std
+        else:
+            raise ValueError # Stop don't just stay still
         self.win_values = [] # Not storing all winning parameters at the moment
         self.wins.append(0)
         self.hits.append(0)

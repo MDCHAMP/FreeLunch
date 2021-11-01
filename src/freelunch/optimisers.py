@@ -3,7 +3,7 @@ Main module definitions in here
 """
 import numpy as np
 
-from freelunch import tech, zoo
+from freelunch import tech, zoo, util
 from freelunch.base import continuous_space_optimiser
 from freelunch.adaptable import normally_varying_parameter
 
@@ -187,7 +187,10 @@ class SA(continuous_space_optimiser):
                     old[i] = new[i]
                 if n < best:
                     best = n
-        return np.array([best])
+        # This is subtle, best is not neccesarily in new... 
+        final_pop = sorted(old, key=lambda x:x.fitness)
+        final_pop[-1] = best # replace worst of new pop with best sol
+        return final_pop
 
 
 class PSO(continuous_space_optimiser):
@@ -361,7 +364,7 @@ class KrillHerd(continuous_space_optimiser):
         winner, loser = self.winners_and_losers(herd)
         spread = loser[0] - winner[0]
         if spread == 0:
-            raise tech.SolutionCollapseError
+            raise util.SolutionCollapseError #TODO should be a warning
         # Alpha stores local [0] and target [1] for each krill 
         alpha = [np.zeros_like(herd[1]), np.zeros_like(herd[1])]
         # Alpha local, the effect of the neighbours
@@ -461,6 +464,7 @@ class KrillHerd(continuous_space_optimiser):
                 current_herd[mutates] = mutant_dna[mutates]
             # Move the herd
             new_pos = current_herd + dt*V
+            new_pos = np.array([tech.apply_sticky_bounds(k, self.bounds) for k in new_pos])
             # Compute objectives and update the herd
             for i,(dna,motion,forage) in enumerate(zip(new_pos,N,F)):
                 pop[i].pos = dna

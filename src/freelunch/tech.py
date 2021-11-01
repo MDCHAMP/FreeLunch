@@ -7,20 +7,6 @@ Standard / common techniques that are used in several optimisers are abstracted 
 import numpy as np
 from freelunch.zoo import animal
 
-# %% Custom exceptions
-
-
-class BadObjectiveFunctionScores(Exception):
-    '''Exception raised when both objective score comparisons evaluate false'''
-
-
-class ZeroLengthSolutionError(Exception):
-    '''Exception raised when an empty solution is passed to a benchmark'''
-
-
-class SolutionCollapseError(Exception):
-    '''Exception raised when all solutions are identical'''
-
 
 # %% Common methods
 
@@ -41,13 +27,14 @@ def compute_obj(pop, obj):
 
 
 def apply_sticky_bounds(dna, bounds):
+    eps = 1e-12
     out = dna[:]
     for i, bound in enumerate(bounds):
         low, high = bound
         if dna[i] > high:
-            out[i] = high
+            out[i] = high - eps
         elif dna[i] < low:
-            out[i] = low
+            out[i] = low + eps
     return out
 
 
@@ -57,9 +44,21 @@ def bounds_as_mat(bounds):
         bounds_mat[i, 0], bounds_mat[i, 1] = bound
     return bounds_mat
 
+    # MDCHAMP am I missing something here TR
+    # @TR I think naievely calling the constructor on nested iterables is deprecieated iirc and might 
+    # not behave like we would expect 
+    # i.e np.array([np.array([0, 1, ..]), np.array([0, 1, ...])]) =/= np.array([[0,1,...], [0,1,...]]) 
+    # The above would fail a structural equality test for example and report different dtypes. 
+    # return np.array(bounds)
+
 
 def lin_reduce(lims, n, n_max):
     # Linearly reduce with generations, e.g. inertia values
+    if lims[1] < lims[0]: 
+        if isinstance(lims,list):
+            lims.reverse()
+        else:
+            np.flip(lims)
     return lims[1] + (lims[0]-lims[1])*n/n_max
 
 
