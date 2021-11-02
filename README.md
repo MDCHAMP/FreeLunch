@@ -20,6 +20,7 @@ Your favourite not in the list? Feel free to add it.
 - Particle Swarm `freelunch.PSO`
 - Krill Herd `freelunch.KrillHerd`
 - Self-adapting Differential Evolution `freelunch.SADE`
+- Quantum Particle Swarm `freelunch.QPSO` 
 
 --Coming soon to 0.1.0--
 
