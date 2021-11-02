@@ -188,7 +188,7 @@ class SA(continuous_space_optimiser):
                 if n < best:
                     best = n
         # This is subtle, best is not neccesarily in new... 
-        final_pop = sorted(old, key=lambda x:x.fitness)
+        final_pop = sorted(old)
         final_pop[-1] = best # replace worst of new pop with best sol
         return final_pop
 
