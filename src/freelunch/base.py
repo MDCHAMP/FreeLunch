@@ -38,7 +38,7 @@ class optimiser:
             sols = np.concatenate(runs)
         else: 
             sols = self.run()
-        sols = sorted(sols, key=lambda x: x.fitness)
+        sols = sorted(sols)
         if not full_output:
             return np.array([sol.dna for sol in sols[:return_m]])
         else:

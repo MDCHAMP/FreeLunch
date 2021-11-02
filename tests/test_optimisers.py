@@ -9,10 +9,10 @@ import json
 np.random.seed(100)
 
 
-from freelunch import DE, SA, PSO, SADE, KrillHerd, SA
+from freelunch import DE, SA, PSO, QPSO, SADE, KrillHerd, SA
 from freelunch.benchmarks import exponential
 
-optimiser_classes = [SA, DE, PSO, SADE, KrillHerd]
+optimiser_classes = [SA, DE, PSO, QPSO, SADE, KrillHerd]
 dims = [1,2,3]
 
 def set_testing_hypers(opt):
