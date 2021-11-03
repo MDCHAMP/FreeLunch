@@ -25,7 +25,7 @@ def uniform_continuous_init_shy(bounds, N, creature=animal, r=1):
     i = 0
     while len(points) < N:
         i += 1
-        if i > 1000: # give up and try a different configuration
+        if i > 200: # give up and try a different configuration
             out = []
         trial = np.array([np.random.uniform(a, b) for a, b in bounds])
         if len(points) == 0 or all([np.linalg.norm(trial-a) > r for a in points]):
