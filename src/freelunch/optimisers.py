@@ -188,7 +188,7 @@ class SA(continuous_space_optimiser):
                 if n < best:
                     best = n
         # This is subtle, best is not neccesarily in new... 
-        final_pop = sorted(old, key=lambda x:x.fitness)
+        final_pop = sorted(old)
         final_pop[-1] = best # replace worst of new pop with best sol
         return final_pop
 
@@ -260,6 +260,44 @@ class PSO(continuous_space_optimiser):
             # Particle class updates best previous position
             # Update global best
             self.g_best = self.best_particle(pop)
+        return pop
+        
+class QPSO(PSO):
+    '''
+    Quantum Particle Swarm Optimisations
+    '''
+    name = 'Quantum Particle Swarm Optimisation'
+    tags = ['Continuous domain', 'Particle swarm']
+    hyper_definitions = {
+        'N':'Population size (int)',
+        'G':'Number of generations (int)',
+        'alpha':'Contraction Expansion Coefficient (np.array, I.shape=(2,))',
+    }
+    hyper_defaults = {
+        'N':100,
+        'G':200,
+        'alpha':np.array([1.0, 0.5]),
+    }
+
+    def mean_best_pos(self, pop):
+        return np.mean([p.best_pos for p in pop], axis=0)
+
+    def move_swarm(self, pop, gen):
+        C = self.mean_best_pos(pop)
+        D = len(C)
+        g_best = self.best_particle(pop)
+        alpha = tech.lin_reduce(self.hypers['alpha'], gen, self.hypers['G'])
+        for p in pop:
+            phi = np.random.random_sample(D)
+            u = np.random.random_sample(D)
+            pp = phi*p.best_pos + (1-phi)*g_best.pos
+            # In algorithm rand(0,1) > 0.5 is 50/50 chance 
+            # Replace here with np.sign(np.random.normal(size=D))
+            # Also 50/50 but nicer for the algorithm
+            p.pos = pp + \
+                np.sign(np.random.normal(size=D))*\
+                    alpha*np.abs(C - p.pos)*np.log(1/u)
+            p.pos = tech.apply_sticky_bounds(p.pos, self.bounds)
         return pop
 
     

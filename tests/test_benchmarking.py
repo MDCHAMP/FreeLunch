@@ -1,12 +1,13 @@
 from freelunch.benchmarks import ackley, exponential, happycat, periodic
 from freelunch.base import optimiser
-from freelunch import DE, SA, PSO, SADE, KrillHerd, SA, GrenadeExplosion
+from freelunch import DE, SA, PSO, SADE, KrillHerd, SA, QPSO, GrenadeExplosion
 import pytest
 import numpy as np
 import json
+
 np.random.seed(100)
 
-optimiser_classes = [SA, DE, PSO, SADE, KrillHerd, GrenadeExplosion]
+optimiser_classes = [SA, DE, PSO, SADE, KrillHerd, QPSO, GrenadeExplosion]
 benchmark_problems = [ackley, exponential, happycat, periodic]
 
 @pytest.mark.benchmark(group="Optimisers")
