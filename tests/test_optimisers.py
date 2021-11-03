@@ -20,8 +20,8 @@ def set_testing_hypers(opt):
     hypers['N'] = 5
     hypers['G'] = 2
     hypers['K'] = 2 # SA should really use G as well...
-    hypers['Ng'] = 2
-    hypers['Nq'] = 5
+    hypers['Ng'] = 5
+    hypers['Nq'] = 2
     return hypers
 
 
