@@ -568,7 +568,7 @@ class GrenadeExplosion(continuous_space_optimiser):
                 valid_shrapnel = []
                 while len(valid_shrapnel) < self.hypers['Nq']:
                     shrapnel = grenade.detonate(Le, p)
-                    shrapnel.dna = tech.apply_grenade_bounds(shrapnel.dna, self.bounds_scaled)
+                    shrapnel.dna = tech.apply_sticky_bounds(shrapnel.dna, self.bounds_scaled) # not the same approach as in the paper!
                     # check the shrapnel is in a valid location
                     if np.all([np.linalg.norm(shrapnel.dna - g.dna)>Rt for g in other_nades]):
                         valid_shrapnel.append(shrapnel)
