@@ -15,6 +15,12 @@ search_ops = [rand_1, rand_2, best_1, best_2, current_1]
 cross_ops = [binary_crossover]
 select_ops = [binary_tournament]
 
+
+def test_base_class():
+    with pytest.raises(NotImplementedError):
+        genetic_operation()()
+
+
 @pytest.mark.parametrize('D',[1,3])
 @pytest.mark.parametrize('op', search_ops)
 def test_search(op,D):
