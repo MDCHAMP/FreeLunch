@@ -79,8 +79,14 @@ class Bounder():
         for p in pop:
             self.bounding_function(p)
 
-    def to_list(self):
-        return {'bounds': self.bounds.to_list(), 'hypers': self.hypers}
+    def __iter__(self):
+        return self.bounds.__iter__()
+
+    def __next__(self):
+        return self.bounds.__next__()
+
+    def tolist(self):
+        return {'bounds': self.bounds.tolist(), 'hypers': self.hypers}
 
 
 class StickyBounds(Bounder):

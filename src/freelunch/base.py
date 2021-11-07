@@ -3,8 +3,11 @@ Base classes for optimisers
 
 '''
 from os import error
+from typing import Tuple
 import numpy as np
+
 from freelunch import darwin
+from freelunch import tech
 from freelunch.adaptable import adaptable_set
 
 
@@ -23,6 +26,7 @@ class optimiser:
         Unlikely to instance the base class but idk what else goes here
         '''
         self.hypers = dict(self.hyper_defaults, **hypers) # Hyperparamters/ methods (dictionary of )
+        self._bounds = None
         self.bounds = np.array(bounds) # Bounds / constraints
         self.nfe = 0
         self.obj = self.wrap_obj_with_nfe(obj) # Objective function 
@@ -55,7 +59,29 @@ class optimiser:
             return out
 
     def __repr__(self):
-        return self.name + ' optimisation object'    
+        return self.name + ' optimisation object'
+
+    @property
+    def bounds(self):
+        return self._bounds
+        
+    @bounds.setter
+    def bounds(self, b):
+        if isinstance(b, tech.Bounder):
+            self._bounds = b
+        elif isinstance(b, Tuple):
+            if len(b) == 3:
+                self._bounds = getattr(tech,b[0])(bounds=b[1], hypers=b[2])
+            elif len(b) == 2:
+                self._bounds = getattr(tech,b[0])(bounds=b[1])
+            else:
+                raise ValueError
+        elif isinstance(b, np.ndarray):
+            # Default sticky bounds
+            self._bounds = tech.StickyBounds(bounds=b)
+        else:
+            raise ValueError
+
 
     def run(self):
         if self.obj is None:
