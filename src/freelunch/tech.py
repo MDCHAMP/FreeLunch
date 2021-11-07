@@ -97,9 +97,6 @@ class Bounder():
     def __iter__(self):
         return self.bounds.__iter__()
 
-    def __next__(self):
-        return self.bounds.__next__()
-
     def __len__(self):
         return self.bounds.shape[0]
 
@@ -109,6 +106,17 @@ class Bounder():
 
     def tolist(self):
         return {'bounds': self.bounds.tolist(), 'hypers': self.hypers}
+
+class NoBounds(Bounder):
+    '''
+    Placeholder for no bounding
+    '''
+
+    def __init__(self) -> None:
+        pass
+
+    def bounding_function(self, p):
+        raise Warning('No bounds applied')
 
 class StickyBounds(Bounder):
     '''

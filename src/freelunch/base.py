@@ -3,7 +3,7 @@ Base classes for optimisers
 
 '''
 from os import error
-from typing import Tuple
+from typing import List, Tuple
 import numpy as np
 
 from freelunch import darwin
@@ -27,7 +27,7 @@ class optimiser:
         '''
         self.hypers = dict(self.hyper_defaults, **hypers) # Hyperparamters/ methods (dictionary of )
         self._bounds = None
-        self.bounds = np.array(bounds) # Bounds / constraints
+        self.bounds = bounds # Bounds / constraints
         self.nfe = 0
         self.obj = self.wrap_obj_with_nfe(obj) # Objective function 
 
@@ -67,7 +67,9 @@ class optimiser:
         
     @bounds.setter
     def bounds(self, b):
-        if isinstance(b, tech.Bounder):
+        if b is None:
+            self._bounds = tech.NoBounds()
+        elif isinstance(b, tech.Bounder):
             self._bounds = b
         elif isinstance(b, Tuple):
             if len(b) == 3:
@@ -79,6 +81,8 @@ class optimiser:
         elif isinstance(b, np.ndarray):
             # Default sticky bounds
             self._bounds = tech.StickyBounds(bounds=b)
+        elif isinstance(b, List):
+                self._bounds = tech.StickyBounds(bounds=b)
         else:
             raise ValueError
 

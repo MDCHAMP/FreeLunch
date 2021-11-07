@@ -105,4 +105,8 @@ def test_bounder(dim, bounding_strat):
 
     B(pop)
     assert(all([(np.all(p.dna == bounds[:,0]+1e-12) or np.all(p.dna == bounds[:,1]-1e-12)) for p in pop]))
+
+    B = NoBounds()
+    with pytest.raises(Warning):
+        B(pop)
     
