@@ -144,3 +144,7 @@ prof/
 
 #Locals
 local/
+
+
+#Old tests
+*.old
