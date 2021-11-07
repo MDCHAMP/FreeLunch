@@ -141,3 +141,6 @@ prof/
 
 # Benchmark data
 */benchmarks
+
+#Locals
+local/
