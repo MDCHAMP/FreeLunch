@@ -5,6 +5,7 @@ Standard / common techniques that are used in several optimisers are abstracted 
 # %% Imports
 
 import numpy as np
+
 from freelunch.zoo import animal
 
 
@@ -24,18 +25,6 @@ def compute_obj(pop, obj):
     for sol in pop:
         sol.fitness = obj(sol.dna)
     return pop
-
-
-def apply_sticky_bounds(dna, bounds):
-    eps = 1e-12
-    out = dna[:]
-    for i, bound in enumerate(bounds):
-        low, high = bound
-        if dna[i] > high:
-            out[i] = high - eps
-        elif dna[i] < low:
-            out[i] = low + eps
-    return out
 
 
 def bounds_as_mat(bounds):
@@ -69,3 +58,46 @@ def pdist(A, B=None):
     if B is None:
         B = A
     return np.sqrt(np.sum((A[:, None]-B[None, :])**2, axis=-1))
+
+
+#%% Bounding Strategies
+
+class Bounder():
+
+    hyper_defaults = {
+        'eps': 1e-12, # Jitter
+    }
+
+    def __init__(self, bounds, hypers={}) -> None:
+        self.bounds = bounds
+        self.hypers = dict(self.hyper_defaults, **hypers)
+
+    def bounding_function(self, pop):
+        raise NotImplementedError
+
+    def __call__(self, pop):
+        for p in pop:
+            self.bounding_function(p)
+
+    def to_list(self):
+        return {'bounds': self.bounds.to_list(), 'hypers': self.hypers}
+
+
+class StickyBounds(Bounder):
+    '''
+    Apply sticky bounds to space
+    '''
+
+
+    def __init__(self, bounds, hypers={}) -> None:
+        super().__init__(bounds, hypers)
+
+    def bounding_function(self, p):
+        out = p.dna[:]
+        for i, bound in enumerate(self.bounds):
+            low, high = bound
+            if p.dna[i] > high:
+                out[i] = high - self.hypers['eps']
+            elif p.dna[i] < low:
+                out[i] = low + self.hypers['eps']
+        p.dna = out

@@ -92,3 +92,34 @@ def test_pdist():
     assert(np.all(pdist(A) == DAA))
     assert(np.all(pdist(A,A) == DAA))
     assert(np.all(pdist(A,B) == DAB))
+
+
+bounders = [StickyBounds]
+@pytest.mark.parametrize('dim',[1,3])
+@pytest.mark.parametrize('bounding_strat', bounders)
+def test_bounder(dim, bounding_strat):
+
+    bounds = np.empty((dim,2))
+    for n in range(dim):
+        bounds[n,1] = 10*np.random.rand()
+        bounds[n,0] = -bounds[n,1]
+    
+    pop = uniform_continuous_init(bounds, 5)
+
+    B = Bounder(bounds)
+    with pytest.raises(NotImplementedError):
+        B(pop)
+
+    B = bounding_strat(bounds)
+    pop_old = pop.copy()
+    assert(all([n == o for o,n in zip(pop_old, pop)]))
+
+    for p in pop:
+        if np.random.uniform() < 0.5:
+            p.dna = bounds[:,0] - 1
+        else:
+            p.dna = bounds[:,1] + 1
+
+    B(pop)
+    assert(all([(np.all(p.dna > bounds[:,0]) or np.all(p.dna < bounds[:,1])) for p in pop]))
+    
