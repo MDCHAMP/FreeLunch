@@ -24,12 +24,13 @@ class optimiser:
     def __init__(self, obj=None, hypers={}, bounds=None):
         '''
         Unlikely to instance the base class but idk what else goes here
-        '''
-        self.hypers = dict(self.hyper_defaults, **hypers) # Hyperparamters/ methods (dictionary of )
-        self._bounds = None
+        '''        
         self.bounds = bounds # Bounds / constraints
+        self.bounder = tech.sticky_bounds
         self.nfe = 0
-        self.obj = self.wrap_obj_with_nfe(obj) # Objective function 
+        self.obj = self._wrap_obj_with_nfe(obj) # Objective function 
+        self.hypers = dict(self.hyper_defaults, **hypers) # Hyperparamters/ methods 
+        self.hypers['bounding'] = self.bounder.__name__
 
     def __call__(self, nruns=1, return_m=1, full_output=False):
         '''
@@ -61,32 +62,6 @@ class optimiser:
     def __repr__(self):
         return self.name + ' optimisation object'
 
-    @property
-    def bounds(self):
-        return self._bounds
-        
-    @bounds.setter
-    def bounds(self, b):
-        if b is None:
-            self._bounds = tech.NoBounds()
-        elif isinstance(b, tech.Bounder):
-            self._bounds = b
-        elif isinstance(b, Tuple):
-            if len(b) == 3:
-                self._bounds = getattr(tech,b[0])(bounds=b[1], hypers=b[2])
-            elif len(b) == 2:
-                self._bounds = getattr(tech,b[0])(bounds=b[1])
-            else:
-                raise ValueError
-        elif isinstance(b, np.ndarray):
-            # Default sticky bounds
-            self._bounds = tech.StickyBounds(bounds=b)
-        elif isinstance(b, List):
-                self._bounds = tech.StickyBounds(bounds=b)
-        else:
-            raise ValueError
-
-
     def run(self):
         if self.obj is None:
             raise NotImplementedError('No objective function selected')
@@ -108,7 +83,12 @@ class optimiser:
             except AttributeError:
                 raise AttributeError('Method not recognised, refer to docs for list of implemented methods') # TODO test
 
-    def wrap_obj_with_nfe(self, obj):
+    def apply_bounds(self, pop, **hypers):
+        '''Apply the bouding method to every object in an iterable'''
+        for sol in pop:
+            self.bounder(sol, self.bounds, **hypers)
+    
+    def _wrap_obj_with_nfe(self, obj):
         if obj is None: return None
         def w_obj(vec):
             self.nfe +=1
