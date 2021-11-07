@@ -57,7 +57,7 @@ class DE(continuous_space_optimiser):
                 trial.dna = breeder(sol.dna, trial.dna, Cr=self.hypers['Cr'])
                 trial_pop[i] = trial
             # Apply bounds
-            self.bounds(trial_pop)
+            self.apply_bounds(trial_pop)
             # Selection operation
             tech.compute_obj(trial_pop, self.obj)
             pop = selector(pop, trial_pop)
@@ -125,7 +125,7 @@ class SADE(continuous_space_optimiser):
                 new.tech.extend([mutator, F.now(), Cr.now()])
                 trial_pop[i] = new
             # Apply bounds
-            self.bounds(trial_pop)
+            self.apply_bounds(trial_pop)
             # Selection operation
             tech.compute_obj(trial_pop, self.obj)
             pop = selector(pop, trial_pop)
@@ -179,7 +179,7 @@ class SA(continuous_space_optimiser):
             for i, o in enumerate(old):
                 #generate neighbour
                 new[i] = self.neighbour(o)
-            self.bounds(new)
+            self.apply_bounds(new)
             tech.compute_obj(new, self.obj)
             # selection with probability P
             for i, o, n in zip(range(self.hypers['N']), old, new):
@@ -254,7 +254,7 @@ class PSO(continuous_space_optimiser):
         for gen in range(self.hypers['G']):
             # Propagate the swarm
             pop = self.move_swarm(pop,gen)
-            self.bounds(pop)
+            self.apply_bounds(pop)
             # Test new swarm locations
             self.test_pop(pop)
             # Particle class updates best previous position
@@ -466,7 +466,7 @@ class KrillHerd(continuous_space_optimiser):
         if self.bounds is None:
             dt = 10 # If no bounds set use default
         else:
-            bounds = self.bounds.bounds
+            bounds = self.bounds
             dt = self.hypers['Ct']*np.sum(bounds[:,1]-bounds[:,0])
         # Main loop 
         for gen in range(self.hypers['G']):
@@ -506,7 +506,7 @@ class KrillHerd(continuous_space_optimiser):
                 pop[i].pos = dna
                 pop[i].motion = motion
                 pop[i].forage = forage
-            self.bounds(pop)    
+            self.apply_bounds(pop)    
             tech.compute_obj(pop, self.obj)
         return pop
 
