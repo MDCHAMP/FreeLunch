@@ -466,7 +466,7 @@ class KrillHerd(continuous_space_optimiser):
         if self.bounds is None:
             dt = 10 # If no bounds set use default
         else:
-            bounds = self.bounds.tomat()
+            bounds = self.bounds.bounds
             dt = self.hypers['Ct']*np.sum(bounds[:,1]-bounds[:,0])
         # Main loop 
         for gen in range(self.hypers['G']):

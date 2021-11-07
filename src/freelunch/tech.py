@@ -110,15 +110,6 @@ class Bounder():
     def tolist(self):
         return {'bounds': self.bounds.tolist(), 'hypers': self.hypers}
 
-    def tomat(self):
-        # Provide bounds as numpy ndarray
-        bounds_mat = np.zeros((len(self.bounds), 2))
-        for i, bound in enumerate(self.bounds):
-            bounds_mat[i, 0], bounds_mat[i, 1] = bound
-        return bounds_mat
-
-
-
 class StickyBounds(Bounder):
     '''
     Apply sticky bounds to space
