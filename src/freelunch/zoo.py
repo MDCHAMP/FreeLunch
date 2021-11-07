@@ -149,3 +149,22 @@ class krill(particle):
 
         self.motion = motion
         self.forage = forage
+
+
+
+
+class shrapnel(animal):
+    '''
+    Coins in the sofa
+    '''
+
+class grenade(animal):
+    '''
+    If you knew we were sentient, maybe you would think twice before tossing one uphill?
+    '''
+
+    def detonate(self, Le, p):
+        s = shrapnel()
+        rm = np.random.uniform(0,1, size = len(self.dna))
+        s.dna = self.dna + (np.sign(rm) * Le * abs(rm)**p)
+        return s 

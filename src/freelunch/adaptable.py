@@ -115,7 +115,10 @@ class linearly_varying_parameter(adaptable_parameter):
         self.a0 = a0
         self.an = an
         self.n = n
-        self.values = np.linspace(a0, an, n)
+        if a0 == an:
+            self.values = np.ones((n,)) * a0
+        else:
+            self.values = np.linspace(a0, an, n)
 
     def op(self, k):
         return self.values[k]

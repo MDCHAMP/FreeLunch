@@ -20,6 +20,24 @@ def uniform_continuous_init(bounds, N, creature=animal):
     return out
 
 
+def uniform_continuous_init_shy(bounds, N, creature=animal, r=1):
+    points = []
+    i = 0
+    while len(points) < N:
+        i += 1
+        if i > 200: # give up and try a different configuration
+            out = []
+        trial = np.array([np.random.uniform(a, b) for a, b in bounds])
+        if len(points) == 0 or all([np.linalg.norm(trial-a) > r for a in points]):
+            points.append(trial)
+    out = np.empty((N,), dtype=object)
+    for i, point in enumerate(points):
+        adam = creature()
+        adam.dna = point
+        out[i] = adam
+    return out
+
+
 def compute_obj(pop, obj):
     for sol in pop:
         sol.fitness = obj(sol.dna)
@@ -60,6 +78,18 @@ def lin_reduce(lims, n, n_max):
         else:
             np.flip(lims)
     return lims[1] + (lims[0]-lims[1])*n/n_max
+
+
+def scale_obj(obj, bounds, u=0, d=2):
+    # affine scaling of obj function
+    us = np.array([(high + low)/2 for low, high in bounds])
+    ds = np.array([(high - low)/2 for low, high in bounds])
+    def obj_scaled(x):
+        x_scaled = (x - us) / ds
+        return obj(x_scaled)
+    def unscaler(x_scaled):
+        return (x_scaled * ds) + us
+    return obj_scaled, unscaler
 
 
 def pdist(A, B=None):
