@@ -57,7 +57,7 @@ def pdist(A, B=None):
 #%% Bounding Strategies
 
 
-def no_bounding(pop, **hypers):
+def no_bounding(p, bounds, **hypers):
     '''
     Placeholder for no bounding
     '''

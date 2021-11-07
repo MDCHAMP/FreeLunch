@@ -63,6 +63,12 @@ def test_sticky_bounds():
     bound_fixture([1.5, -2.2], [1-eps, -2+eps],bounds, sticky_bounds, eps=eps)
 
 
+
+def test_no_bounds():
+    with pytest.raises(Warning):
+        no_bounding(animal(), [])
+
+
 def test_bounds_as_mat():
 
     bounds = [[-1, 1], [-2, 2]]
