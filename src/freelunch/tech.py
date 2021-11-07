@@ -105,7 +105,11 @@ class Bounder():
         return self.bounds.shape
 
     def tolist(self):
-        return {'bounds': self.bounds.tolist(), 'hypers': self.hypers}
+        return {
+            'strategy':self.__name__,
+            'bounds': self.bounds.tolist(),
+            'hypers': self.hypers
+            }
 
 class NoBounds(Bounder):
     '''
@@ -113,6 +117,7 @@ class NoBounds(Bounder):
     '''
 
     def __init__(self) -> None:
+        self.__name__ = 'No Bounds'
         pass
 
     def bounding_function(self, p):
@@ -123,8 +128,8 @@ class StickyBounds(Bounder):
     Apply sticky bounds to space
     '''
 
-
     def __init__(self, bounds, hypers={}) -> None:
+        self.__name__ = 'Sticky Bounds'
         super().__init__(bounds, hypers)
 
     def bounding_function(self, p):
