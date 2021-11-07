@@ -48,8 +48,8 @@ def test_run(opt,n,d):
     assert(all(x<=y for x, y in zip(out['scores'], out['scores'][1:]))) # scores are ordered
     for o in out['solutions']:
         for i,v in enumerate(o):
-            assert(v > out['bounds'][i][0])
-            assert(v < out['bounds'][i][1])
+            assert(v > out['bounds']['bounds'][i][0])
+            assert(v < out['bounds']['bounds'][i][1])
 
 
 @pytest.mark.parametrize('opt', optimiser_classes)

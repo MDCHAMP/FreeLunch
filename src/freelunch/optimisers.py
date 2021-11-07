@@ -55,9 +55,9 @@ class DE(continuous_space_optimiser):
                 trial.dna = mutator(sol, pop=pop, F=self.hypers['F'])
                 # Crossover operation
                 trial.dna = breeder(sol.dna, trial.dna, Cr=self.hypers['Cr'])
-                #apply bounds
-                trial.dna = tech.apply_sticky_bounds(trial.dna, self.bounds)
                 trial_pop[i] = trial
+            # Apply bounds
+            self.bounds(trial_pop)
             # Selection operation
             tech.compute_obj(trial_pop, self.obj)
             pop = selector(pop, trial_pop)
@@ -121,11 +121,11 @@ class SADE(continuous_space_optimiser):
                 new.dna = mutator(sol, pop=pop, F=F())
                 # crossover
                 new.dna = breeder(sol.dna, new.dna, Cr())
-                # apply bounds
-                new.dna = tech.apply_sticky_bounds(new.dna, self.bounds)
                 # Record methods used to produce new individual
                 new.tech.extend([mutator, F.now(), Cr.now()])
                 trial_pop[i] = new
+            # Apply bounds
+            self.bounds(trial_pop)
             # Selection operation
             tech.compute_obj(trial_pop, self.obj)
             pop = selector(pop, trial_pop)
@@ -164,7 +164,6 @@ class SA(continuous_space_optimiser):
         for i, u, bound in zip(idxs, old.dna, self.bounds):
             sig = (bound[1] - bound[0]) / 10
             new.dna[i] = np.random.normal(u, sig)
-        tech.apply_sticky_bounds(new.dna, self.bounds)
         return new
 
     def run(self):
@@ -180,6 +179,7 @@ class SA(continuous_space_optimiser):
             for i, o in enumerate(old):
                 #generate neighbour
                 new[i] = self.neighbour(o)
+            self.bounds(new)
             tech.compute_obj(new, self.obj)
             # selection with probability P
             for i, o, n in zip(range(self.hypers['N']), old, new):
@@ -217,7 +217,7 @@ class PSO(continuous_space_optimiser):
         pop = np.empty((N,), dtype=object)
         for i in range(N):
             pop[i] = zoo.particle(np.array([np.random.uniform(a,b) for a, b in self.bounds]))
-            pop[i].vel = np.squeeze((2*np.random.rand(self.bounds.shape[0],1)-1)*np.diff(self.bounds))
+            pop[i].vel = np.array([np.random.uniform(a,b) for a, b in self.bounds])
         return pop
 
     def move_swarm(self, pop, gen):
@@ -228,7 +228,6 @@ class PSO(continuous_space_optimiser):
             p.vel = inertia*p.vel + \
                 self.hypers['A'][0]*np.random.rand()*(p.best_pos-p.pos) + \
                 self.hypers['A'][1]*np.random.rand()*(self.g_best.pos-p.pos)
-            p.pos = tech.apply_sticky_bounds(p.pos + p.vel, self.bounds)
         return pop
 
     def test_pop(self, pop):
@@ -255,6 +254,7 @@ class PSO(continuous_space_optimiser):
         for gen in range(self.hypers['G']):
             # Propagate the swarm
             pop = self.move_swarm(pop,gen)
+            self.bounds(pop)
             # Test new swarm locations
             self.test_pop(pop)
             # Particle class updates best previous position
@@ -297,7 +297,6 @@ class QPSO(PSO):
             p.pos = pp + \
                 np.sign(np.random.normal(size=D))*\
                     alpha*np.abs(C - p.pos)*np.log(1/u)
-            p.pos = tech.apply_sticky_bounds(p.pos, self.bounds)
         return pop
 
     
@@ -467,7 +466,7 @@ class KrillHerd(continuous_space_optimiser):
         if self.bounds is None:
             dt = 10 # If no bounds set use default
         else:
-            bounds = tech.bounds_as_mat(self.bounds)
+            bounds = self.bounds.tomat()
             dt = self.hypers['Ct']*np.sum(bounds[:,1]-bounds[:,0])
         # Main loop 
         for gen in range(self.hypers['G']):
@@ -502,12 +501,12 @@ class KrillHerd(continuous_space_optimiser):
                 current_herd[mutates] = mutant_dna[mutates]
             # Move the herd
             new_pos = current_herd + dt*V
-            new_pos = np.array([tech.apply_sticky_bounds(k, self.bounds) for k in new_pos])
             # Compute objectives and update the herd
             for i,(dna,motion,forage) in enumerate(zip(new_pos,N,F)):
                 pop[i].pos = dna
                 pop[i].motion = motion
                 pop[i].forage = forage
-                pop[i].fitness = self.obj(dna)
+            self.bounds(pop)    
+            tech.compute_obj(pop, self.obj)
         return pop
 

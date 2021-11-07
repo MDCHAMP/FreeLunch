@@ -44,13 +44,6 @@ def test_compute_obj():
     assert(len(pop) == N)
     for p in pop: assert(p.fitness == 1)
 
-
-def test_bounds_as_mat():
-    
-    bounds = [[-1,1],[-2,2]]
-    bounds_mat = np.array(bounds)
-    assert(np.all(bounds_as_mat(bounds) == bounds_mat))
-
 def test_lin_reduce():
 
     lims = [2,4]

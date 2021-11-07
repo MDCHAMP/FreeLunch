@@ -27,11 +27,11 @@ def compute_obj(pop, obj):
     return pop
 
 
-def bounds_as_mat(bounds):
-    bounds_mat = np.zeros((len(bounds), 2))
-    for i, bound in enumerate(bounds):
-        bounds_mat[i, 0], bounds_mat[i, 1] = bound
-    return bounds_mat
+# def bounds_as_mat(bounds):
+#     bounds_mat = np.zeros((len(bounds), 2))
+#     for i, bound in enumerate(bounds):
+#         bounds_mat[i, 0], bounds_mat[i, 1] = bound
+#     return bounds_mat
 
     # MDCHAMP am I missing something here TR
     # @TR I think naievely calling the constructor on nested iterables is deprecieated iirc and might 
@@ -69,8 +69,23 @@ class Bounder():
     }
 
     def __init__(self, bounds, hypers={}) -> None:
+        self._bounds = None
         self.bounds = bounds
         self.hypers = dict(self.hyper_defaults, **hypers)
+
+    @property
+    def bounds(self):
+        return self._bounds
+
+    @bounds.setter
+    def bounds(self, b):
+        if isinstance(b, np.ndarray):
+            self._bounds = b
+        else:
+            bounds_mat = np.zeros((len(b), 2))
+            for i, bound in enumerate(b):
+                bounds_mat[i, 0], bounds_mat[i, 1] = bound
+            self._bounds = bounds_mat
 
     def bounding_function(self, pop):
         raise NotImplementedError
@@ -85,8 +100,23 @@ class Bounder():
     def __next__(self):
         return self.bounds.__next__()
 
+    def __len__(self):
+        return self.bounds.shape[0]
+
+    @property
+    def shape(self):
+        return self.bounds.shape
+
     def tolist(self):
         return {'bounds': self.bounds.tolist(), 'hypers': self.hypers}
+
+    def tomat(self):
+        # Provide bounds as numpy ndarray
+        bounds_mat = np.zeros((len(self.bounds), 2))
+        for i, bound in enumerate(self.bounds):
+            bounds_mat[i, 0], bounds_mat[i, 1] = bound
+        return bounds_mat
+
 
 
 class StickyBounds(Bounder):
