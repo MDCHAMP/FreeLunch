@@ -19,8 +19,9 @@ def set_testing_hypers(opt):
     hypers = opt.hyper_defaults
     hypers['N'] = 5
     hypers['G'] = 2
-    hypers['K'] = 2  # SA should really use G as well...
-
+    hypers['K'] = 2 # SA should really use G as well...
+    hypers['Ng'] = 5
+    hypers['Nq'] = 2
     return hypers
 
 
