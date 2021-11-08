@@ -4,14 +4,14 @@ Testing the optimisers
 Testing for function not performance see benchmarking script
 '''
 from freelunch.benchmarks import exponential
-from freelunch import DE, SA, PSO, QPSO, SADE, KrillHerd, SA
+from freelunch import DE, SA, PSO, QPSO, SADE, KrillHerd, SA, GrenadeExplosion
 import pytest
 import numpy as np
 import json
 np.random.seed(100)
 
 
-optimiser_classes = [SA, DE, PSO, QPSO, SADE, KrillHerd]
+optimiser_classes = [SA, DE, PSO, QPSO, SADE, KrillHerd, GrenadeExplosion]
 dims = [1, 2, 3]
 
 
