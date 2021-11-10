@@ -7,9 +7,9 @@ import numpy as np
 np.random.seed(100)
 
 from freelunch.tech import *
-from freelunch.zoo import animal, particle, krill, grenade
+from freelunch.zoo import animal, particle, krill
 
-animals = [None, animal,particle, krill, grenade]
+animals = [None, animal,particle, krill]
 
 def dummy_obj_fun(dna):
     return 1
