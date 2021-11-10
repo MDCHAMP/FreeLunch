@@ -1,7 +1,7 @@
 '''
 Testing tech
 '''
-from freelunch.zoo import animal, particle, krill, grenade
+from freelunch.zoo import animal, particle, krill
 from freelunch.tech import *
 import pytest
 import numpy as np
@@ -9,8 +9,8 @@ import numpy as np
 np.random.seed(100)
 
 
+animals = [None, animal, particle, krill]
 
-animals = [None, animal,particle, krill, grenade]
 
 def dummy_obj_fun(dna):
     return 1

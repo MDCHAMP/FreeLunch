@@ -21,7 +21,6 @@ Your favourite not in the list? Feel free to add it.
 - Krill Herd `freelunch.KrillHerd`
 - Self-adapting Differential Evolution `freelunch.SADE`
 - Quantum Particle Swarm `freelunch.QPSO` 
-- Grenade explosion method `freelunch.GrenadeExplosion`
 
 --Coming soon to 0.1.0--
 
