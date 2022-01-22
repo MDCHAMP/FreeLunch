@@ -1,9 +1,9 @@
 '''
 Base classes for optimisers
 
-'''
-from os import error
-from typing import List, Tuple
+''' 
+from multiprocessing import Pool
+
 import numpy as np
 
 from freelunch import darwin
@@ -28,18 +28,23 @@ class optimiser:
         self.bounds = bounds # Bounds / constraints
         self.bounder = tech.sticky_bounds
         self.nfe = 0
+        self.raw_obj = obj
         self.obj = self._wrap_obj_with_nfe(obj) # Objective function 
         self.hypers = dict(self.hyper_defaults, **hypers) # Hyperparamters/ methods 
         self.hypers['bounding'] = self.bounder.__name__
 
-    def __call__(self, nruns=1, return_m=1, full_output=False):
+    def __call__(self, nruns=1, return_m=1, full_output=False, workers=1, pool_args={}, chunks=1):
         '''
         API for running the optimisation
         '''
         if self.obj is None:
             raise NotImplementedError('No optimiser selected')
         if nruns > 1:
-            runs = [self.run() for i in range(nruns)]
+            if workers > 1:
+                self.obj = self.raw_obj
+                runs = Pool(workers, **pool_args).starmap(self.run, [() for _ in range(nruns)], chunks)           
+            else:
+                runs = [self.run() for i in range(nruns)]
             sols = np.concatenate(runs)
         else: 
             sols = self.run()

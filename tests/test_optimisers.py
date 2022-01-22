@@ -20,8 +20,6 @@ def set_testing_hypers(opt):
     hypers['N'] = 5
     hypers['G'] = 2
     hypers['K'] = 2  # SA should really use G as well...
-
-
     return hypers
 
 
@@ -33,8 +31,6 @@ def test_instancing_defaults(opt):
             assert np.all(v == opt.hyper_defaults[k])
 
 # Since this happens in the base class it should be ok to just test DE
-
-
 @pytest.mark.parametrize('n', [1, 3, 5])
 def test_nfe(n):
     o = exponential(n)
@@ -42,6 +38,12 @@ def test_nfe(n):
     out = DE(obj=o, bounds=o.bounds, hypers=hypers)(nruns=n, full_output=True)
     assert out['nfe'] == (out['hypers']['G'] + 1) * out['hypers']['N'] * n
 
+# Since this happens in the base class it should be ok to just test DE
+@pytest.mark.parametrize('n', [1, 3, 5])
+def test_multiproc(n):
+    o = exponential(2)
+    hypers = set_testing_hypers(DE)
+    out = DE(obj=o, bounds=o.bounds, hypers=hypers)(nruns=n, full_output=True, workers=n)
 
 @pytest.mark.parametrize('opt', optimiser_classes)
 @pytest.mark.parametrize('n', [1, 3])
