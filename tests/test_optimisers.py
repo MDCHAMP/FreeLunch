@@ -38,13 +38,20 @@ def test_nfe(n):
     out = DE(obj=o, bounds=o.bounds, hypers=hypers)(nruns=n, full_output=True)
     assert out['nfe'] == (out['hypers']['G'] + 1) * out['hypers']['N'] * n
 
-# Since this happens in the base class it should be ok to just test DE
 @pytest.mark.parametrize('n', [1, 3, 5])
 def test_multiproc(n):
     o = exponential(2)
     hypers = set_testing_hypers(DE)
     out = DE(obj=o, bounds=o.bounds, hypers=hypers)(nruns=n, full_output=True, workers=n)
     assert out['nfe'] == (out['hypers']['G'] + 1) * out['hypers']['N'] * n
+
+# Test every optimiser to catch pickling bugs - you never do know...
+@pytest.mark.parametrize('opt', optimiser_classes)
+def test_multiproc(opt):
+    o = exponential(2)
+    hypers = set_testing_hypers(opt)
+    opt(obj=o, bounds=o.bounds, hypers=hypers)(nruns=4, full_output=True, workers=2)
+
 
 @pytest.mark.parametrize('opt', optimiser_classes)
 @pytest.mark.parametrize('n', [1, 3])
