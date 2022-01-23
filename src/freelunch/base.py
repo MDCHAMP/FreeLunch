@@ -69,14 +69,6 @@ class optimiser:
     def run_mp(self):
         return self.run(), self.nfe
 
-    def run(self):
-        if self.obj is None:
-            raise NotImplementedError('No objective function selected')
-
-    def run_quick(self):
-        if self.obj is None:
-            raise NotImplementedError('No objective function selected')
-
     def parse_hyper(self, op):
         if isinstance(op, list): # top 10 recursive gamer moments
             strats = [self.parse_hyper(strat) for strat in op]
