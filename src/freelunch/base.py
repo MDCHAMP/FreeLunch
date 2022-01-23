@@ -2,6 +2,7 @@
 Base classes for optimisers
 
 ''' 
+from functools import partial
 from multiprocessing import Pool
 
 import numpy as np
@@ -21,15 +22,14 @@ class optimiser:
     hyper_defaults = {}
     can_run_quick = False
 
-    def __init__(self, obj=None, hypers={}, bounds=None):
+    def __init__(self, obj, hypers={}, bounds=None):
         '''
         Unlikely to instance the base class but idk what else goes here
         '''        
         self.bounds = bounds # Bounds / constraints
         self.bounder = tech.sticky_bounds
         self.nfe = 0
-        self.raw_obj = obj
-        self.obj = self._wrap_obj_with_nfe(obj) # Objective function 
+        self.obj = partial(self._obj, obj)  # Extend capability of objective function (mp safe!!)
         self.hypers = dict(self.hyper_defaults, **hypers) # Hyperparamters/ methods 
         self.hypers['bounding'] = self.bounder.__name__
 
@@ -37,11 +37,8 @@ class optimiser:
         '''
         API for running the optimisation
         '''
-        if self.obj is None:
-            raise NotImplementedError('No optimiser selected')
         if nruns > 1:
             if workers > 1:
-                self.obj = self.raw_obj
                 runs = Pool(workers, **pool_args).starmap(self.run, [() for _ in range(nruns)], chunks)           
             else:
                 runs = [self.run() for i in range(nruns)]
@@ -93,17 +90,17 @@ class optimiser:
         for sol in pop:
             self.bounder(sol, self.bounds, **hypers)
     
-    def _wrap_obj_with_nfe(self, obj):
-        if obj is None: return None
-        def w_obj(vec):
-            self.nfe +=1
-            fit = obj(vec)
-            try:
-                if np.isnan(fit): return None
-                return float(fit)
-            except(ValueError, TypeError):
-                return None
-        return w_obj
+
+    def _obj(self, obj, vec):
+        '''Adds nfe counting and bad value handling to raw_obj'''
+        self.nfe +=1
+        fit = obj(vec)
+        try:
+            if np.isnan(fit): return None
+            return float(fit)
+        except(ValueError, TypeError):
+            return None
+
 
 # Subclasses for granularity
 
