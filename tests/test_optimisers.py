@@ -25,7 +25,7 @@ def set_testing_hypers(opt):
 
 @pytest.mark.parametrize('opt', optimiser_classes)
 def test_instancing_defaults(opt):
-    o = opt()
+    o = opt(exponential())
     for k, v in o.hypers.items():
         if k in opt.hyper_defaults:
             assert np.all(v == opt.hyper_defaults[k])
@@ -94,5 +94,5 @@ def test_can_json(opt, n):
 
 @pytest.mark.parametrize('opt', optimiser_classes)
 def test_repr(opt):
-    rep = opt().__repr__()
+    rep = opt(exponential()).__repr__()
     assert(rep == (opt.name + ' optimisation object'))
