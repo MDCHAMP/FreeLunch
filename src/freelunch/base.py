@@ -39,7 +39,9 @@ class optimiser:
         '''
         if nruns > 1:
             if workers > 1:
-                runs = Pool(workers, **pool_args).starmap(self.run, [() for _ in range(nruns)], chunks)           
+                ret = Pool(workers, **pool_args).starmap(self.run_mp, [() for _ in range(nruns)], chunks)
+                runs, _nfes = [list(a) for a in zip(*ret)]
+                self.nfe = sum(_nfes)
             else:
                 runs = [self.run() for i in range(nruns)]
             sols = np.concatenate(runs)
@@ -63,6 +65,9 @@ class optimiser:
 
     def __repr__(self):
         return self.name + ' optimisation object'
+
+    def run_mp(self):
+        return self.run(), self.nfe
 
     def run(self):
         if self.obj is None:
