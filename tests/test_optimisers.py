@@ -44,6 +44,7 @@ def test_multiproc(n):
     o = exponential(2)
     hypers = set_testing_hypers(DE)
     out = DE(obj=o, bounds=o.bounds, hypers=hypers)(nruns=n, full_output=True, workers=n)
+    assert out['nfe'] == (out['hypers']['G'] + 1) * out['hypers']['N'] * n
 
 @pytest.mark.parametrize('opt', optimiser_classes)
 @pytest.mark.parametrize('n', [1, 3])
