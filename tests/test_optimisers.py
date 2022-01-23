@@ -47,7 +47,7 @@ def test_multiproc(n):
 
 # Test every optimiser to catch pickling bugs - you never do know...
 @pytest.mark.parametrize('opt', optimiser_classes)
-def test_multiproc(opt):
+def test_multiproc_optimisers(opt):
     o = exponential(2)
     hypers = set_testing_hypers(opt)
     opt(obj=o, bounds=o.bounds, hypers=hypers)(nruns=4, full_output=True, workers=2)
