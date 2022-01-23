@@ -19,7 +19,10 @@ def test_hyp_parse():
 def test_no_optimiser():
     with pytest.raises(TypeError):
         optimiser()
-
+    with pytest.raises(AttributeError):    
+        optimiser(lambda x: None).run()
+    with pytest.raises(AttributeError):    
+        optimiser(lambda x: None).run_mp()
 
 def test_naughty_obj():
     opt = optimiser(obj=lambda x: np.random.choice([np.nan, np.inf, 'a string']))
