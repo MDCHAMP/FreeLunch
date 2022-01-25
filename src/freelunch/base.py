@@ -33,30 +33,30 @@ class optimiser:
         self.hypers = dict(self.hyper_defaults, **hypers) # Hyperparamters/ methods 
         self.hypers['bounding'] = self.bounder.__name__
 
-    def __call__(self, nruns=1, return_m=1, full_output=False, workers=1, pool_args={}, chunks=1):
+    def __call__(self, n_runs=1, n_return=1, full_output=False, n_workers=1, pool_args={}, chunks=1):
         '''
         API for running the optimisation
         '''
-        if nruns > 1:
-            if workers > 1:
-                ret = Pool(workers, **pool_args).starmap(self.run_mp, [() for _ in range(nruns)], chunks)
+        if n_runs > 1:
+            if n_workers > 1:
+                ret = Pool(n_workers, **pool_args).starmap(self.run_mp, [() for _ in range(n_runs)], chunks)
                 runs, _nfes = [list(a) for a in zip(*ret)]
                 self.nfe = sum(_nfes)
             else:
-                runs = [self.run() for i in range(nruns)]
+                runs = [self.run() for i in range(n_runs)]
             sols = np.concatenate(runs)
         else: 
             sols = self.run()
         sols = sorted(sols)
         if not full_output:
-            return np.array([sol.dna for sol in sols[:return_m]])
+            return np.array([sol.dna for sol in sols[:n_return]])
         else:
             json_hypers = {k: v.tolist() if isinstance(v, np.ndarray) else v for k,v in self.hypers.items() }
             out = {
                 'optimiser':self.name,
                 'hypers':json_hypers,
                 'bounds':self.bounds.tolist(),
-                'nruns':nruns,
+                'nruns':n_runs,
                 'nfe':self.nfe,
                 'solutions':[sol.dna.tolist() for sol in sols],
                 'scores':[sol.fitness for sol in sols]

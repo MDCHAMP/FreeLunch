@@ -35,14 +35,14 @@ def test_instancing_defaults(opt):
 def test_nfe(n):
     o = exponential(n)
     hypers = set_testing_hypers(DE)
-    out = DE(obj=o, bounds=o.bounds, hypers=hypers)(nruns=n, full_output=True)
+    out = DE(obj=o, bounds=o.bounds, hypers=hypers)(n_runs=n, full_output=True)
     assert out['nfe'] == (out['hypers']['G'] + 1) * out['hypers']['N'] * n
 
 @pytest.mark.parametrize('n', [1, 3, 5])
 def test_multiproc(n):
     o = exponential(2)
     hypers = set_testing_hypers(DE)
-    out = DE(obj=o, bounds=o.bounds, hypers=hypers)(nruns=n, full_output=True, workers=n)
+    out = DE(obj=o, bounds=o.bounds, hypers=hypers)(n_runs=n, full_output=True, n_workers=n)
     assert out['nfe'] == (out['hypers']['G'] + 1) * out['hypers']['N'] * n
 
 # Test every optimiser to catch pickling bugs - you never do know...
@@ -50,7 +50,7 @@ def test_multiproc(n):
 def test_multiproc_optimisers(opt):
     o = exponential(2)
     hypers = set_testing_hypers(opt)
-    opt(obj=o, bounds=o.bounds, hypers=hypers)(nruns=4, full_output=True, workers=2)
+    opt(obj=o, bounds=o.bounds, hypers=hypers)(n_runs=4, full_output=True, n_workers=2)
 
 
 @pytest.mark.parametrize('opt', optimiser_classes)
@@ -59,7 +59,7 @@ def test_multiproc_optimisers(opt):
 def test_run(opt, n, d):
     o = exponential(d)
     hypers = set_testing_hypers(opt)
-    out = opt(obj=o, bounds=o.bounds, hypers=hypers)(nruns=n, full_output=True)
+    out = opt(obj=o, bounds=o.bounds, hypers=hypers)(n_runs=n, full_output=True)
     assert(len(out['solutions']) == n*hypers['N'])
     # scores are ordered
     assert(all(x <= y for x, y in zip(out['scores'], out['scores'][1:])))
@@ -86,7 +86,7 @@ def test_run_not_full(opt, n, m, d):
     o = exponential(d)
     hypers = set_testing_hypers(opt)
     out = opt(obj=o, bounds=o.bounds, hypers=hypers)(
-        nruns=n, return_m=m, full_output=False)
+        n_runs=n, n_return=m, full_output=False)
     assert(len(out) == m)
     assert([(len(s) == d) for s in out])
 
@@ -96,7 +96,7 @@ def test_run_not_full(opt, n, m, d):
 def test_can_json(opt, n):
     o = exponential(1)
     hypers = set_testing_hypers(opt)
-    out = opt(obj=o, bounds=o.bounds, hypers=hypers)(nruns=n, full_output=True)
+    out = opt(obj=o, bounds=o.bounds, hypers=hypers)(n_runs=n, full_output=True)
     s = json.dumps(out)
 
 
