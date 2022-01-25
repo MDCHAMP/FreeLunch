@@ -10,7 +10,7 @@ import numpy as np
 from freelunch import darwin
 from freelunch import tech
 from freelunch.adaptable import adaptable_set
-
+from freelunch.util import UnpicklableObjectiveFunction
 
 class optimiser:
     '''
@@ -39,7 +39,10 @@ class optimiser:
         '''
         if n_runs > 1:
             if n_workers > 1:
-                ret = Pool(n_workers, **pool_args).starmap(self.run_mp, [() for _ in range(n_runs)], chunks)
+                try:
+                    ret = Pool(n_workers, **pool_args).starmap(self.run_mp, [() for _ in range(n_runs)], chunks)
+                except AttributeError:
+                    raise UnpicklableObjectiveFunction
                 runs, _nfes = [list(a) for a in zip(*ret)]
                 self.nfe = sum(_nfes)
             else:
