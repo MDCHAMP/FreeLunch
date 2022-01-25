@@ -2,12 +2,9 @@
 
 
 [![PyPI](https://badge.fury.io/py/freelunch.svg)](https://badge.fury.io/py/freelunch)![Code](https://github.com/MDCHAMP/FreeLunch/workflows/actions%20code%20quality/badge.svg) ![Tests](https://github.com/MDCHAMP/FreeLunch/workflows/actions%20pytest/badge.svg)   ![Benchmark](https://github.com/MDCHAMP/FreeLunch/workflows/actions%20pytest%20benchmark/badge.svg) [![Coverage](https://codecov.io/gh/MDCHAMP/FreeLunch/branch/main/graph/badge.svg)](https://codecov.io/gh/MDCHAMP/FreeLunch)
-
-Basically a dump of useful / funny metaheuristics with a (hopefully) simple interface. 
-
-Feeling cute might add automatic benchmarking later idk.
-
-There are literally so many implementations of all of these so... here's one more! 
+___
+## About
+___
 
 ## Features
 
@@ -38,30 +35,109 @@ Tier list: TBA
 - N-dimensional Happy Cat function
 - N-dimensional Exponential function
 
-## Usage
 
-### Optimisers
+___
+## Install
 
 Install with pip (req. `numpy`).
 
 ```
 pip install freelunch
 ```
+___
+## Usage
 
-Import and instance your favourite meta-heuristics!
+Create instances of your favourite meta-heuristics!
 
 ```python
 import freelunch
-opt = freelunch.DE(obj=my_objective_function, bounds=my_bounds) # Differential evolution
+opt = freelunch.DE(my_objective_function, bounds=my_bounds) # Differential evolution
 ```
 
-`obj` - objective function, callable: `obj(sol) -> float or None`
+Where,
+
+ - `obj`: objective function that excepts a single argument, the trial vector `x`, and returns `float ` or `None`. i.e. `obj(x) -> float or None`
 
 
-`bounds` - bounds for elements of sol: `bounds [[lower, upper]]*len(sol)` 
+ - `bounds`: Iterable bounds for elements of `x` i.e. `bounds [[lower, upper]]*len(sol)` 
 where: `(sol[i] <= lower) -> bool` and `(sol[i] >= upper) -> bool`.
 
+
+## Running the optimisation
+
+Run by calling the instance. There are several different calling signatures. Use any combination of the arguments below to suit your needs! 
+
+
+To return the best solution only:
+
+```python
+quick_result = opt() # (D,)
+```
+
+To return optimum after `n_runs`:
+
+```python
+best_of_nruns = opt(n_runs=n) # (D,)
+```
+
+To return optimum after `n_runs` in parallel (uses `multiprocessing.Pool`), see note below.:
+
+```python
+best_of_nruns = opt(n_runs=n, n_workers=w, pool_args={}, chunks=1) # (D,)
+```
+
+Return best `m` solutions in `np.ndarray`:
+
+```python
+best_m = opt(n_return=m) # (D, m)
+```
+
+Return `json` friendly `dict` with fun metadata!
+
+```python
+full_output = opt(full_output=True)
+    # {
+    #     'optimiser':'DE',
+    #     'hypers':...,
+    #     'bounds':...,
+    #     'nruns':nruns,
+    #     'nfe':1234,
+    #     'solutions':[sol1, sol2, ..., solm*n_runs], # All solutions from all runs sorted by fitness
+    #     'scores':[fit1, fit2, ..., fitm*n_runs]
+    # }
+
+```
+___
+## Customisation
+
+Want to change things around?
+
+- ### Change the initialisation strategy
+
+TBC
+
+- ### Change the bounding strategy
+
+The simplest way to do this is to overwrite the `optimiser.bounder` attribute. There are a number of ready made strategies in `freelunch.tech` or alternatively define a custom method with the following call signature. 
+
+```python
+
+opt = fr.DE(obj, ...)
+
+def my_bounder(p, bounds, **hypers):
+    '''custom bounding method'''
+    p.dna = ... # custom bounding logic
+
+opt.bounder = my_bounder # overwrite the bounder attribute
+
+# and then call as before
+x_optimised = opt()
+```
+
+ - ### Changing the hyperparameters
+
 Check out the hyperparameters and set your own, (defaults set automatically):
+
 
 ```python
 print(opt.hyper_definitions)
@@ -89,42 +165,8 @@ print(opt.hypers)
     #     'Cr':0.2
     # }
 ```
-
-Run by calling the instance. To return the best solution only:
-
-```python
-quick_result = opt()
-```
-
-To return optimum after `nruns`:
-
-```python
-best_of_runs = opt(nruns=n) 
-```
-
-Return best `m` solutions in `np.ndarray`:
-
-```python
-best_m = opt(return_m=m)
-```
-
-Return `json` friendly `dict` with fun metadata!
-
-```python
-full_output = opt(full_output=True)
-    # {
-    #     'optimiser':'DE',
-    #     'hypers':...,
-    #     'bounds':...,
-    #     'nruns':nruns,
-    #     'nfe':1234,
-    #     'solutions':[sol1, sol2, ..., solm*nruns],
-    #     'scores':[fit1, fit2, ..., fitm*nruns]
-    # }
-
-```
-
-### Benchmarks 
+___
+## Benchmarks 
 
 Access from `freelunch.benchmarks` for example:
 
@@ -135,5 +177,41 @@ fit = bench(sol) # evaluate by calling
 bench.bounds # [[-10, 10],[-10, 10]]
 bench.optimum # [0, 0] 
 bench.f0 # 0.0
+```
+___
+## A note on running optimisations in parallel. 
+
+Because `multiprocessing.Pool` relies on `multiprocessing.forking.pickle` to send code to parallel processes, it is imperative that anything passed to the freelunch optimisers can be pickled. For example, the following common python pattern for producing an objective function with a single argument,
+
+```python
+
+method = ... # some methods / args that are requred by the objective function
+args = 
+
+def wrap_my_obj(method, args):
+    def _obj(x):
+        return method(args, x)
+    return _obj
+
+obj = wrap_my_obj(method, args)
+
+```
+
+cannot be pickled because `_obj` is not importable from the top level module scope and will raise `freelunch.util.UnpicklableObjectiveFunction` . Instead consider using `functools.partial` i.e.
+
+
+```python
+
+from functools import partial
+
+method = ... # some methods / args that are requred by the objective function
+args = ...
+
+
+def _obj(method, args, x):
+    return method(args, x)
+
+obj = partial(_obj, method, args)
+
 ```
 
