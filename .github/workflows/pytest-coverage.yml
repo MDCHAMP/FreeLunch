@@ -24,7 +24,7 @@
 #   * peter-evans/commit-comment@v1: adds message to commit
 # **************************************************************************************************************** #
 
-name: Pytest coverage
+name: pytest coverage
 
 on: [push, pull_request, workflow_dispatch]
 
@@ -53,7 +53,7 @@ jobs:
       uses: alexanderdamiani/pytester-cov@v1.2.1
       with:
         pytest-root-dir: '.'
-        cov-omit-list: 'test/*, temp/main3.py, temp/main4.py'
+        cov-omit-list: 'test/*'
         cov-threshold-single: ${{ env.COVERAGE_SINGLE }}
         cov-threshold-total: ${{ env.COVERAGE_TOTAL }}
 
@@ -84,7 +84,7 @@ jobs:
     #     body: ${{ steps.pytester-cov.outputs.output-table }}
 
     - name: Coverage total fail - exit
-      if: ${{ steps.pytester-cov.outputs.cov-threshold-total-fail == 'true' }}
+      # if: ${{ steps.pytester-cov.outputs.cov-threshold-total-fail == 'true' }}
       run: |
         echo "cov single fail ${{ steps.pytester-cov.outputs.cov-threshold-total-fail }}"
         exit 1
