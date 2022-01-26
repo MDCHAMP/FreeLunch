@@ -26,7 +26,7 @@
 
 name: pytest coverage
 
-on: [push, pull_request, workflow_dispatch]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -52,8 +52,8 @@ jobs:
       id: pytester-cov
       uses: alexanderdamiani/pytester-cov@v1.2.1
       with:
-        pytest-root-dir: '.'
-        cov-omit-list: 'test/*'
+        pytest-root-dir: './src/freelunch/'
+        cov-omit-list: './test/*'
         cov-threshold-single: ${{ env.COVERAGE_SINGLE }}
         cov-threshold-total: ${{ env.COVERAGE_TOTAL }}
 
