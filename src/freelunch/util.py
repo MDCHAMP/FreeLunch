@@ -6,17 +6,22 @@ import numpy as np
 from numpy.lib.type_check import real
 
 # %% Custom exceptions
+
 class BadObjectiveFunctionScores(Exception):
     '''Exception raised when both objective score comparisons evaluate false'''
 
 class ZeroLengthSolutionError(Exception):
     '''Exception raised when an empty solution is passed to a benchmark'''
-
-class SolutionCollapseError(Exception):
-    '''Exception raised when all solutions are identical'''
-
 class InvalidSolutionUpdate(Exception):
     '''Exception raised when trying to move an animal/particle to a bad location'''
+
+# %% Custom warnings
+
+class SolutionCollapseWarning(Warning):
+    '''Warning: All solutions in the population are identical'''
+
+class KrillSingularityWarning(SolutionCollapseWarning):
+    '''Warning: Krill singularity identified, adding pertubation'''
 
 #%% Helper functions
 
