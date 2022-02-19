@@ -54,6 +54,7 @@ jobs:
       with:
         pytest-root-dir: './src/'
         pytest-tests-dir: './tests/'
+        requirements-file: './.github/.manifest/requirements.txt'
         cov-omit-list: './tests/test_benchmarking.py'
         cov-threshold-single: ${{ env.COVERAGE_SINGLE }}
         cov-threshold-total: ${{ env.COVERAGE_TOTAL }}
