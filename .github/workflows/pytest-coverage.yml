@@ -33,8 +33,8 @@ jobs:
 
     runs-on: ubuntu-latest
     env:
-      COVERAGE_SINGLE: 60
-      COVERAGE_TOTAL: 60
+      COVERAGE_SINGLE: 80
+      COVERAGE_TOTAL: 90
 
     steps:
     - uses: actions/checkout@v2
@@ -52,8 +52,8 @@ jobs:
       id: pytester-cov
       uses: alexanderdamiani/pytester-cov@v1.2.1
       with:
-        pytest-root-dir: './src/freelunch/'
-        cov-omit-list: './test/*'
+        pytest-root-dir: './src/'
+        cov-omit-list: './test/'
         cov-threshold-single: ${{ env.COVERAGE_SINGLE }}
         cov-threshold-total: ${{ env.COVERAGE_TOTAL }}
 
