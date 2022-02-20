@@ -4,13 +4,16 @@ codecov:
 coverage:
   precision: 2
   round: down
-  range: "70...100"
+  range: "80...100"
   status:
-    project:
+    project: # Overall project coverage
       default:
         target: 90%    # the required coverage value
-        threshold: 1%  # the leniency in hitting the target
-
+        threshold: 5%  # the leniency in hitting the target
+    patch: # Patch coverage 
+      default:
+        target: 80%
+        threshold: 10%
 parsers:
   gcov:
     branch_detection:
