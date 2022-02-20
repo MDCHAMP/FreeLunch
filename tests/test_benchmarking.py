@@ -14,7 +14,7 @@ benchmark_problems = [ackley, exponential, happycat, periodic]
 def test_bench_optimisers(benchmark, opt):
     o = exponential(1)
     bench_opt = opt(obj=o, bounds=o.bounds)
-    benchmark(bench_opt, return_m=1) 
+    benchmark(bench_opt) 
 
 @pytest.mark.benchmark(group="Benchmarks")
 @pytest.mark.parametrize('obj', benchmark_problems)

@@ -148,3 +148,6 @@ local/
 
 #Old tests
 *.old
+
+# Local sractch
+.misc/

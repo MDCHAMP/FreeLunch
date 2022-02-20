@@ -3,13 +3,14 @@ Utility functions
 '''
 
 import numpy as np
-from numpy.lib.type_check import real
 
 # %% Custom exceptions
 
 class BadObjectiveFunctionScores(Exception):
     '''Exception raised when both objective score comparisons evaluate false'''
 
+class UnpicklableObjectiveFunction(Exception):
+    '''Exception raised when objectivefunction cannot be pickled for multiprocessing'''
 class ZeroLengthSolutionError(Exception):
     '''Exception raised when an empty solution is passed to a benchmark'''
 class InvalidSolutionUpdate(Exception):
