@@ -2,8 +2,13 @@
 
 
 [![PyPI](https://badge.fury.io/py/freelunch.svg)](https://badge.fury.io/py/freelunch)![Code](https://github.com/MDCHAMP/FreeLunch/workflows/actions%20code%20quality/badge.svg) ![Tests](https://github.com/MDCHAMP/FreeLunch/workflows/actions%20pytest/badge.svg)   ![Benchmark](https://github.com/MDCHAMP/FreeLunch/workflows/actions%20pytest%20benchmark/badge.svg) [![Coverage](https://codecov.io/gh/MDCHAMP/FreeLunch/branch/main/graph/badge.svg)](https://codecov.io/gh/MDCHAMP/FreeLunch)
+
+*Please note the minor changes to the `optimiser` call signature since `0.0.11`, details below.* 
 ___
 ## About
+
+Freelunch is a convenient python implementation of a number of meta-heuristic optimisation (with an 's') algorithms.  
+
 ___
 
 ## Features
