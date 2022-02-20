@@ -403,7 +403,7 @@ class KrillHerd(continuous_space_optimiser):
         winner, loser = self.winners_and_losers(herd)
         spread = loser[0] - winner[0]
         if spread == 0:
-            warnings.warn(util.KrillSingularityWarning)
+            warnings.warn(util.KrillSingularityWarning) #TODO add jitter?
         # Alpha stores local [0] and target [1] for each krill 
         alpha = [np.zeros_like(herd[1]), np.zeros_like(herd[1])]
         # Alpha local, the effect of the neighbours
