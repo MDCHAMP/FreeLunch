@@ -40,6 +40,11 @@ def real_finite(a):
         raise ValueError
 
 
+def _tolist(arr):
+    if isinstance(arr, np.ndarray): return arr.tolist()
+    else: return arr
+
+
 #%% Decorators
 
 def verify_real_finite(check_args, check_vars):
