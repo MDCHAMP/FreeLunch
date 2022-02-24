@@ -8,7 +8,7 @@ from freelunch import DE, SA, PSO, QPSO, SADE, KrillHerd, SA
 import pytest
 import numpy as np
 import json
-np.random.seed(100)
+np.random.seed(200)
 
 
 optimiser_classes = [SA, DE, PSO, QPSO, SADE, KrillHerd]
@@ -62,6 +62,7 @@ def test_multiproc_optimisers(opt):
 @pytest.mark.parametrize('n', [1, 3])
 @pytest.mark.parametrize('d', [1, 3, 5])
 def test_run(opt, n, d):
+    np.random.seed(200)
     o = exponential(d)
     hypers = set_testing_hypers(opt)
     out = opt(obj=o, bounds=o.bounds, hypers=hypers)(n_runs=n, full_output=True)

@@ -403,7 +403,8 @@ class KrillHerd(continuous_space_optimiser):
         winner, loser = self.winners_and_losers(herd)
         spread = loser[0] - winner[0]
         if spread == 0:
-            warnings.warn(util.KrillSingularityWarning) #TODO add jitter?
+            warnings.warn(util.KrillSingularityWarning)
+            spread = 1e-8
         # Alpha stores local [0] and target [1] for each krill 
         alpha = [np.zeros_like(herd[1]), np.zeros_like(herd[1])]
         # Alpha local, the effect of the neighbours
@@ -429,6 +430,8 @@ class KrillHerd(continuous_space_optimiser):
     def foraging(self,herd,gen,pop):
         winner, loser = self.winners_and_losers(herd)
         spread = loser[0] - winner[0]
+        if spread == 0:
+            spread = 1e-8
         # Tasty food at the centre of mass but how good is it
         #Xfood = (np.sum(herd[1]/herd[0][:,None], axis=0) / np.sum(1/herd[0]))[:,None].T
         Xfood = np.average(herd[1],weights=1/herd[0],axis=0)
