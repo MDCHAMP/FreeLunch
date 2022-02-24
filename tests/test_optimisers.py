@@ -22,6 +22,11 @@ def set_testing_hypers(opt):
     hypers['K'] = 2  # SA should really use G as well...
     return hypers
 
+@pytest.mark.parametrize('n', np.arange(5)+1)
+def test_full_output(n):
+    hypers = set_testing_hypers(DE)
+    opt = DE(obj=lambda x: 1, hypers=hypers, bounds=[[-1, 1]]*n)
+    opt(n_runs=1, full_output=True)
 
 @pytest.mark.parametrize('opt', optimiser_classes)
 def test_instancing_defaults(opt):
