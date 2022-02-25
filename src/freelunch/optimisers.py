@@ -403,7 +403,7 @@ class KrillHerd(continuous_space_optimiser):
         winner, loser = self.winners_and_losers(herd)
         spread = loser[0] - winner[0]
         if spread == 0:
-            warnings.warn(util.KrillSingularityWarning)
+            warnings.warn(util.KrillSingularityWarning())
             spread = 1e-8
         # Alpha stores local [0] and target [1] for each krill 
         alpha = [np.zeros_like(herd[1]), np.zeros_like(herd[1])]
