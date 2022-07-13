@@ -51,10 +51,14 @@ def test_gaussian_init(N, dim, creature):
         bounds[n, 1] = 10*np.random.rand()
         bounds[n, 0] = -bounds[n, 1]
 
+        mu = np.random.uniform(-bounds[n, 1]/5, bounds[n, 1]/5)
+        sig = np.random.uniform(0,1)
+    
+
     if creature is None:
-        pop = Gaussian_neigbourhood_init(bounds, N)
+        pop = Gaussian_neigbourhood_init(bounds, N, mu=mu, sig=sig)
     else:
-        pop = Gaussian_neigbourhood_init(bounds, N, creature=creature)
+        pop = Gaussian_neigbourhood_init(bounds, N, creature=creature, mu=mu, sig=sig)
 
     assert(len(pop) == N)
     assert(np.all(pop[0].dna > bounds[:, 0]))
