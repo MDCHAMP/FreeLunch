@@ -45,7 +45,7 @@ class DE(continuous_space_optimiser):
         # and the crowd says bo...                                           <-- Funniest joke in repo
         selector = self.parse_hyper(self.hypers['selection'])
         # initial pop
-        pop = tech.uniform_continuous_init(self.bounds, self.hypers['N'])
+        pop = self.initialiser(self.bounds, self.hypers['N'])
         tech.compute_obj(pop, self.obj)
         # main loop
         for gen in range(self.hypers['G']):
@@ -105,7 +105,7 @@ class SADE(continuous_space_optimiser):
         F = normally_varying_parameter(self.hypers['F_u'], self.hypers['F_sig'])
         Cr = normally_varying_parameter(self.hypers['Cr_u'], self.hypers['Cr_sig'])
         #initial pop 
-        pop = tech.uniform_continuous_init(self.bounds, self.hypers['N'])
+        pop = self.initialiser(self.bounds, self.hypers['N'])
         tech.compute_obj(pop, self.obj)
         #main loop
         for gen in range(self.hypers['G']):
@@ -170,7 +170,7 @@ class SA(continuous_space_optimiser):
 
     def run(self):
         # initialise
-        old = tech.uniform_continuous_init(self.bounds, self.hypers['N'])
+        old = self.initialiser(self.bounds, self.hypers['N'])
         tech.compute_obj(old, self.obj)
         best = min(old, key=lambda x: x.fitness)
         # main loop
@@ -214,7 +214,7 @@ class PSO(continuous_space_optimiser):
         'A':np.array([0.1, 0.1])
     }
 
-    def init_pop(self,N):
+    def init_pop(self,N): # TODO make hotswappable with custom bounding
         # Function which initialises the swarm
         pop = np.empty((N,), dtype=object)
         for i in range(N):
@@ -343,7 +343,7 @@ class KrillHerd(continuous_space_optimiser):
         'Mu':0.5
     }
 
-    def init_pop(self,N):
+    def init_pop(self,N): # TODO make hotswappable with custom bounding
         # Function which initialises the krill randomly within the bounds 
         pop = np.empty((N,), dtype=object)
         for i in range(N):
