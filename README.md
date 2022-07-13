@@ -119,7 +119,20 @@ Want to change things around?
 
 - ### Change the initialisation strategy
 
-TBC
+Custom initialisation strategies can be supplied by altering the `optimiser.initialiser` attribute of any optimiser instance. For example:
+
+```python
+opt = fr.DE(obj, ...)
+
+def my_initialiser(bounds, N, **hypers):
+    'Custom population initialisation'
+    # Remember to return and interable of length N
+    population = ... # custum logic
+    return population
+
+```
+
+Additionally, some examples of common initialisation strategies can be found in the `freelunch.tech` module. 
 
 - ### Change the bounding strategy
 
