@@ -29,12 +29,14 @@ class optimiser:
         '''
         self.bounds = bounds  # Bounds / constraints
         self.bounder = tech.sticky_bounds
+        self.initialiser = tech.uniform_continuous_init 
         self.nfe = 0
         # Extend capability of objective function (mp safe!!)
         self.obj = partial(self._obj, obj)
         # Hyperparamters/ methods
         self.hypers = dict(self.hyper_defaults, **hypers)
         self.hypers['bounding'] = self.bounder.__name__
+        self.hypers['initialisation'] = self.initialiser.__name__
 
     def __call__(self, n_runs=1, n_return=1, full_output=False, n_workers=1, pool_args={}, chunks=1):
         '''
