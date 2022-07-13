@@ -58,7 +58,7 @@ def test_gaussian_init(N, dim, creature):
     if creature is None:
         pop = Gaussian_neigbourhood_init(bounds, N, mu=mu, sig=sig)
     else:
-        pop = Gaussian_neigbourhood_init(bounds, N, creature=creature, mu=mu, sig=sig)
+        pop = Gaussian_neigbourhood_init(bounds, N, creature=creature)
 
     assert(len(pop) == N)
     assert(np.all(pop[0].dna > bounds[:, 0]))
