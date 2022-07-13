@@ -41,6 +41,30 @@ def test_uniform_init(N, dim, creature):
     assert(np.all(pop[0].dna > bounds[:, 0]))
     assert(np.all(pop[0].dna < bounds[:, 1]))
 
+@pytest.mark.parametrize('N', [1, 3])
+@pytest.mark.parametrize('dim', [1, 3])
+@pytest.mark.parametrize('creature', animals)
+def test_gaussian_init(N, dim, creature):
+
+    bounds = np.empty((dim, 2))
+    for n in range(dim):
+        bounds[n, 1] = 10*np.random.rand()
+        bounds[n, 0] = -bounds[n, 1]
+
+        mu = np.random.uniform(-bounds[n, 1]/5, bounds[n, 1]/5)
+        sig = np.random.uniform(0,1)
+    
+
+    if creature is None:
+        pop = Gaussian_neigbourhood_init(bounds, N, mu=mu, sig=sig)
+    else:
+        pop = Gaussian_neigbourhood_init(bounds, N, creature=creature)
+
+    assert(len(pop) == N)
+    assert(np.all(pop[0].dna > bounds[:, 0]))
+    assert(np.all(pop[0].dna < bounds[:, 1]))
+
+
 
 def test_compute_obj():
 
