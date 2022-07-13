@@ -11,14 +11,7 @@ from freelunch.zoo import animal
 
 # %% Common methods
 
-def uniform_continuous_init(bounds, N, creature=animal):
-    out = np.empty((N,), dtype=object)
-    for i in range(N):
-        adam = creature()
-        adam.dna = np.array([np.random.uniform(a, b)
-                             for a, b in bounds])
-        out[i] = adam
-    return out
+
 
 
 def compute_obj(pop, obj):
@@ -73,3 +66,26 @@ def sticky_bounds(p, bounds, eps=1e-12, **hypers):
         if   p.dna[i] > high: out[i] = high - eps
         elif p.dna[i] < low:  out[i] = low + eps
         p.dna = out
+
+# %% Intialisation strategies
+
+def uniform_continuous_init(bounds, N, creature=animal):
+    out = np.empty((N,), dtype=object)
+    for i in range(N):
+        adam = creature()
+        adam.dna = np.array([np.random.uniform(a, b)
+                             for a, b in bounds])
+        out[i] = adam
+    return out
+
+def Gaussian_neigbourhood_init(bounds, N, creature=animal, mu=None, sig=None):
+    if mu is None:
+        mu = [(a+b)/2 for a,b in bounds]
+    if sig is None:
+        sig = [(b-a)/6 for a,b in bounds]
+    out = np.empty((N,), dtype=object)
+    for i in range(N):
+        adam = creature()
+        adam.dna = np.random.normal(mu, sig)
+        out[i] = adam
+    return out
