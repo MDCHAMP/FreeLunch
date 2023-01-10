@@ -106,6 +106,12 @@ class optimiser:
         except(ValueError, TypeError):
             return None
 
+    def curve_callback(self, best=None, mean=None):
+        if best is None:
+            self.data = {'best':[], 'mean':[]}
+        else:
+            self.data['best'].append(best)
+            self.data['mean'].append(mean)
 
 # Subclasses for granularity
 

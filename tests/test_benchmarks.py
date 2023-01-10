@@ -7,9 +7,9 @@ import numpy as np
 np.random.seed(100)
 
 from freelunch.util import ZeroLengthSolutionError
-from freelunch.benchmarks import ackley, exponential, happycat, periodic
+from freelunch.benchmarks import ackley, exponential, happycat, periodic, MOLGA_TEST_SUITE
 
-benchmark_problems = [ackley, exponential, happycat, periodic]
+benchmark_problems = [ackley, exponential, happycat, periodic, *MOLGA_TEST_SUITE]
 dims = [1,2,3]
 
 @pytest.mark.parametrize('obj', benchmark_problems)
@@ -17,7 +17,7 @@ dims = [1,2,3]
 def test_true_optima(obj, n):
 	b = obj(n)
 	evaluates = b(b.optimum)
-	assert evaluates == b.f0
+	assert np.allclose(evaluates, b.f0)
 
 @pytest.mark.parametrize('obj', benchmark_problems)
 def test_err(obj):
