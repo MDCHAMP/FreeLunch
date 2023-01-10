@@ -40,6 +40,12 @@ def real_finite(a):
         raise ValueError
 
 
+def expm(A):
+    v,S = np.linalg.eig(A)
+    if not len(np.unique(v))==len(v):
+        raise ValueError('Non-diagonisable input matrix! Try choosing different parameters')
+    return np.real(S@np.diag(np.exp(v))@np.linalg.inv(S))
+
 def _tolist(arr):
     if isinstance(arr, np.ndarray): return arr.tolist()
     else: return arr

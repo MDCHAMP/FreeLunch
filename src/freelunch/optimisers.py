@@ -4,7 +4,6 @@ Main module definitions in here
 import warnings
 
 import numpy as np
-from scipy.linalg import expm
 
 from freelunch import tech, zoo, util
 from freelunch.base import continuous_space_optimiser
@@ -388,7 +387,7 @@ class PAO(continuous_space_optimiser):
         A = np.array([[0, 1], [-kp/self.hypers['m'], -(self.hypers['z']
                                                        * (2*np.sqrt(kp*self.hypers['m'])))/self.hypers['m']]])
         L = np.array([[0], [1]])
-        Phi = expm(
+        Phi = util.expm(
             np.block([[A, L@L.T], [np.zeros_like(A), -A.T]])*self.hypers['dt'])
         Adt = Phi[:2, :2]
         Sig_L = np.linalg.cholesky(Phi[:2, 2:]@Adt.T)
