@@ -131,7 +131,8 @@ class ABC(optimiser):
         self.pos = tech.uniform_continuous_init(self.bounds, self.hypers['N'])
         self.fit = np.array([self.obj(x) for x in self.pos])
 
-    def crossover_points(self, pos):
+    @staticmethod
+    def crossover_points(pos):
         """ABC Crossover Location 
 
         Args:
@@ -143,11 +144,11 @@ class ABC(optimiser):
         
         N = pos.shape[0]
         crossover_point = pos.copy()
-        d = np.random.randint(0, pos.shape[1], size=N)
-        rand_idx = np.arange(N) + np.random.randint(1, N, size=(N))
+        d = np.random.randint(0, pos.shape[1], size=(N,1))
+        rand_idx = np.arange(N) + np.random.randint(1, N, size=(N,))
         rand_idx[rand_idx>=N] -= N
-        mask = np.tile(np.arange(pos.shape[1]),N).T == d
-        crossover_point[mask] -= pos[rand_idx,:][mask]
+        mask = np.tile(np.arange(pos.shape[1]),(N,1)) == d
+        crossover_point[mask] -= pos[rand_idx][mask]
         
         return crossover_point
         
@@ -163,7 +164,7 @@ class ABC(optimiser):
         # rand_idx[rand_idx>=N] -= N
         # crossover_point[rand_idx,d] = self.pos[rand_idx,d]
         crossover_point = self.crossover_points(self.pos[:self.hypers["N"]//2]) 
-        new_candidates = self.pos + np.random.uniform(-1,1,size=(self.hypers["N"]))*crossover_point
+        new_candidates = self.pos[:self.hypers["N"]//2] + np.random.uniform(-1,1,size=(self.hypers["N"]//2))*crossover_point
 
         # Greedy Selection...
         new_fit = np.array([self.obj(x) for x in new_candidates])
@@ -178,7 +179,7 @@ class ABC(optimiser):
         # Eq 7...
         fit_xm = np.ones_like(fitness)
         fit_xm[fitness >= 0] = 1/(1+fitness[fitness >= 0])
-        fit_xm[fitness < 0] = 1+np.abs(fitness[fitness<0])
+        fit_xm[fitness < 0] = 1+np.abs(fitness[fitness < 0])
 
         # Enter the onlooker bee phase
         onlookers = np.random.choice(

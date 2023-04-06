@@ -5,16 +5,17 @@ Testing for function not performance see benchmarking script
 '''
 from freelunch.benchmarks import exponential
 from freelunch import optimisers
+from itertools import permutations
 import inspect
 import pytest
 import numpy as np
 import json
 np.random.seed(200)
 
-# Pull out all optimisers automatically
+# Pull out all optimisers automatically - sorry Max!
 optimiser_classes = [
     cl for name, cl in inspect.getmembers(optimisers) 
-    if inspect.isclass(cl) and name is not "optimiser" and issubclass(cl,optimisers.optimiser)]
+    if inspect.isclass(cl) and name != "optimiser" and issubclass(cl,optimisers.optimiser)]
 dims = [1, 2, 3]
 
 
@@ -118,3 +119,29 @@ def test_can_json(opt, n):
 def test_repr(opt):
     rep = opt(exponential()).__repr__()
     assert(rep == (opt.name + ' optimisation object'))
+
+@pytest.mark.parametrize('d', [1, 2])
+def test_abc_crossover(d):
+    """Test the stupid crossover thing in ABC
+
+    Args:
+        d (int): Dimensionality
+    """
+    N = 5
+    o = exponential(d)
+    hypers = set_testing_hypers(optimisers.ABC)
+    opt = optimisers.ABC(obj=o, bounds=o.bounds, hypers=hypers)
+    # Fake a run
+    pos = np.random.standard_normal((N,d))
+    crossovers = opt.crossover_points(pos)
+    all_possible = []
+    for a,b in permutations(pos, 2):
+        all_possible.append(a-b)
+    all_possible = np.array(all_possible)
+
+    for c in crossovers:
+        assert np.any(c == all_possible)
+    
+
+
+
