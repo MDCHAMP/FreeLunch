@@ -6,26 +6,19 @@ Standard / common techniques that are used in several optimisers are abstracted 
 
 import numpy as np
 
-from freelunch.zoo import animal
 
 
 # %% Common methods
 
+def update_local_best(opt):
+    better = opt.fit < opt.local_best_fit
+    opt.local_best_fit[better] = opt.fit[better] 
+    opt.local_best_pos[better] = opt.pos[better]   
 
-
-
-def compute_obj(pop, obj):
-    for sol in pop:
-        sol.fitness = obj(sol.dna)
-    return pop
-
-
-def bounds_as_mat(bounds):
-    bounds_mat = np.zeros((len(bounds), 2))
-    for i, bound in enumerate(bounds):
-        bounds_mat[i, 0], bounds_mat[i, 1] = bound
-    return bounds_mat
-
+def update_global_best(opt):
+    gbest = np.argmin(opt.local_best)
+    opt.global_best_fit = opt.fit[gbest]
+    opt.global_best_pos = opt.local_best_pos[gbest]
 
 
 def lin_reduce(lims, n, n_max):
@@ -56,7 +49,7 @@ def no_bounding(p, bounds, **hypers):
     '''
     raise Warning('No bounds applied')
 
-def sticky_bounds(p, bounds, eps=1e-12, **hypers):
+def sticky_bounds(p, bounds, eps=1e-12, **hypers): # TODO vectorise
     '''
     Apply sticky bounds to space
     '''
@@ -69,16 +62,10 @@ def sticky_bounds(p, bounds, eps=1e-12, **hypers):
 
 # %% Intialisation strategies
 
-def uniform_continuous_init(bounds, N, creature=animal):
-    out = np.empty((N,), dtype=object)
-    for i in range(N):
-        adam = creature()
-        adam.dna = np.array([np.random.uniform(a, b)
-                             for a, b in bounds])
-        out[i] = adam
-    return out
+def uniform_continuous_init(bounds, N):
+    return np.random.uniform(*bounds.T,  (N, len(bounds)))
 
-def Gaussian_neigbourhood_init(bounds, N, creature=animal, mu=None, sig=None):
+def gaussian_neigbourhood_init(bounds, N, creature, mu=None, sig=None): # TODO sensibleise
     if mu is None:
         mu = [(a+b)/2 for a,b in bounds]
     if sig is None:

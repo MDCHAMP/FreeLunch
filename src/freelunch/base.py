@@ -3,14 +3,10 @@ Base classes for optimisers
 
 '''
 from functools import partial
-from multiprocessing import Pool
+from typing import Iterable
 
 import numpy as np
-
-from freelunch import darwin
 from freelunch import tech
-from freelunch.adaptable import adaptable_set
-from freelunch.util import UnpicklableObjectiveFunction, _tolist
 
 
 class optimiser:
@@ -23,99 +19,80 @@ class optimiser:
     hyper_defaults = {}
     can_run_quick = False
 
-    def __init__(self, obj, hypers={}, bounds=None):
+    def __init__(self, obj, bounds=None, hypers={}):
         '''
         Unlikely to instance the base class but idk what else goes here
         '''
-        self.bounds = bounds  # Bounds / constraints
-        self.bounder = tech.sticky_bounds
-        self.initialiser = tech.uniform_continuous_init 
-        self.nfe = 0
-        # Extend capability of objective function (mp safe!!)
-        self.obj = partial(self._obj, obj)
-        # Hyperparamters/ methods
-        self.hypers = dict(self.hyper_defaults, **hypers)
-        self.hypers['bounding'] = self.bounder.__name__
-        self.hypers['initialisation'] = self.initialiser.__name__
 
-    def __call__(self, n_runs=1, n_return=1, full_output=False, n_workers=1, pool_args={}, chunks=1):
+        # Bounding
+        self.bounds  = bounds  # Bounds / constraints
+        if bounds is None:
+            self.bounder = tech.no_bounding 
+        elif isinstance(bounds, Iterable):
+            self.bounder = tech.sticky_bounds
+        
+        # Objective funciton
+        self.nfe = 0
+        self.obj = partial(self.wrap_obj, obj)
+        
+        # Hyperparamters/ methods
+        self.hypers = self.hyper_defaults | hypers
+
+    def __call__(self):
         '''
         API for running the optimisation
         '''
-        if n_runs > 1:
-            if n_workers > 1:
-                try:
-                    ret = Pool(n_workers, **pool_args).starmap(self.run_mp,
-                                                               [() for _ in range(n_runs)], chunks)
-                except AttributeError:
-                    raise UnpicklableObjectiveFunction
-                runs, _nfes = [list(a) for a in zip(*ret)]
-                self.nfe = sum(_nfes)
-            else:
-                runs = [self.run() for i in range(n_runs)]
-            sols = np.concatenate(runs)
-        else:
-            sols = self.run()
-        sols = sorted(sols)
-        if not full_output:
-            return np.array([sol.dna for sol in sols[:n_return]])
-        else:
-            return {
-                'optimiser': self.name,
-                'hypers': {k: _tolist(v) for k, v in self.hypers.items()},
-                'bounds': _tolist(self.bounds),
-                'nruns': n_runs,
-                'nfe': self.nfe,
-                'solutions': [_tolist(sol.dna) for sol in sols],
-                'scores': [sol.fitness for sol in sols]
-            }
 
-    def __repr__(self):
-        return self.name + ' optimisation object'
+        self.run()
+        idx = np.argmin(self.fitness)
+        return self.fitness[idx], self.pop[idx]
 
-    def run_mp(self):
-        return self.run(), self.nfe
 
-    def parse_hyper(self, op):
-        if isinstance(op, list):  # top 10 recursive gamer moments
-            strats = [self.parse_hyper(strat) for strat in op]
-            return adaptable_set(strats)
-        elif isinstance(op, type) and issubclass(op, darwin.genetic_operation):
-            return op()
-        elif isinstance(op, str):
-            try:
-                op = getattr(darwin, op)
-                return op()
-            except AttributeError:
-                raise AttributeError(
-                    'Method not recognised, refer to docs for list of implemented methods')  # TODO test
-
-    def apply_bounds(self, pop, **hypers):
-        '''Apply the bouding method to every object in an iterable'''
-        for sol in pop:
-            self.bounder(sol, self.bounds, **hypers)
-
-    def _obj(self, obj, vec):
+    def wrap_obj(self, obj, vec):
         '''Adds nfe counting and bad value handling to raw_obj'''
         self.nfe += 1
         fit = obj(vec)
-        try:
-            if np.isnan(fit):
-                return None
-            return float(fit)
-        except(ValueError, TypeError):
-            return None
+        # fit = verify_well_behaved(fit)
+        return fit
 
+    def pre_loop(self):
+        """Here is where each optimiser sets up before looping
+        """
+        ...
+        
+    def step(self):
+        """Placeholder optimisation step
+        """
+        # This placeholder is causing test_no_optimiser to fail.
+        # @TODO: Raise warning instead?
+        ... 
+        
+    def post_step(self):
+        if self.post_step is not None:
+            return self.post_step(self)
 
-# Subclasses for granularity
+    def run(self):
+        """Generic Run Loop
+        We want to implement a common interface for all optimisers.
+        """
 
-class continuous_space_optimiser(optimiser):
-    '''
-    Base class for continuous space optimisers i.e DE, PSO, SA etc.
-    '''
+        # All methods initalise a population 
+        self.gen = 0
+        self.pre_loop()
+        self.bounder(self)
 
+        self.fitness = np.array([self.obj(x) for x in self.pop])
+        self.post_step()
+        
+        # Main Loop
+        for self.gen in range(1,self.hypers["G"]):
 
-class discrete_space_optimiser(optimiser):
-    '''
-    Base class for discrete space optimisers i.e GA, GP etc.
-    '''
+            # Step the optimiser
+            self.step()
+            self.bounder(self)
+            self.fitness = np.array([self.obj(x) for x in self.pop])
+
+            # Provide a point to hook in after the step
+            if self.post_step() is False:
+                break
+
