@@ -38,14 +38,17 @@ class optimiser:
         # Hyperparamters/ methods
         self.hypers = self.hyper_defaults | hypers
 
+        # Hooks
+        self.post_step = None
+
     def __call__(self):
         '''
         API for running the optimisation
         '''
 
         self.run()
-        idx = np.argmin(self.fitness)
-        return self.fitness[idx], self.pop[idx]
+        idx = np.argmin(self.fit)
+        return self.fit[idx], self.pos[idx]
 
 
     def wrap_obj(self, obj, vec):
@@ -67,7 +70,7 @@ class optimiser:
         # @TODO: Raise warning instead?
         ... 
         
-    def post_step(self):
+    def post_step_hook(self):
         if self.post_step is not None:
             return self.post_step(self)
 
@@ -78,12 +81,12 @@ class optimiser:
         # All methods initalise a population 
         self.gen = 0
         self.pre_loop()
-        self.post_step()
+        self.post_step_hook()
         # Main Loop
         for self.gen in range(1,self.hypers["G"]):
             # Step the optimiser
             self.step()
             # Provide a point to hook in after the step
-            if self.post_step() is False:
+            if self.post_step_hook() is False:
                 break
 

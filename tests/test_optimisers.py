@@ -20,7 +20,7 @@ dims = [1, 2, 3]
 
 def set_testing_hypers(opt):
     hypers = opt.hyper_defaults
-    hypers['N'] = 5
+    hypers['N'] = 10
     hypers['G'] = 2
     hypers['K'] = 2  # SA should really use G as well...
     return hypers
@@ -83,8 +83,12 @@ def test_run(opt, n, d):
 def test_run_one(opt, d):
     o = exponential(d)
     hypers = set_testing_hypers(opt)
-    out = opt(obj=o, bounds=o.bounds, hypers=hypers)(full_output=True)
-    assert(len(out['solutions']) == hypers['N'])
+    out = opt(obj=o, bounds=o.bounds, hypers=hypers)()
+    # assert(len(out['solutions']) == hypers['N'])
+    assert len(out) == 2
+    assert isinstance(out[0], float)
+    assert isinstance(out[1], np.ndarray)
+    assert out[1].shape[0] == o.bounds.shape[0]
 
 
 @pytest.mark.parametrize('opt', optimiser_classes)

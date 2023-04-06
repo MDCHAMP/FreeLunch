@@ -10,6 +10,7 @@ import numpy as np
 
 def greedy_selection(old_fit, new_fit, old_vars, new_vars):
     idx = new_fit < old_fit
+    old_fit[idx] = new_fit[idx]
     if isinstance(old_vars, np.ndarray):
         old_vars[idx] = new_vars[idx]
     else:
@@ -23,7 +24,7 @@ def update_local_best(opt):
     opt.local_best_pos[better] = opt.pos[better]   
 
 def update_global_best(opt):
-    gbest = np.argmin(opt.local_best)
+    gbest = np.argmin(opt.local_best_fit)
     opt.global_best_fit = opt.fit[gbest]
     opt.global_best_pos = opt.local_best_pos[gbest]
 
@@ -50,22 +51,29 @@ def pdist(A, B=None):
 #%% Bounding Strategies
 
 
-def no_bounding(p, bounds, **hypers):
+def no_bounding(opt):
     '''
     Placeholder for no bounding
     '''
     raise Warning('No bounds applied')
 
-def sticky_bounds(p, bounds, eps=1e-12, **hypers): # TODO vectorise
+def sticky_bounds(opt): # TODO vectorise
     '''
     Apply sticky bounds to space
     '''
-    out = p.dna[:]
-    for i, bound in enumerate(bounds):
-        low, high = bound
-        if   p.dna[i] > high: out[i] = high - eps
-        elif p.dna[i] < low:  out[i] = low + eps
-        p.dna = out
+
+    out_low = opt.pos < opt.bounds[:,0]
+    out_high = opt.pos > opt.bounds[:,1]
+    opt.pos[out_low] = np.tile(opt.bounds[:,0],[opt.pos.shape[0],1])[out_low]
+    opt.pos[out_high] = np.tile(opt.bounds[:,1],[opt.pos.shape[0],1])[out_high]
+
+
+    # out = p.dna[:]
+    # for i, bound in enumerate(bounds):
+    #     low, high = bound
+    #     if   p.dna[i] > high: out[i] = high - eps
+    #     elif p.dna[i] < low:  out[i] = low + eps
+    #     p.dna = out
 
 # %% Intialisation strategies
 

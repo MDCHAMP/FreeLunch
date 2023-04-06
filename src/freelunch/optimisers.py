@@ -37,8 +37,8 @@ class PSO(optimiser):
 
     def pre_loop(self):
         self.pos = tech.uniform_continuous_init(self.bounds, self.hypers['N'])
-        self.vel = tech.uniform_continuous_init([self.hypers['v']]*len(self.bounds), self.hypers['N'])
-        self.fit = np.array([self.obj(x) for x in self.pop])
+        self.vel = tech.uniform_continuous_init(np.array([self.hypers['v']]*len(self.bounds)), self.hypers['N'])
+        self.fit = np.array([self.obj(x) for x in self.pos])
         idx = np.argmin(self.fit)
         self.local_best_pos = self.pos.copy()
         self.global_best_pos = self.pos[idx].copy()
@@ -52,8 +52,8 @@ class PSO(optimiser):
         # Update velocity
         self.vel = (
             inertia*self.vel + 
-            self.hypers['A'][0]*np.random.rand((self.hypers["N"],))*(self.local_best_pos - self.pos) + 
-            self.hypers['A'][1]*np.random.rand((self.hypers["N"],))*(self.global_best_pos - self.pos))
+            self.hypers['A'][0]*np.random.uniform((self.hypers["N"],))*(self.local_best_pos - self.pos) + 
+            self.hypers['A'][1]*np.random.uniform((self.hypers["N"],))*(self.global_best_pos - self.pos))
         # Move
         self.pos += self.vel
 
@@ -61,7 +61,7 @@ class PSO(optimiser):
         self.bounder(self)
 
         # Eval fitness
-        self.fit = np.array([self.obj(x) for x in self.pop])
+        self.fit = np.array([self.obj(x) for x in self.pos])
         
         # Bookeeping post eval
         tech.update_local_best(self)
@@ -87,7 +87,7 @@ class QPSO(PSO):
         'v':np.array([-1, 1])
     }
 
-    def step(self, pop, gen):
+    def step(self):
         C = self.local_best_pos.mean(0)
         D = len(C)
         alpha = tech.lin_reduce(self.hypers['alpha'], self.gen, self.hypers['G'])
@@ -124,32 +124,56 @@ class ABC(optimiser):
     hyper_defaults = {
         'N': 100,
         'G': 100,
+        'limit': 5,
     }
 
     def pre_loop(self):
         self.pos = tech.uniform_continuous_init(self.bounds, self.hypers['N'])
-        self.fit = np.array([self.obj(x) for x in self.pop])
+        self.fit = np.array([self.obj(x) for x in self.pos])
+
+    def crossover_points(self, pos):
+        """ABC Crossover Location 
+
+        Args:
+            pos (np.ndarray): postitions to update
+
+        Returns:
+            np.ndarray: crossover points (x_{ik} - x_{jk})  
+        """
+        
+        N = pos.shape[0]
+        crossover_point = pos.copy()
+        d = np.random.randint(0, pos.shape[1], size=N)
+        rand_idx = np.arange(N) + np.random.randint(1, N, size=(N))
+        rand_idx[rand_idx>=N] -= N
+        mask = np.tile(np.arange(pos.shape[1]),N).T == d
+        crossover_point[mask] -= pos[rand_idx,:][mask]
+        
+        return crossover_point
         
     def step(self):
 
         # New candidates
-        crossover_point = self.pos.copy()
-        N = self.hypers['N']
+        # crossover_point = self.pos.copy()
+        # N = self.hypers['N']
         
-        # Employed Bees Phase
-        d = np.random.randint(0,self.pos.shape[1],size=self.pos.size[0])
-        rand_idx = np.arange(N) + np.random.randint(1,N,size=(N))
-        rand_idx[rand_idx>=N] -= N
-        crossover_point[rand_idx,d] = self.pos[rand_idx,d]
+        # # Employed Bees Phase
+        # d = np.random.randint(0,self.pos.shape[1],size=self.pos.size[0])
+        # rand_idx = np.arange(N) + np.random.randint(1,N,size=(N))
+        # rand_idx[rand_idx>=N] -= N
+        # crossover_point[rand_idx,d] = self.pos[rand_idx,d]
+        crossover_point = self.crossover_points(self.pos[:self.hypers["N"]//2]) 
         new_candidates = self.pos + np.random.uniform(-1,1,size=(self.hypers["N"]))*crossover_point
 
         # Greedy Selection...
         new_fit = np.array([self.obj(x) for x in new_candidates])
-        better_idx = new_fit < self.fitness
-        fitness = self.fitness.copy()
-        fitness[better_idx] = new_fit[better_idx]
-        pos = self.pos.copy()
-        pos[better_idx] = new_candidates[better_idx]
+        tech.greedy_selection(self.fitness, new_fit, self.pos, new_candidates)
+
+        # better_idx = new_fit < self.fitness
+        # fitness = self.fitness.copy()
+        # fitness[better_idx] = new_fit[better_idx]
+        # pos = self.pos.copy()
+        # pos[better_idx] = new_candidates[better_idx]
 
         # Eq 7...
         fit_xm = np.ones_like(fitness)
