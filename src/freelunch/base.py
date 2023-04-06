@@ -75,23 +75,14 @@ class optimiser:
         """Generic Run Loop
         We want to implement a common interface for all optimisers.
         """
-
         # All methods initalise a population 
         self.gen = 0
         self.pre_loop()
-        self.bounder(self)
-
-        self.fitness = np.array([self.obj(x) for x in self.pop])
         self.post_step()
-        
         # Main Loop
         for self.gen in range(1,self.hypers["G"]):
-
             # Step the optimiser
             self.step()
-            self.bounder(self)
-            self.fitness = np.array([self.obj(x) for x in self.pop])
-
             # Provide a point to hook in after the step
             if self.post_step() is False:
                 break
