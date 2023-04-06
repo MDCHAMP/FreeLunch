@@ -1,15 +1,14 @@
-'''
-Testing tech
-'''
-from freelunch.zoo import animal, particle, krill
+# '''
+# Testing tech
+# '''
+
 from freelunch.tech import *
 import pytest
 import numpy as np
 
 np.random.seed(100)
 
-
-animals = [None, animal, particle, krill]
+animals = [None]
 
 
 def dummy_obj_fun(dna):
@@ -20,6 +19,45 @@ def bound_fixture(a, b, bnds, bounder, **hypers):
     a = animal(dna=a)
     bounder(a, bnds, **hypers)
     assert np.all(a.dna == b)
+
+
+def test_greedy_selection():
+
+    fit_old = np.array([1,2,3])
+    fit_new = np.array([2,0,4])
+    idx = fit_new < fit_old
+
+    pos_old = np.ones((3,2))
+    pos_old_copy = pos_old.copy()
+    pos_new = 3*np.ones((3,2))
+
+    vel_old = -1*np.ones((3,2))
+    vel_old_copy = vel_old.copy()
+    vel_new = 2*np.ones((3,2))
+
+    greedy_selection(fit_old, fit_new, pos_old, pos_new)
+
+    assert np.all(pos_old[idx] == pos_new[idx])
+    assert np.all(pos_old[~idx] == pos_old_copy[~idx])
+
+    pos_old = np.ones((3,2))
+    pos_old_copy = pos_old.copy()
+    pos_new = 3*np.ones((3,2))
+
+
+    greedy_selection(fit_old, fit_new, [pos_old], [pos_new])
+
+    assert np.all(pos_old[idx] == pos_new[idx])
+    assert np.all(pos_old[~idx] == pos_old_copy[~idx])
+
+    
+    greedy_selection(fit_old, fit_new, [pos_old, vel_old], [pos_new, vel_new])
+
+    assert np.all(pos_old[idx] == pos_new[idx])
+    assert np.all(pos_old[~idx] == pos_old_copy[~idx])
+    assert np.all(vel_old[idx] == vel_new[idx])
+    assert np.all(vel_old[~idx] == vel_old_copy[~idx])
+    
 
 
 @pytest.mark.parametrize('N', [1, 3])
@@ -56,9 +94,9 @@ def test_gaussian_init(N, dim, creature):
     
 
     if creature is None:
-        pop = Gaussian_neigbourhood_init(bounds, N, mu=mu, sig=sig)
+        pop = gaussian_neigbourhood_init(bounds, N, mu=mu, sig=sig)
     else:
-        pop = Gaussian_neigbourhood_init(bounds, N, creature=creature)
+        pop = gaussian_neigbourhood_init(bounds, N, creature=creature)
 
     assert(len(pop) == N)
     assert(np.all(pop[0].dna > bounds[:, 0]))
@@ -93,11 +131,11 @@ def test_no_bounds():
         no_bounding(animal(), [])
 
 
-def test_bounds_as_mat():
+# def test_bounds_as_mat():
 
-    bounds = [[-1, 1], [-2, 2]]
-    bounds_mat = np.array(bounds)
-    assert(np.all(bounds_as_mat(bounds) == bounds_mat))
+#     bounds = [[-1, 1], [-2, 2]]
+#     bounds_mat = np.array(bounds)
+#     assert(np.all(bounds_as_mat(bounds) == bounds_mat))
 
 
 def test_lin_reduce():

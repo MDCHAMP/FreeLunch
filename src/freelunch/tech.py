@@ -6,9 +6,16 @@ Standard / common techniques that are used in several optimisers are abstracted 
 
 import numpy as np
 
-
-
 # %% Common methods
+
+def greedy_selection(old_fit, new_fit, old_vars, new_vars):
+    idx = new_fit < old_fit
+    if isinstance(old_vars, np.ndarray):
+        old_vars[idx] = new_vars[idx]
+    else:
+        for o, n in zip(old_vars,new_vars):
+            o[idx] = n[idx]
+
 
 def update_local_best(opt):
     better = opt.fit < opt.local_best_fit

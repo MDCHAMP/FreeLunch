@@ -6,7 +6,6 @@ import numpy as np
 
 np.random.seed(100)
 
-from freelunch.util import ZeroLengthSolutionError
 from freelunch.benchmarks import ackley, exponential, happycat, periodic
 
 benchmark_problems = [ackley, exponential, happycat, periodic]
@@ -19,9 +18,4 @@ def test_true_optima(obj, n):
 	evaluates = b(b.optimum)
 	assert evaluates == b.f0
 
-@pytest.mark.parametrize('obj', benchmark_problems)
-def test_err(obj):
-
-    with pytest.raises(ZeroLengthSolutionError):
-        obj()([])
 

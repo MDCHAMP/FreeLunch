@@ -5,7 +5,7 @@ import warnings
 
 import numpy as np
 
-from freelunch import tech, util
+from freelunch import tech
 from freelunch.base import optimiser
 
 

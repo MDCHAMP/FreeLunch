@@ -5,8 +5,6 @@ import pytest
 import numpy as np
 
 from freelunch.base import *
-from freelunch.util import UnpicklableObjectiveFunction
-from freelunch.darwin import rand_1
 from freelunch.benchmarks import exponential
 
 def test_hyp_parse():
