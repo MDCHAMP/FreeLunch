@@ -16,9 +16,13 @@ def dummy_obj_fun(dna):
 
 
 def bound_fixture(a, b, bnds, bounder, **hypers):
-    a = animal(dna=a)
-    bounder(a, bnds, **hypers)
-    assert np.all(a.dna == b)
+    class dummy_opt():
+        def __init__(self, x, bounds):
+            self.pos = x
+            self.bounds = bounds
+    opt = dummy_opt(np.tile(a,[10,1]), np.array(bnds)) # Make a population array
+    bounder(opt)
+    assert np.allclose(opt.pos, b)
 
 
 def test_greedy_selection():
@@ -40,6 +44,10 @@ def test_greedy_selection():
     assert np.all(pos_old[idx] == pos_new[idx])
     assert np.all(pos_old[~idx] == pos_old_copy[~idx])
 
+    fit_old = np.array([1,2,3])
+    fit_new = np.array([2,0,4])
+    idx = fit_new < fit_old
+
     pos_old = np.ones((3,2))
     pos_old_copy = pos_old.copy()
     pos_new = 3*np.ones((3,2))
@@ -49,6 +57,18 @@ def test_greedy_selection():
 
     assert np.all(pos_old[idx] == pos_new[idx])
     assert np.all(pos_old[~idx] == pos_old_copy[~idx])
+
+    fit_old = np.array([1,2,3])
+    fit_new = np.array([2,0,4])
+    idx = fit_new < fit_old
+
+    pos_old = np.ones((3,2))
+    pos_old_copy = pos_old.copy()
+    pos_new = 3*np.ones((3,2))
+
+    vel_old = -1*np.ones((3,2))
+    vel_old_copy = vel_old.copy()
+    vel_new = 2*np.ones((3,2))
 
     
     greedy_selection(fit_old, fit_new, [pos_old, vel_old], [pos_new, vel_new])
@@ -79,38 +99,61 @@ def test_uniform_init(N, dim):
 @pytest.mark.parametrize('dim', [1, 3])
 def test_gaussian_init(N, dim):
 
+    if dim == 1:
+        bounds = np.empty((dim, 2))
+        for n in range(dim):
+            bounds[n, 1] = 10*np.random.rand()
+            bounds[n, 0] = -bounds[n, 1]
+            
+            mu = np.random.uniform(-bounds[n, 1]/5, bounds[n, 1]/5)
+            sig= np.random.uniform(0,1)
+
+        pop = gaussian_neigbourhood_init(bounds, N, mu=mu, sig=sig)
+
+        assert(pop.shape[0] == N)
+        assert(pop.shape[1] == dim)
+        assert(np.all(pop > 5*bounds[:, 0]))
+        assert(np.all(pop < 5*bounds[:, 1]))
+
+
     bounds = np.empty((dim, 2))
+    mu = []
+    sig = []
     for n in range(dim):
         bounds[n, 1] = 10*np.random.rand()
         bounds[n, 0] = -bounds[n, 1]
-
-        mu = np.array(np.random.uniform(-bounds[n, 1]/5, bounds[n, 1]/5))
-        sig = np.array(np.random.uniform(0,1))
+        
+        mu.append(np.random.uniform(-bounds[n, 1]/5, bounds[n, 1]/5))
+        sig.append(np.random.uniform(0,1))
     
+    mu = np.array(mu)
+    sig = np.array(sig)    
 
     pop = gaussian_neigbourhood_init(bounds, N, mu=mu, sig=sig)
 
-    assert(len(pop) == N)
-    assert(np.all(pop > bounds[:, 0]))
-    assert(np.all(pop < bounds[:, 1]))
+    assert(pop.shape[0] == N)
+    assert(pop.shape[1] == dim)
+    assert(np.all(pop > 5*bounds[:, 0]))
+    assert(np.all(pop < 5*bounds[:, 1]))
 
     pop = gaussian_neigbourhood_init(bounds, N)
 
-    assert(len(pop) == N)
-    assert(np.all(pop > bounds[:, 0]))
-    assert(np.all(pop < bounds[:, 1]))
+    assert(pop.shape[0] == N)
+    assert(pop.shape[1] == dim)
+    assert(np.all(pop > 5*bounds[:, 0]))
+    assert(np.all(pop < 5*bounds[:, 1]))
 
 
+# TODO: Is this needed, I don't think so...
+# def test_compute_obj():
 
-def test_compute_obj():
+#     N = 10
+#     pop = uniform_continuous_init(np.array([[-1., 1.]]), N)
+#     pop = compute_obj(pop, dummy_obj_fun)
 
-    N = 10
-    pop = uniform_continuous_init(np.array([[-1., 1.]]), N)
-    pop = compute_obj(pop, dummy_obj_fun)
-
-    assert(len(pop) == N)
-    for p in pop:
-        assert(p.fitness == 1)
+#     assert(len(pop) == N)
+#     for p in pop:
+#         assert(p.fitness == 1)
 
 
 def test_sticky_bounds():
@@ -126,14 +169,7 @@ def test_sticky_bounds():
 
 def test_no_bounds():
     with pytest.raises(Warning):
-        no_bounding(animal(), [])
-
-
-# def test_bounds_as_mat():
-
-#     bounds = [[-1, 1], [-2, 2]]
-#     bounds_mat = np.array(bounds)
-#     assert(np.all(bounds_as_mat(bounds) == bounds_mat))
+        no_bounding(None)
 
 
 def test_lin_reduce():

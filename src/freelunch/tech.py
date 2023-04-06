@@ -76,12 +76,12 @@ def uniform_continuous_init(bounds, N):
 def gaussian_neigbourhood_init(bounds, N, mu=None, sig=None): # TODO sensibleise
     if mu is None:
         mu = np.array([(a+b)/2 for a,b in bounds])
-    elif len(mu.shape) == 0:
+    elif isinstance(mu, float) or len(mu.shape) == 0:
         mu = np.array([mu])
 
     if sig is None:
         sig = np.array([(b-a)/6 for a,b in bounds])
-    elif len(sig.shape) == 0:
+    elif isinstance(sig,float) or len(sig.shape) == 0:
         sig = np.array([sig])
 
     return np.random.multivariate_normal(mu,np.diag(sig**2),size=(N,))

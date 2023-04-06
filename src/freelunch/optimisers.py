@@ -92,8 +92,8 @@ class QPSO(PSO):
         D = len(C)
         alpha = tech.lin_reduce(self.hypers['alpha'], self.gen, self.hypers['G'])
 
-        phi = np.random.uniform(size=(self.hypers["N"],))
-        u = np.random.uniform(size=(self.hypers["N"],))
+        phi = np.random.uniform(size=(self.hypers["N"],1))
+        u = np.random.uniform(size=(self.hypers["N"],1))
         self.pos = (
             phi*self.local_best_pos + (1-phi)*self.global_best_pos + 
             np.sign(np.random.normal(size=(self.hypers["N"],D))) * 
@@ -104,7 +104,7 @@ class QPSO(PSO):
         self.bounder(self)
 
         # Eval fitness
-        self.fit = np.array([self.obj(x) for x in self.pop])
+        self.fit = np.array([self.obj(x) for x in self.pos])
         
         # Bookeeping post eval
         tech.update_local_best(self)
