@@ -68,26 +68,20 @@ def sticky_bounds(opt): # TODO vectorise
     opt.pos[out_high] = np.tile(opt.bounds[:,1],[opt.pos.shape[0],1])[out_high]
 
 
-    # out = p.dna[:]
-    # for i, bound in enumerate(bounds):
-    #     low, high = bound
-    #     if   p.dna[i] > high: out[i] = high - eps
-    #     elif p.dna[i] < low:  out[i] = low + eps
-    #     p.dna = out
-
 # %% Intialisation strategies
 
 def uniform_continuous_init(bounds, N):
     return np.random.uniform(*bounds.T,  (N, len(bounds)))
 
-def gaussian_neigbourhood_init(bounds, N, creature, mu=None, sig=None): # TODO sensibleise
+def gaussian_neigbourhood_init(bounds, N, mu=None, sig=None): # TODO sensibleise
     if mu is None:
-        mu = [(a+b)/2 for a,b in bounds]
+        mu = np.array([(a+b)/2 for a,b in bounds])
+    elif len(mu.shape) == 0:
+        mu = np.array([mu])
+
     if sig is None:
-        sig = [(b-a)/6 for a,b in bounds]
-    out = np.empty((N,), dtype=object)
-    for i in range(N):
-        adam = creature()
-        adam.dna = np.random.normal(mu, sig)
-        out[i] = adam
-    return out
+        sig = np.array([(b-a)/6 for a,b in bounds])
+    elif len(sig.shape) == 0:
+        sig = np.array([sig])
+
+    return np.random.multivariate_normal(mu,np.diag(sig**2),size=(N,))

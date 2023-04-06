@@ -62,45 +62,43 @@ def test_greedy_selection():
 
 @pytest.mark.parametrize('N', [1, 3])
 @pytest.mark.parametrize('dim', [1, 3])
-@pytest.mark.parametrize('creature', animals)
-def test_uniform_init(N, dim, creature):
+def test_uniform_init(N, dim):
 
     bounds = np.empty((dim, 2))
     for n in range(dim):
         bounds[n, 1] = 10*np.random.rand()
         bounds[n, 0] = -bounds[n, 1]
 
-    if creature is None:
-        pop = uniform_continuous_init(bounds, N)
-    else:
-        pop = uniform_continuous_init(bounds, N, creature=creature)
+    pop = uniform_continuous_init(bounds, N)
 
     assert(len(pop) == N)
-    assert(np.all(pop[0].dna > bounds[:, 0]))
-    assert(np.all(pop[0].dna < bounds[:, 1]))
+    assert(np.all(pop > bounds[:, 0]))
+    assert(np.all(pop < bounds[:, 1]))
 
 @pytest.mark.parametrize('N', [1, 3])
 @pytest.mark.parametrize('dim', [1, 3])
-@pytest.mark.parametrize('creature', animals)
-def test_gaussian_init(N, dim, creature):
+def test_gaussian_init(N, dim):
 
     bounds = np.empty((dim, 2))
     for n in range(dim):
         bounds[n, 1] = 10*np.random.rand()
         bounds[n, 0] = -bounds[n, 1]
 
-        mu = np.random.uniform(-bounds[n, 1]/5, bounds[n, 1]/5)
-        sig = np.random.uniform(0,1)
+        mu = np.array(np.random.uniform(-bounds[n, 1]/5, bounds[n, 1]/5))
+        sig = np.array(np.random.uniform(0,1))
     
 
-    if creature is None:
-        pop = gaussian_neigbourhood_init(bounds, N, mu=mu, sig=sig)
-    else:
-        pop = gaussian_neigbourhood_init(bounds, N, creature=creature)
+    pop = gaussian_neigbourhood_init(bounds, N, mu=mu, sig=sig)
 
     assert(len(pop) == N)
-    assert(np.all(pop[0].dna > bounds[:, 0]))
-    assert(np.all(pop[0].dna < bounds[:, 1]))
+    assert(np.all(pop > bounds[:, 0]))
+    assert(np.all(pop < bounds[:, 1]))
+
+    pop = gaussian_neigbourhood_init(bounds, N)
+
+    assert(len(pop) == N)
+    assert(np.all(pop > bounds[:, 0]))
+    assert(np.all(pop < bounds[:, 1]))
 
 
 
