@@ -130,6 +130,11 @@ class ABC(optimiser):
     def pre_loop(self):
         self.pos = tech.uniform_continuous_init(self.bounds, self.hypers['N'])
         self.fit = np.array([self.obj(x) for x in self.pos])
+        self.best_fit = np.min(self.fit)
+        self.best_pos = self.pos[np.argmin(self.fit)]
+        self.stalls = np.zeros((self.hypers["N"]))
+        self.hypers["N_employed"] = self.hypers["N"]//2
+        self.hypers["N_onlookers"] = self.hypers["N"] - self.hypers["N_employed"]
 
     @staticmethod
     def crossover_points(pos):
@@ -154,55 +159,55 @@ class ABC(optimiser):
         
     def step(self):
 
-        # New candidates
-        # crossover_point = self.pos.copy()
-        # N = self.hypers['N']
-        
-        # # Employed Bees Phase
-        # d = np.random.randint(0,self.pos.shape[1],size=self.pos.size[0])
-        # rand_idx = np.arange(N) + np.random.randint(1,N,size=(N))
-        # rand_idx[rand_idx>=N] -= N
-        # crossover_point[rand_idx,d] = self.pos[rand_idx,d]
-        crossover_point = self.crossover_points(self.pos[:self.hypers["N"]//2]) 
-        new_candidates = self.pos[:self.hypers["N"]//2] + np.random.uniform(-1,1,size=(self.hypers["N"]//2))*crossover_point
+        # The employed bees (good capitalist bees)
+        employed = self.pos[:self.hypers["N_employed"]]
+        employed_fit = self.fit[:self.hypers["N_employed"]]
+        crossover_point = self.crossover_points(employed) 
+        new_candidates = employed + np.random.uniform(-1,1,size=(self.hypers["N_employed"],1))*crossover_point
 
         # Greedy Selection...
         new_fit = np.array([self.obj(x) for x in new_candidates])
-        tech.greedy_selection(self.fitness, new_fit, self.pos, new_candidates)
+        tech.greedy_selection(employed_fit, new_fit, employed, new_candidates)
 
-        # better_idx = new_fit < self.fitness
-        # fitness = self.fitness.copy()
-        # fitness[better_idx] = new_fit[better_idx]
-        # pos = self.pos.copy()
-        # pos[better_idx] = new_candidates[better_idx]
+        # "Fitness" of each employed bee 
+        fit_xm = np.ones_like(employed_fit)
+        fit_xm[employed_fit >= 0] = 1/(1+employed_fit[employed_fit >= 0])
+        fit_xm[employed_fit < 0] = 1+np.abs(employed_fit[employed_fit < 0])
 
-        # Eq 7...
-        fit_xm = np.ones_like(fitness)
-        fit_xm[fitness >= 0] = 1/(1+fitness[fitness >= 0])
-        fit_xm[fitness < 0] = 1+np.abs(fitness[fitness < 0])
+        # Enter the onlooker bee phase (bad unproductive bees)
 
-        # Enter the onlooker bee phase
-        onlookers = np.random.choice(
-            pos,
-            size=N,
+        # Pinwheel onlookers choosing one of the employees to take credit for...
+        idx = np.random.choice(
+            np.arange(self.hypers["N_employed"]),
+            size=self.hypers["N_onlookers"],
             p=fit_xm/np.sum(fit_xm),
             replace=True)
+        onlookers = employed[idx]
+        onlookers_fit = employed_fit[idx]
 
-        crossover_point = onlookers.copy()
-        d = np.random.randint(0,self.pos.shape[1],size=self.pos.size[0])
-        rand_idx = np.arange(N) + np.random.randint(1,N,size=(N))
-        rand_idx[rand_idx>=N] -= N
-        crossover_point[rand_idx,d] = self.pos[rand_idx,d]
-
-        new_candidates = onlookers + np.random.uniform(-1,1,size=(self.hypers["N"]))*crossover_point
+        # Onlooker selections
+        crossover_point = self.crossover_points(onlookers) 
+        new_candidates = onlookers + np.random.uniform(-1,1,size=(self.hypers["N_onlookers"],1))*crossover_point
 
         # Greedy Selection...
         new_fit = np.array([self.obj(x) for x in new_candidates])
-        better_idx = new_fit < self.fitness
-        fitness = self.fitness.copy()
-        fitness[better_idx] = new_fit[better_idx]
-        pos = self.pos.copy()
-        pos[better_idx] = new_candidates[better_idx]
+        tech.greedy_selection(onlookers_fit, new_fit, onlookers, new_candidates)
+
+        # Cleaning up
+        new_pop = np.concatenate((employed, onlookers),axis=0)
+        new_fit = np.concatenate((employed_fit, onlookers_fit),axis=0)
+        self.stalls[np.all(self.pos == new_pop, axis=1)] += 1
+        self.pos = new_pop
+        self.fit = new_fit
+        
+        if np.any(self.fit < self.best_fit):
+            self.best_fit = np.min(self.best_fit)
+            self.best_pos = self.pos[np.argmin(self.fit)]
+
+
+
+
+       
 
         
 
