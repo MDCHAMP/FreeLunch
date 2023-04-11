@@ -135,13 +135,13 @@ class normally_varying_parameter(adaptable_parameter):
 
     def update(self):  # fit normal distribution to successful parameters
         u = self.u if len(self.win_values) == 0 else np.mean(self.win_values)
-        std = self.std if len(self.win_values) == 0 else max(np.std(self.win_values), 10**-3)
+        sig = self.sig if len(self.win_values) == 0 else max(np.std(self.win_values), 10**-3)
         if not np.isnan(u):
             self.u = u 
         else:
             raise ValueError # Stop don't just stay still
-        if not np.isnan(std):
-            self.std = std
+        if not np.isnan(sig):
+            self.sig = sig
         else:
             raise ValueError # Stop don't just stay still
         self.win_values = [] # Not storing all winning parameters at the moment
