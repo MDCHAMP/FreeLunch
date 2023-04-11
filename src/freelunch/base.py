@@ -55,7 +55,7 @@ class optimiser:
         '''Adds nfe counting and bad value handling to raw_obj'''
         self.nfe += 1
         fit = obj(vec)
-        # fit = verify_well_behaved(fit)
+        # fit = verify_well_behaved(fit) TODO single POC for handling bad objective scores
         return fit
 
     def pre_loop(self):

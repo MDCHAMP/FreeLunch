@@ -1,3 +1,4 @@
+# @TODO ?rn util.py  
 '''
 Standard / common techniques that are used in several optimisers are abstracted to functions here. 
 '''

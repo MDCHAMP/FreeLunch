@@ -97,8 +97,7 @@ class QPSO(PSO):
         self.pos = (
             phi*self.local_best_pos + (1-phi)*self.global_best_pos + 
             np.sign(np.random.normal(size=(self.hypers["N"],D))) * 
-            alpha*np.abs(C-self.pos)*np.log(1/u)
-            )
+            alpha*np.abs(C-self.pos)*np.log(1/u))
         
         # Bounding
         self.bounder(self)
@@ -119,7 +118,7 @@ class ABC(optimiser):
     tags = ['Continuous domain', 'Particle swarm', 'Utterly terrible']
     hyper_definitions = {
         'N': 'Population size (int)',
-        'G': 'Number of generations (int)',
+        'G': 'Number of generations (int)', # TODO add N_employed, N_onlookers etc. here also logic for making sure these sum to N
     }
     hyper_defaults = {
         'N': 100,
