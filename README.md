@@ -15,6 +15,9 @@ ___
 
 ### Optimisers
 
+--NEW and EXCITING---
+ - Particle attractor optimistion `freelunch.PAO` (pronounced POW)
+
 Your favourite not in the list? Feel free to add it.
 
 - Differential evolution `freelunch.DE`
