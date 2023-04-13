@@ -165,20 +165,20 @@ class PSO(optimiser):
         "G": "Number of generations (int)",
         "I": "Inertia coefficients (np.array, I.shape=(2,))",
         "A": "Acceleration (np.array, I.shape=(2,))",
-        "v": "Velocity bounds",
+        "v0": "Velocity (ratio of bounds width)",
     }
     hyper_defaults = {
         "N": 100,
         "G": 100,
-        "I": np.array([0.1, 0.9]),
-        "A": np.array([0.1, 0.1]),
-        "v": np.array([-1, 1]),
+        "I": np.array([0.4, 0.3]),
+        "A": np.array([0.01, 0.02]),
+        "v0": 0,
     }
 
     def pre_loop(self):
         self.pos = tech.uniform_continuous_init(self.bounds, self.hypers["N"])
         self.vel = tech.uniform_continuous_init(
-            np.array([self.hypers["v"]] * len(self.bounds)), self.hypers["N"]
+            (self.bounds - self.bounds.mean(1)) * self.hypers["v0"], self.hypers["N"]
         )
         self.fit = np.array([self.obj(x) for x in self.pos])
         # Initial bookeeping
@@ -213,6 +213,7 @@ class PSO(optimiser):
     def post_loop(self):
         self.pos, self.fit = self.local_best
 
+
 class QPSO(PSO):
     """
     Quantum Particle Swarm Optimisations
@@ -224,13 +225,13 @@ class QPSO(PSO):
         "N": "Population size (int)",
         "G": "Number of generations (int)",
         "alpha": "Contraction Expansion Coefficient (np.array, I.shape=(2,))",
-        "v": "Velocity bounds",
+        "v0": "Velocity (ratio of bounds width)",
     }
     hyper_defaults = {
         "N": 100,
         "G": 100,
         "alpha": np.array([1.0, 0.5]),
-        "v": np.array([-1, 1]),
+        "v0": 0,
     }
 
     def step(self):
