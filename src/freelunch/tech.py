@@ -1,88 +1,175 @@
-# @TODO ?rn util.py  
-'''
+"""
 Standard / common techniques that are used in several optimisers are abstracted to functions here. 
-'''
+"""
 
 # %% Imports
 
 import numpy as np
-
-# %% Common methods
-
-def greedy_selection(old_fit, new_fit, old_vars, new_vars):
-    idx = new_fit < old_fit
-    old_fit[idx] = new_fit[idx]
-    if isinstance(old_vars, np.ndarray):
-        old_vars[idx] = new_vars[idx]
-    else:
-        for o, n in zip(old_vars,new_vars):
-            o[idx] = n[idx]
-
-
-def update_local_best(opt):
-    better = opt.fit < opt.local_best_fit
-    opt.local_best_fit[better] = opt.fit[better] 
-    opt.local_best_pos[better] = opt.pos[better]   
-
-def update_global_best(opt):
-    gbest = np.argmin(opt.local_best_fit)
-    opt.global_best_fit = opt.fit[gbest]
-    opt.global_best_pos = opt.local_best_pos[gbest]
-
-
-def lin_reduce(lims, n, n_max):
-    # Linearly reduce with generations, e.g. inertia values
-    if lims[1] < lims[0]: 
-        if isinstance(lims,list):
-            lims.reverse()
-        else:
-            np.flip(lims)
-    return lims[1] + (lims[0]-lims[1])*n/n_max
-
-
-def pdist(A, B=None):
-    '''
-    Pairwise Euclidean Distance inside array
-    '''
-    if B is None:
-        B = A
-    return np.sqrt(np.sum((A[:, None]-B[None, :])**2, axis=-1))
-
-
-#%% Bounding Strategies
-
-
-def no_bounding(opt):
-    '''
-    Placeholder for no bounding
-    '''
-    raise Warning('No bounds applied')
-
-def sticky_bounds(opt): # TODO vectorise
-    '''
-    Apply sticky bounds to space
-    '''
-
-    out_low = opt.pos < opt.bounds[:,0]
-    out_high = opt.pos > opt.bounds[:,1]
-    opt.pos[out_low] = np.tile(opt.bounds[:,0],[opt.pos.shape[0],1])[out_low]
-    opt.pos[out_high] = np.tile(opt.bounds[:,1],[opt.pos.shape[0],1])[out_high]
-
+from json import JSONEncoder
 
 # %% Intialisation strategies
 
+
 def uniform_continuous_init(bounds, N):
-    return np.random.uniform(*bounds.T,  (N, len(bounds)))
+    return np.random.uniform(*bounds.T, (N, len(bounds)))
 
-def gaussian_neigbourhood_init(bounds, N, mu=None, sig=None): # TODO sensibleise
-    if mu is None:
-        mu = np.array([(a+b)/2 for a,b in bounds])
-    elif isinstance(mu, float) or len(mu.shape) == 0:
-        mu = np.array([mu])
 
-    if sig is None:
-        sig = np.array([(b-a)/6 for a,b in bounds])
-    elif isinstance(sig,float) or len(sig.shape) == 0:
-        sig = np.array([sig])
+# %% Mutation strategies
 
-    return np.random.multivariate_normal(mu,np.diag(sig**2),size=(N,))
+
+def rand_1(pop, F, k=None):
+    pos, _ = pop
+    a, b, c = parent_idx_no_repeats(len(pos), n=3, k=k)
+    return pos[a] + (F * (pos[b] - pos[c]))
+
+
+def rand_2(pop, F, k=None):
+    pos, _ = pop
+    a, b, c, d, e = parent_idx_no_repeats(len(pos), n=5, k=k)
+    return pos[a] + F * (pos[b] - pos[c]) + F * (pos[d] - pos[e])
+
+
+def best_1(pop, F, k=None):
+    pos, fit = pop
+    a = np.argmin(fit)
+    b, c = parent_idx_no_repeats(len(pos), n=2, k=k)
+    return pos[a] + F * (pos[b] - pos[c])
+
+
+def best_2(pop, F, k=None):
+    pos, fit = pop
+    a = np.argmin(fit)
+    b, c, d, e = parent_idx_no_repeats(len(pos), n=4, k=k)
+    return pos[a] + F * (pos[b] - pos[c]) + F * (pos[d] - pos[e])
+
+
+def current_2(pop, F, k=None):
+    pos, fit = pop
+    a = np.argmin(fit)
+    b, c, d = parent_idx_no_repeats(len(pos), n=3, k=k)
+    if k is None:
+        k = slice(None)
+    return pos[k] + F * (pos[a] - pos[b]) + F * (pos[c] - pos[d])
+
+
+# %% Crossover strategies
+
+
+def binary_crossover(pos, newpos, Crs, jrand=True):
+    idx = np.random.uniform(size=pos.shape) < Crs
+    if jrand: # always swap one dimension
+        idx[:, np.random.randint(0, pos.shape[1])] = True*np.ones((pos.shape[0]))
+    pos = pos.copy()
+    pos[idx] = newpos[idx]
+    return pos
+
+
+# %% Selection strategies
+
+
+def greedy_selection(oldpop, newpop, return_idx=False):
+    idx = newpop[1] < oldpop[1]
+    pop = oldpop[0].copy(), oldpop[1].copy()
+    pop[0][idx] = newpop[0][idx]
+    pop[1][idx] = newpop[1][idx]
+    if return_idx:
+        return (pop[0], pop[1]), idx
+    else:
+        return (pop[0], pop[1])
+
+
+def update_best(best, newpop):
+    idx = np.argmin(newpop[1])
+    if newpop[1][idx] < best[1]: # update best
+        best = newpop[0][idx], newpop[1][idx]
+    return best
+
+
+# %% Bounding Strategies
+
+
+def no_bounding(pos, bounds):
+    """
+    Placeholder for no bounding
+    """
+    raise Warning("No bounds applied")
+
+
+def sticky_bounds(pos, bounds):
+    """
+    Apply sticky bounds to space
+    """
+    out_low  = pos < bounds[:, 0]
+    out_high = pos > bounds[:, 1]
+    pos = pos.copy()
+    pos[out_low]  = (np.ones_like(pos)*bounds[None,:,0])[out_low]  # @TJR :chefs_kiss
+    pos[out_high] = (np.ones_like(pos)*bounds[None,:,1])[out_high] 
+    return pos
+
+# %% Adaptable parameters
+
+
+def lin_vary(lims, n, n_max):
+    # Linearly vary with generations, e.g. inertia values
+    return lims[1] + (lims[0] - lims[1]) * n / n_max
+
+
+def normal_update(p, scores, jit=1e-6):
+    if len(scores) == 0:
+        out = p
+    else:
+        out = np.mean(scores), np.std(scores) + jit
+    return out
+
+
+def update_selection_probs(scores):
+    hits, wins = scores 
+    p = (hits+1) / (hits+wins)
+    return p / np.sum(p)
+
+
+def track_hits_wins(scores, selection_idx, success_idx):
+    hits, wins = scores
+    a, b = np.unique(selection_idx, return_counts=1)
+    hits[a] += b
+    for i in a:
+        wins[i] += sum(success_idx[selection_idx==i])
+    return hits, wins
+
+
+# %%  Misc
+
+
+def parent_idx_no_repeats(N, n, k=None):
+    assert N > n
+    if k is None:
+        k = np.arange(N)
+    elif type(k) is int:
+        k = np.array([k])
+    if len(k) < N / 10:  # for small samples it is more efficient to use choice
+        return np.array(
+            [np.random.choice(np.arange(N), size=(n), replace=False) for i in k]
+        ).T
+    else:  # for large samples we can go accross the population
+        idxs = np.array([np.arange(N)] * (n + 1)).T
+        for i in range(1, n + 1):
+            while sum(same := np.any(idxs[:, :i] == idxs[:, None, i], axis=1)) > 0:
+                idxs[same, i] = np.random.randint(0, N, sum(same))
+    return idxs[k, 1:].T
+
+
+def pdist(A, B=None):
+    """
+    Pairwise Euclidean Distance inside array
+    """
+    if B is None:
+        B = A
+    return np.sqrt(np.sum((A[:, None] - B[None, :]) ** 2, axis=-1))
+
+
+class freelunch_json_encoder(JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        else:
+            return JSONEncoder.default(self, obj)

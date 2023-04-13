@@ -4,32 +4,35 @@ Testing tech
 import pytest
 import numpy as np
 
+import freelunch.tech
+from freelunch.optimisers import DE
 from freelunch.base import *
 from freelunch.benchmarks import exponential
 
-def test_hyp_parse():
-    opt = optimiser(exponential())
-    assert(rand_1.__name__ == opt.parse_hyper(rand_1).__class__.__name__)
+obj = lambda x: 0
 
-    with pytest.raises(AttributeError):
-        opt.parse_hyper('Not a function')
-
-
-def test_no_optimiser():
+def test_no_obj():
     with pytest.raises(TypeError):
         optimiser()
-    with pytest.raises(AttributeError):    
-        optimiser(lambda x: None).run()
-    with pytest.raises(AttributeError):    
-        optimiser(lambda x: None).run_mp()
 
-def test_unpicklable():
-    obj = lambda x:None
-    x = optimiser(obj)
-    with pytest.raises(UnpicklableObjectiveFunction):
-        x(n_runs=2, n_workers=2)
+def test_no_bounds():
+    opt = optimiser(obj)
+    with pytest.raises(Warning):
+        opt.bounder(None, None)
 
-def test_naughty_obj():
-    opt = optimiser(obj=lambda x: np.random.choice([np.nan, np.inf, 'a string']))
-    for i in range(20):
-        assert opt.obj([]) == None
+def test_bounds():
+    opt = optimiser(obj, bounds=[[-1, 1]])
+    assert opt.bounder is tech.sticky_bounds
+
+def test_nfe_counter():
+    opt = optimiser(obj)
+    assert opt.nfe == 0
+    [opt.obj(i) for i in range(10)]
+    assert opt.nfe == 10
+
+def test_post_step():
+    opt = optimiser(obj)
+    def log(op):
+        return op.name
+    opt.post_step = log
+    assert opt.post_step(opt) == 'optimiser'

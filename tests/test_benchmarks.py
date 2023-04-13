@@ -18,4 +18,7 @@ def test_true_optima(obj, n):
 	evaluates = b(b.optimum)
 	assert evaluates == b.f0
 
+def test_zero_solution():
+	with pytest.raises(AttributeError):
+		ackley(2)(np.array([]))
 

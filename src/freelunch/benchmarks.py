@@ -13,17 +13,14 @@ class benchmark:
     default_bounds = lambda n:None
     rtm_optimum = lambda n:None
 
-    def __init__(self, n=None):
-        if n is None:
-            self.n = 2
-        else:
-            self.n = n
+    def __init__(self, n=2):
+        self.n = n
         self.bounds = self.default_bounds() 
         self.optimum = self.rtn_optimum()
 
     def __call__(self, dna):
         if len(dna) == 0:
-            raise ZeroLengthSolutionError('An empty trial solution was passed')
+            raise AttributeError('An empty trial solution was passed')
         return self.obj(dna)
 
 # %%
