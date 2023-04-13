@@ -4,10 +4,7 @@ Testing tech
 import pytest
 import numpy as np
 
-import freelunch.tech
-from freelunch.optimisers import DE
 from freelunch.base import *
-from freelunch.benchmarks import exponential
 
 obj = lambda x: 0
 
