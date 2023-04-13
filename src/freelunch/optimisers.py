@@ -39,7 +39,8 @@ class RandomSearch(optimiser):
         self.best = tech.update_best(self.best, (self.pos, self.fit))
 
     def post_loop(self):
-        self.pos, self.fit = self.best
+        self.pos[0] = self.best[0]
+        self.fit[0] = self.best[1]
 
 
 class DE(optimiser):
