@@ -166,7 +166,7 @@ def test_track_hits_wins():
 # %% Misc testing
 
 
-@pytest.mark.parametrize("N", [10, 100])
+@pytest.mark.parametrize("N", [1, 10, 100])
 @pytest.mark.parametrize(
     "n",
     [
@@ -183,9 +183,10 @@ def test_parent_idx_no_repeats(N, n, k):
         lk = len(k)
     else:
         lk = 1
-    if N < n:
+    if N <= n:
         with pytest.raises(AssertionError):
             parent_idx_no_repeats(N, n, k)
+        return
     else:
         idxs = parent_idx_no_repeats(N, n, k)
         assert idxs.shape == (n, lk)

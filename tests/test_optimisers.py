@@ -32,7 +32,7 @@ dims = [1, 2, 3]
 def set_testing_hypers(opt):
     hypers = opt.hyper_defaults
     hypers["N"] = 10
-    hypers["G"] = 2
+    hypers["G"] = 11
     return hypers
 
 
@@ -54,3 +54,13 @@ def test_can_json(opt, n):
     hypers = set_testing_hypers(opt)
     best, runs = opt(obj=o, bounds=o.bounds, hypers=hypers)(n_runs=n)
     s = json.dumps(runs, cls=tech.freelunch_json_encoder)
+
+
+# @TODO more grnaular tests here
+
+def test_early_stop():
+    pass
+
+def test_can_optimise():
+    pass
+

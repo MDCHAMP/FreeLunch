@@ -63,18 +63,18 @@ class optimiser:
 
     def pre_loop(self):
         """Here is where each optimiser sets up before looping"""
-        ...
+        pass
 
     def post_loop(self):
         """Here is where each optimiser cleans up after looping"""
-        ...
+        pass
 
     def step(self):
         """Placeholder optimisation step"""
-        ...
+        pass
 
     def post_step(self):
-        ...
+        pass
 
     def run(self):
         """Generic Run Loop
