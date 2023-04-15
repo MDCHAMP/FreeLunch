@@ -38,6 +38,7 @@ class optimiser:
         self.obj = partial(self.wrap_obj, obj)
         # Hyperparamters/ methods
         self.hypers = self.hyper_defaults | hypers
+        self.post_step = lambda x: None
 
     def __call__(self, n_runs=1):
         """
@@ -73,23 +74,20 @@ class optimiser:
         """Placeholder optimisation step"""
         pass
 
-    def post_step(self):
-        pass
-
     def run(self):
         """Generic Run Loop
         We want to implement a common interface for all optimisers.
         """
         self.nfe, self.gen = 0, 0
         self.pre_loop()
-        self.post_step()
+        self.post_step(self)
         # Main Loop
         for self.gen in range(1, self.hypers["G"]):
             # Step the optimiser
             self.step()
-            if self.post_step() is False:
+            if self.post_step(self) is False:
                 break
-    
+
         self.post_loop()
 
     def _to_dict(self):
