@@ -49,9 +49,8 @@ class optimiser:
         for n in range(n_runs):
             self.run()
             runs.append(self._to_dict())
-            b = runs[n]["pos"][0], runs[n]["fit"][0]
-            if n == 0 or b[1] < best[1]:
-                best = b
+            if n == 0 or self.global_best[1] < best[1]:
+                best = self.global_best
         return best, runs
 
     def wrap_obj(self, obj, vec):
@@ -80,11 +79,15 @@ class optimiser:
         """
         self.nfe, self.gen = 0, 0
         self.pre_loop()
+        self.global_best = tech.update_best(
+            (None, _BAD_OBJ_SCORE), (self.pos, self.fit)
+        )
         self.post_step(self)
         # Main Loop
         for self.gen in range(1, self.hypers["G"]):
             # Step the optimiser
             self.step()
+            self.global_best = tech.update_best(self.global_best, (self.pos, self.fit))
             if self.post_step(self) is False:
                 break
 

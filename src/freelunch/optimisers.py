@@ -184,8 +184,6 @@ class PSO(optimiser):
         self.fit = np.array([self.obj(x) for x in self.pos])
         # Initial bookeeping
         self.local_best = self.pos.copy(), self.fit.copy()
-        idx = np.argmin(self.fit)
-        self.global_best = self.pos[idx], self.fit[idx]
 
     def step(self):
         N, G = self.hypers["N"], self.hypers["G"]
@@ -209,7 +207,6 @@ class PSO(optimiser):
         self.fit = np.array([self.obj(x) for x in self.pos])
         # Bookeeping post eval
         self.local_best = tech.greedy_selection(self.local_best, (self.pos, self.fit))
-        self.global_best = tech.update_best(self.global_best, self.local_best)
 
     def post_loop(self):
         self.pos, self.fit = self.local_best
@@ -256,7 +253,6 @@ class QPSO(PSO):
         self.fit = np.array([self.obj(x) for x in self.pos])
         # Bookeeping post eval
         self.local_best = tech.greedy_selection(self.local_best, (self.pos, self.fit))
-        self.global_best = tech.update_best(self.global_best, self.local_best)
 
 
 # class ABC(optimiser):
