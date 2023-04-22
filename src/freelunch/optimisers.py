@@ -179,7 +179,7 @@ class PSO(optimiser):
     def pre_loop(self):
         self.pos = tech.uniform_continuous_init(self.bounds, self.hypers["N"])
         self.vel = tech.uniform_continuous_init(
-            (self.bounds - self.bounds.mean(1)) * self.hypers["v0"], self.hypers["N"]
+            (self.bounds - self.bounds.mean(1)[:, None]) * self.hypers["v0"], self.hypers["N"]
         )
         self.fit = np.array([self.obj(x) for x in self.pos])
         # Initial bookeeping
@@ -253,6 +253,89 @@ class QPSO(PSO):
         self.fit = np.array([self.obj(x) for x in self.pos])
         # Bookeeping post eval
         self.local_best = tech.greedy_selection(self.local_best, (self.pos, self.fit))
+
+
+class PAO(PSO):
+    """
+    Particle Attractor Optimisation (PAO) for now.
+
+    Essentially a state-space implementation of a second order SDE with a number of weighted attractors
+    """
+
+    name = "Particle Attractor Optimisation"
+    tags = ["Continuous domain", "Particle swarm"]
+    hyper_definitions = {
+        "N": "Population size (int)",
+        "G": "Number of generations (int)",
+        "m": "Inertia coefficient (i.e mass)",
+        "c": "Damping (ie prop. to stiffness matrix)",
+        "k": "Stiffness parmaeters (i.e lambda1, lambda2 etc.)",
+        "q": "Randomness factor (space dust)",
+        "dt": "Timestep size",
+        "v0": "Velocity (ratio of bounds width)",
+
+    }
+    hyper_defaults = {
+        "N": 100,
+        "G": 100,
+        "m": 1,
+        "z": 0.2,
+        "k": np.array([1, 1]),
+        "q": [1, 1],
+        "dt": 1,
+        "v0": 0 
+    }
+
+    def update_attractors(self):
+        """
+        Overwrite this function to create custom attractors
+        Default behavour is to use local best and global best locations
+        """
+        self.local_best = tech.greedy_selection(self.local_best, (self.pos, self.fit))
+        # attractors
+        attractors = np.stack(
+            [self.local_best[0], np.ones_like(self.pos)*self.global_best[0]], axis=2
+        ).transpose(2, 0, 1)
+        # offset
+        offset = np.dot(attractors.T, self.hypers["k"]).T / np.sum(self.hypers["k"])
+        return offset
+
+    def pre_loop(self):
+        super().pre_loop()
+        # init A matrix and Sig_L
+        zet, m = self.hypers["z"], self.hypers["m"]
+        wn2 = np.sum(self.hypers["k"]) / m
+        A = np.array([[0, 1], [-wn2 / m, -2 * zet * np.sqrt(wn2) / m]])
+        L = np.array([[0], [1]])
+        Phi = tech.expm(
+            np.block([[A, L @ L.T], [np.zeros_like(A), -A.T]]) * self.hypers["dt"]
+        )
+        self.Adt = Phi[:2, :2]
+        self.Sig_L = np.linalg.cholesky(Phi[:2, 2:] @ self.Adt.T)
+        # preallocate swam states in transformed coordinates
+        self.Xprime = np.stack((self.pos, self.vel), axis=2)
+
+    def step(self):
+        N, D = self.pos.shape[0], self.bounds.shape[0]
+        # update attraction centres
+        self.offset = self.update_attractors()
+        # compute scaling factor of noise for each state
+        q = tech.lin_vary(self.hypers["q"], self.gen, self.hypers["G"]) * (
+            np.abs(self.local_best[0] - self.global_best[0])
+        )
+        # recover swarm states in generalised coordinates
+        self.Xprime[..., 0] = self.pos - self.offset  
+        # move the swarm in generalised coordinates
+        draws = np.random.standard_normal(size=(N, D, 2, 1))
+        self.Xprime = (
+            self.Adt @ self.Xprime[..., None]
+            + (q[..., None, None] * self.Sig_L) @ draws
+        )[..., 0]
+        # Recover swarm in original coordinates
+        self.pos = self.Xprime[..., 0] + self.offset
+        self.vel = self.Xprime[..., 1]
+        self.pos = self.bounder(self.pos, self.bounds)
+        self.fit = np.array([self.obj(x) for x in self.pos])
 
 
 # class ABC(optimiser):

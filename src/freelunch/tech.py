@@ -57,8 +57,8 @@ def current_2(pop, F, k=None):
 
 def binary_crossover(pos, newpos, Crs, jrand=True):
     idx = np.random.uniform(size=pos.shape) < Crs
-    if jrand: # always swap one dimension
-        idx[:, np.random.randint(0, pos.shape[1])] = True*np.ones((pos.shape[0]))
+    if jrand:  # always swap one dimension
+        idx[:, np.random.randint(0, pos.shape[1])] = True * np.ones((pos.shape[0]))
     pos = pos.copy()
     pos[idx] = newpos[idx]
     return pos
@@ -80,7 +80,7 @@ def greedy_selection(oldpop, newpop, return_idx=False):
 
 def update_best(best, newpop):
     idx = np.argmin(newpop[1])
-    if newpop[1][idx] < best[1]: # update best
+    if newpop[1][idx] < best[1]:  # update best
         best = newpop[0][idx], newpop[1][idx]
     return best
 
@@ -99,12 +99,13 @@ def sticky_bounds(pos, bounds):
     """
     Apply sticky bounds to space
     """
-    out_low  = pos < bounds[:, 0]
+    out_low = pos < bounds[:, 0]
     out_high = pos > bounds[:, 1]
     pos = pos.copy()
-    pos[out_low]  = (np.ones_like(pos)*bounds[None,:,0])[out_low]  # @TJR :chefs_kiss
-    pos[out_high] = (np.ones_like(pos)*bounds[None,:,1])[out_high] 
+    pos[out_low] = (np.ones_like(pos) * bounds[None, :, 0])[out_low]  # @TJR :chefs_kiss
+    pos[out_high] = (np.ones_like(pos) * bounds[None, :, 1])[out_high]
     return pos
+
 
 # %% Adaptable parameters
 
@@ -123,8 +124,8 @@ def normal_update(p, scores, jit=1e-6):
 
 
 def update_selection_probs(scores):
-    hits, wins = scores 
-    p = (hits+1) / (hits+wins)
+    hits, wins = scores
+    p = (hits + 1) / (hits + wins)
     return p / np.sum(p)
 
 
@@ -133,7 +134,7 @@ def track_hits_wins(scores, selection_idx, success_idx):
     a, b = np.unique(selection_idx, return_counts=1)
     hits[a] += b
     for i in a:
-        wins[i] += sum(success_idx[selection_idx==i])
+        wins[i] += sum(success_idx[selection_idx == i])
     return hits, wins
 
 
@@ -165,6 +166,15 @@ def pdist(A, B=None):
     if B is None:
         B = A
     return np.sqrt(np.sum((A[:, None] - B[None, :]) ** 2, axis=-1))
+
+
+def expm(A):
+    v, S = np.linalg.eig(A)
+    if not len(np.unique(v)) == len(v):
+        raise ValueError(
+            "Non-diagonisable input matrix! Try choosing different parameters"
+        )
+    return np.real(S @ np.diag(np.exp(v)) @ np.linalg.inv(S))
 
 
 class freelunch_json_encoder(JSONEncoder):
