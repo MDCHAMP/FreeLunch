@@ -12,11 +12,10 @@ import numpy as np
 import pytest
 
 from freelunch import optimisers, tech
-from freelunch.benchmarks import exponential
+from freelunch.benchmarks import exponential, sphere
 
 # %% Fixtures
 
-np.random.seed(100)
 
 # Pull out all optimisers automatically - sorry Max!
 optimiser_classes = [
@@ -74,7 +73,7 @@ def test_can_mp(n):
 
 @pytest.mark.parametrize("opt", optimiser_classes)
 def test_can_optimise(opt): # this is a flaky test but wcyd
-    obj = exponential(1)
+    obj = sphere(1)
     optim = opt(obj, obj.bounds)
     (x0, f0), runs = optim()
-    assert f0 < -0.9
+    assert f0 < 0.01

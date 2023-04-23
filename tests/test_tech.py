@@ -5,7 +5,6 @@ import pytest
 
 from freelunch.tech import *
 
-np.random.seed(100)
 
 # %% Fixtures
 
