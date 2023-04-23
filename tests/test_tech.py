@@ -10,7 +10,7 @@ from freelunch.tech import *
 
 test_pos = np.random.uniform(size=(100, 2))
 test_fit = np.random.uniform(size=(100,))
-MUTATORS = [rand_1, rand_2, best_1, best_2, current_2]
+MUTATORS = [rand_1, rand_2, best_1, best_2, rand_to_best_1]
 
 
 def bound_fixt(pos, bounder, bnds, eps=1e-12):
@@ -114,8 +114,8 @@ def test_sticky_bounds():
 
 
 def test_no_bounds():
-    with pytest.raises(Warning):
-        no_bounding(None, None)
+    with pytest.warns(Warning):
+        no_bounding(test_pos, None)
 
 
 # %% Adaptable parameters
@@ -146,7 +146,7 @@ def test_normal_update(S):
 def test_update_selection_probs():
     hits = np.array([1, 2, 3, 5])
     wins = np.array([1, 0, 2, 1])
-    ps = update_selection_probs((hits, wins))
+    ps = update_selection_probs(hits, wins)
     assert sum(ps) == 1
     assert np.all(ps > 0)
 

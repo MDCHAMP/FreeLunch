@@ -109,7 +109,7 @@ class SADE(DE):
             tech.rand_2,
             tech.best_1,
             tech.best_2,
-            tech.current_2,
+            tech.rand_to_best_1,
         ]
 
     def pre_loop(self):
@@ -127,7 +127,7 @@ class SADE(DE):
         if self.gen % self.hypers["Lp"] == 0:  # Learning period complete?
             self.F = tech.normal_update(self.F, self.F_wins)
             self.Cr = tech.normal_update(self.Cr, self.Cr_wins)
-            self.mut_probs = tech.update_selection_probs(self.mut_scores)
+            self.mut_probs = tech.update_selection_probs(*self.mut_scores)
             self.F_wins, self.Cr_wins = [], []  # Reset tracking vars
             self.mut_scores = (np.zeros((nm,)), np.zeros((nm,)))  # (hits, wins)
         Fs = np.random.normal(*self.F, (N, 1))

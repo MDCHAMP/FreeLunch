@@ -14,12 +14,6 @@ def test_no_obj():
         optimiser()
 
 
-def test_no_bounds():
-    opt = optimiser(obj)
-    with pytest.raises(Warning):
-        opt.bounder(None, None)
-
-
 def test_bounds():
     opt = optimiser(obj, bounds=[[-1, 1]])
     assert opt.bounder is tech.sticky_bounds
