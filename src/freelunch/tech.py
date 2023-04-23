@@ -1,8 +1,7 @@
-"""
-Standard / common techniques that are used in several optimisers are abstracted to functions here. 
-"""
+"""Utility functions used by multiple optimisation algortihms.
 
-# %% Imports
+All functions in this script should be unaware of optimiser state. 
+"""
 
 import numpy as np
 from json import JSONEncoder
@@ -89,16 +88,10 @@ def update_best(best, newpop):
 
 
 def no_bounding(pos, bounds):
-    """
-    Placeholder for no bounding
-    """
     raise Warning("No bounds applied")
 
 
 def sticky_bounds(pos, bounds):
-    """
-    Apply sticky bounds to space
-    """
     out_low = pos < bounds[:, 0]
     out_high = pos > bounds[:, 1]
     pos = pos.copy()
@@ -160,9 +153,6 @@ def parent_idx_no_repeats(N, n, k=None):
 
 
 def pdist(A, B=None):
-    """
-    Pairwise Euclidean Distance inside array
-    """
     if B is None:
         B = A
     return np.sqrt(np.sum((A[:, None] - B[None, :]) ** 2, axis=-1))
@@ -171,9 +161,9 @@ def pdist(A, B=None):
 def expm(A):
     v, S = np.linalg.eig(A)
     if not len(np.unique(v)) == len(v):
-        if np.allclose(A, np.zeros_like(A)): # zero case
+        if np.allclose(A, np.zeros_like(A)):  # zero case
             return np.eye(len(v))
-        elif np.all(A[~np.diag(np.array([True]*len(v)))]==0): # matrix is diagonal
+        elif np.all(A[~np.diag(np.array([True] * len(v)))] == 0):  # matrix is diagonal
             return np.diag(np.exp(np.diag(A)))
         raise ValueError(
             "Non-diagonisable input matrix! Try choosing different parameters"

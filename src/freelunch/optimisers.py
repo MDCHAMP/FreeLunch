@@ -1,5 +1,6 @@
-"""
-Main module definitions in here
+"""Optimisation algorthms.
+
+Each optimisation algorithm is implemented here as a subclass of the base optimiser class. 
 """
 
 import numpy as np
