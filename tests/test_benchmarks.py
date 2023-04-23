@@ -1,6 +1,3 @@
-"""
-Testing benchmark problems
-"""
 import pytest
 import numpy as np
 

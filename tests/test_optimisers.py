@@ -1,10 +1,3 @@
-"""
-Testing the optimisers
-
-Testing for function not performance see benchmarking script
-"""
-
-
 import inspect
 import json
 
