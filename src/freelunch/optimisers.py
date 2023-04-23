@@ -13,9 +13,7 @@ from freelunch.base import optimiser
 
 
 class RandomSearch(optimiser):
-    """
-    Random Search
-    """
+    """Sample at random from the search space."""
 
     name = "RandomSearch"
     tags = ["Stochastic"]
@@ -25,22 +23,24 @@ class RandomSearch(optimiser):
     def pre_loop(self):
         self.pos = tech.uniform_continuous_init(self.bounds, self.hypers["N"])
         self.fit = np.array([self.obj(x) for x in self.pos])
-        idx = np.argmin(self.fit)
-        self.best = self.pos[idx], self.fit[idx]
 
     def step(self):
-        self.pos = tech.uniform_continuous_init(self.bounds, self.hypers["N"])
-        self.fit = np.array([self.obj(x) for x in self.pos])
-        self.best = tech.update_best(self.best, (self.pos, self.fit))
-
-    def post_loop(self):
-        self.pos[0] = self.best[0]
-        self.fit[0] = self.best[1]
+        self.pre_loop()  # updating of global best is handled in obj
 
 
 class DE(optimiser):
-    """
-    Differential evolution
+    """Differential Evolution.
+
+    Efficient genetic inspired optimisation algorithm that approximates the finite difference operation.
+
+    This class also acts as a base class for DE variants.
+
+    Implemented as in: https://link.springer.com/article/10.1023/a:1008202821328
+
+    Attributes:
+        mutator (callable): Mutation strategy (see freelunch.tech for options)
+        crossover (callable): Crossover strategy (see freelunch.tech for options)
+        selector (callable): Selection strategy (see freelunch.tech for options)
     """
 
     name = "Differential Evolution"
@@ -51,7 +51,7 @@ class DE(optimiser):
     }
     hyper_defaults = {
         "F": 0.5,
-        "Cr": 0.2,
+        "Cr": 0.1,
     }
 
     def __init__(self, *args, **kwargs):
@@ -75,8 +75,14 @@ class DE(optimiser):
 
 
 class SADE(DE):
-    """
-    Self-Adapting Differential evolution
+    """Self-Adapting Differential Evolution.
+
+    Efficient genetic inspired optimisation algorithm that approximates the finite difference operation.
+
+    Implemented as in: https://ieeexplore.ieee.org/document/1554904
+
+    Attributes:
+        mutators (list): Mutation strategies considered in the adaptation (see freelunch.tech for options)
     """
 
     name = "Self-Adapting Differential Evolution"
@@ -90,10 +96,10 @@ class SADE(DE):
     }
     hyper_defaults = {
         "F_u": 0.5,
-        "F_sig": 0.2,
+        "F_sig": 0.3,
         "Cr_u": 0.2,
         "Cr_sig": 0.1,
-        "Lp": 10,
+        "Lp": 25,
     }
 
     def __init__(self, *args, **kwargs):
@@ -112,23 +118,23 @@ class SADE(DE):
         self.fit = np.array([self.obj(x) for x in self.pos])
         self.F = (self.hypers["F_u"], self.hypers["F_sig"])
         self.Cr = self.hypers["Cr_u"], self.hypers["Cr_sig"]
+        self.F_wins, self.Cr_wins = [], []  # init tracking vars
         self.mut_probs = np.ones(nm) / nm
-        self.F_wins, self.Cr_wins = [], []
         self.mut_scores = (np.zeros(nm), np.zeros(nm))  # (hits, wins)
 
     def step(self):
         N, nm = self.hypers["N"], len(self.mutators)
-        if self.gen % self.hypers["Lp"] == 0:
+        if self.gen % self.hypers["Lp"] == 0:  # Learning period complete?
             self.F = tech.normal_update(self.F, self.F_wins)
             self.Cr = tech.normal_update(self.Cr, self.Cr_wins)
             self.mut_probs = tech.update_selection_probs(self.mut_scores)
-            self.F_wins, self.Cr_wins = [], []  # Reset tracking variables
+            self.F_wins, self.Cr_wins = [], []  # Reset tracking vars
             self.mut_scores = (np.zeros((nm,)), np.zeros((nm,)))  # (hits, wins)
         Fs = np.random.normal(*self.F, (N, 1))
         Crs = np.random.normal(*self.Cr, (N, 1))
         midx = np.random.choice(range(len(self.mutators)), size=N, p=self.mut_probs)
         newpos = self.pos.copy()
-        for i, (m, f) in enumerate(zip(midx, Fs)):
+        for i, (m, f) in enumerate(zip(midx, Fs)):  # this loop is slow but unavoidable
             newpos[i] = self.mutators[m]((self.pos, self.fit), f, k=i)
         newpos = self.crossover(self.pos, newpos, Crs)
         newpos = self.bounder(newpos, self.bounds)
@@ -142,8 +148,13 @@ class SADE(DE):
 
 
 class PSO(optimiser):
-    """
-    Base Class for Particle Swarm Optimisations
+    """Particle Swarm Optimisation.
+
+    Base class for all PSO variants.
+
+    Implemented as in: https://ieeexplore.ieee.org/document/488968
+
+    Note that the default hyperparameters here differ from those of the original paper above.
     """
 
     name = "Particle Swarm Optimisation"
@@ -197,21 +208,18 @@ class PSO(optimiser):
 
 
 class QPSO(PSO):
-    """
-    Quantum Particle Swarm Optimisations
+    """Quantum Particle Swarm Optimisation
+    
+    Implemented as in: @TJR TODO link to paper and report and differences
     """
 
     name = "Quantum Particle Swarm Optimisation"
     tags = ["Continuous domain", "Particle swarm"]
     hyper_definitions = {
-        "N": "Population size (int)",
-        "G": "Number of generations (int)",
         "alpha": "Contraction Expansion Coefficient (np.array, I.shape=(2,))",
         "v0": "Velocity (ratio of bounds width)",
     }
     hyper_defaults = {
-        "N": 100,
-        "G": 100,
         "alpha": np.array([1.0, 0.5]),
         "v0": 0,
     }
@@ -240,27 +248,28 @@ class QPSO(PSO):
 
 
 class PAO(PSO):
-    """
-    Particle Attractor Optimisation (PAO) for now.
+    """Particle Attractor Optimisation.
 
-    Essentially a state-space implementation of a second order SDE with a number of weighted attractors
+    (Rhymes with 'cow')
+
+    Essentially a state-space implementation of a second order SDE with a number of weighted attractors.
+
+    Implemented as in: PREPRINT TBA
+
+    Note that a linearly varing value of q is implemented here.
     """
 
     name = "Particle Attractor Optimisation"
     tags = ["Continuous domain", "Particle swarm"]
     hyper_definitions = {
-        "N": "Population size (int)",
-        "G": "Number of generations (int)",
         "m": "Inertia coefficient (i.e mass)",
-        "c": "Damping (ie prop. to stiffness matrix)",
-        "k": "Stiffness parmaeters (i.e lambda1, lambda2 etc.)",
-        "q": "Randomness factor (space dust)",
+        "z": "Damping ratio",
+        "k": "Stiffness parmaeters [k1, ..., kn]",
+        "q": "Stochastic factor range [q0, qT]",
         "dt": "Timestep size",
         "v0": "Velocity (ratio of bounds width)",
     }
     hyper_defaults = {
-        "N": 100,
-        "G": 100,
         "m": 1,
         "z": 0.2,
         "k": np.array([1, 1]),
@@ -270,9 +279,14 @@ class PAO(PSO):
     }
 
     def update_attractors(self):
-        """
-        Overwrite this function to create custom attractors
-        Default behavour is to use local best and global best locations
+        """Update the attraction centres and copmpute offset.
+
+        Default behavour is to use local best and global best locations.
+
+        This function can be overwritten to create custom variants of PAO with arbitrary attraction centres. When implementing a custom method care must be taken to calculate the coordinates of the overall offset (in the original coordinates) for each particle with shape (N,D).
+
+        Returns:
+            np.ndarray: Locations of the attraction centres
         """
         self.local_best = tech.greedy_selection(self.local_best, (self.pos, self.fit))
         # attractors

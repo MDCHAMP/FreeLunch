@@ -23,6 +23,7 @@ class optimiser:
         hyper_defaults: Default values of hyperparameters from the source paper (unless otherwise stated)
         obj: Objective function to be optimised. Note that freelunch always assumes a minimisation problem.
         bounds: A Dx2 array of [lower, upper] bounds where D is the problem dimension.
+        bounder: Bounding strategy (see freelunch.tech for options)
         hypers: Hyperparameters of the optimisation algorthim (to override the defaults)
         nfe: Number of function evaluations in current run
         pos: Positions of current population (NxD)
