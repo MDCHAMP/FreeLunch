@@ -18,14 +18,8 @@ class RandomSearch(optimiser):
 
     name = "RandomSearch"
     tags = ["Stochastic"]
-    hyper_definitions = {
-        "N": "Population size (int)",
-        "G": "Number of generations (int)",
-    }
-    hyper_defaults = {
-        "N": 100,
-        "G": 100,
-    }
+    hyper_definitions = {}
+    hyper_defaults = {}
 
     def pre_loop(self):
         self.pos = tech.uniform_continuous_init(self.bounds, self.hypers["N"])
@@ -51,14 +45,10 @@ class DE(optimiser):
     name = "Differential Evolution"
     tags = ["continuous domain", "population based", "evolutionary"]
     hyper_definitions = {
-        "N": "Population size (int)",
-        "G": "Number of generations (int)",
         "F": "Mutation parameter (float in [0,1])",
         "Cr": "Crossover probability (float in [0,1])",
     }
     hyper_defaults = {
-        "N": 100,
-        "G": 100,
         "F": 0.5,
         "Cr": 0.2,
     }
@@ -91,8 +81,6 @@ class SADE(DE):
     name = "Self-Adapting Differential Evolution"
     tags = ["continuous domain", "population based", "evolutionary", "adaptive"]
     hyper_definitions = {
-        "N": "Population size (int)",
-        "G": "Number of generations (int)",
         "F_u": "Mutation parameter initial mean (float in [0,2])",
         "F_sig": "Mutation parameter initial standard deviation (float in [0,1])",
         "Cr_u": "Crossover probability initial mean (float in [0,1])",
@@ -100,8 +88,6 @@ class SADE(DE):
         "Lp": "Learning period",
     }
     hyper_defaults = {
-        "N": 100,
-        "G": 100,
         "F_u": 0.5,
         "F_sig": 0.2,
         "Cr_u": 0.2,
@@ -162,15 +148,11 @@ class PSO(optimiser):
     name = "Particle Swarm Optimisation"
     tags = ["Continuous domain", "Particle swarm"]
     hyper_definitions = {
-        "N": "Population size (int)",
-        "G": "Number of generations (int)",
         "I": "Inertia coefficients (np.array, I.shape=(2,))",
         "A": "Acceleration (np.array, I.shape=(2,))",
         "v0": "Velocity (ratio of bounds width)",
     }
     hyper_defaults = {
-        "N": 100,
-        "G": 100,
         "I": np.array([0.4, 0.3]),
         "A": np.array([0.01, 0.02]),
         "v0": 0,
@@ -179,7 +161,8 @@ class PSO(optimiser):
     def pre_loop(self):
         self.pos = tech.uniform_continuous_init(self.bounds, self.hypers["N"])
         self.vel = tech.uniform_continuous_init(
-            (self.bounds - self.bounds.mean(1)[:, None]) * self.hypers["v0"], self.hypers["N"]
+            (self.bounds - self.bounds.mean(1)[:, None]) * self.hypers["v0"],
+            self.hypers["N"],
         )
         self.fit = np.array([self.obj(x) for x in self.pos])
         # Initial bookeeping
@@ -273,7 +256,6 @@ class PAO(PSO):
         "q": "Randomness factor (space dust)",
         "dt": "Timestep size",
         "v0": "Velocity (ratio of bounds width)",
-
     }
     hyper_defaults = {
         "N": 100,
@@ -283,7 +265,7 @@ class PAO(PSO):
         "k": np.array([1, 1]),
         "q": [1, 1],
         "dt": 1,
-        "v0": 0 
+        "v0": 0,
     }
 
     def update_attractors(self):
@@ -294,7 +276,7 @@ class PAO(PSO):
         self.local_best = tech.greedy_selection(self.local_best, (self.pos, self.fit))
         # attractors
         attractors = np.stack(
-            [self.local_best[0], np.ones_like(self.pos)*self.global_best[0]], axis=2
+            [self.local_best[0], np.ones_like(self.pos) * self.global_best[0]], axis=2
         ).transpose(2, 0, 1)
         # offset
         offset = np.dot(attractors.T, self.hypers["k"]).T / np.sum(self.hypers["k"])
@@ -324,7 +306,7 @@ class PAO(PSO):
             np.abs(self.local_best[0] - self.global_best[0])
         )
         # recover swarm states in generalised coordinates
-        self.Xprime[..., 0] = self.pos - self.offset  
+        self.Xprime[..., 0] = self.pos - self.offset
         # move the swarm in generalised coordinates
         draws = np.random.standard_normal(size=(N, D, 2, 1))
         self.Xprime = (

@@ -29,8 +29,8 @@ optimiser_classes = [
 dims = [1, 2, 3]
 
 
-def early_stopper(opt):
-    if opt.gen == 3:
+def early_stopper(state):
+    if state.gen == 3:
         return False
 
 def set_testing_hypers(opt):
@@ -62,13 +62,19 @@ def test_can_json(opt, n):
 def test_early_stop():
     o = exponential(2)
     opt = optimisers.DE(o, o.bounds)
-    opt.post_step = early_stopper
+    opt.post_step_hook = early_stopper
     opt()
     assert opt.gen == 3
 
+@pytest.mark.parametrize("n", [1,2])
+def test_can_mp(n):
+    obj = exponential(2)
+    opt = optimisers.DE(obj, obj.bounds, {'N':10, 'G':10})
+    opt(1, n)
 
-# @TODO more grnaular tests here
-def test_can_optimise():
-    pass
-
-
+@pytest.mark.parametrize("opt", optimiser_classes)
+def test_can_optimise(opt): # this is a flaky test but wcyd
+    obj = exponential(1)
+    optim = opt(obj, obj.bounds)
+    (x0, f0), runs = optim()
+    assert f0 < -0.9
