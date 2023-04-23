@@ -1,95 +1,165 @@
-'''
-Benchmarks for testing / comparisons
-'''
+"""Benchmarks utilities for testing optimisers.
+
+Each benchmarks derives from the benchmarks base class.
+"""
 
 import numpy as np
 
-# %%
+# %% Base class
+
 
 class benchmark:
-    '''
-    base class for benchmarking functions
-    '''
-    default_bounds = lambda n:None
-    rtm_optimum = lambda n:None
+    """Base class for benchmark functions.
+
+    Attributes:
+        bounds (np.ndarray): Default bounds for the optimisation problem.
+        optimum (np.ndarray): Location of optimum
+        f0 (float): Value of benchmark function at the optimum.
+    """
 
     def __init__(self, n=2):
+        """Initialise the benchmark.
+
+        Args:
+            n (int, optional): Problem dimension. Defaults to 2.
+        """
         self.n = n
-        self.bounds = self.default_bounds() 
-        self.optimum = self.rtn_optimum()
+        self.bounds = self._get_bounds()
+        self.optimum = self._get_optimum()
 
-    def __call__(self, dna):
-        if len(dna) == 0:
-            raise AttributeError('An empty trial solution was passed')
-        return self.obj(dna)
+    def __call__(self, x):
+        """Evaluate the benchmark at location x.
 
-# %%
+        Args:
+            x (np.ndarray): Location at which to evaluate the benchmark.
+
+        Returns:
+            float: Value of the benchmark at position x.
+        """
+        pass
+
+    def _get_bounds(self):
+        """Get default bounds for the optimisation problem."""
+        pass
+
+    def _get_optimum(self):
+        """Get true position of optimum for the optimisation problem."""
+        pass
+
+
+# %% Benchmark functions
 
 
 class ackley(benchmark):
-    '''
-    ackely function in n dimensions
-    '''
+    """Ackley benchmark function.
 
-    default_bounds = lambda self:np.array([[-10, 10]]*self.n)
-    rtn_optimum = lambda self:np.array([0]*self.n)
+    Ackley function implemented in n dimensions.
+
+    For details see: https://www.sfu.ca/~ssurjano/ackley.html
+    """
+
     f0 = 0
-    tol = 10**-2
+    a, b, c = 20, 0.2, 2 * np.pi
 
-    a,b,c = 20, 0.2, 2*np.pi
-    def obj(self, dna):
-        t1 = -self.a * np.exp(-self.b * (1/len(dna)) * np.sum(dna**2))
-        t2 = - np.exp(1/len(dna) * np.sum(np.cos(self.c * dna))) 
+    def __call__(self, x):
+        t1 = -self.a * np.exp(-self.b * (1 / len(x)) * np.sum(x**2))
+        t2 = -np.exp(1 / len(x) * np.sum(np.cos(self.c * x)))
         t3 = self.a + np.exp(1)
         return t1 + t2 + t3
 
+    def _get_bounds(self):
+        return np.array([[-32.768, 32.768]] * self.n)
+
+    def _get_optimum(self):
+        return np.zeros(self.n)
+
 
 class exponential(benchmark):
-    '''
-    exponential function in n dimensions
-    '''
-    
-    default_bounds = lambda self:np.array([[-10, 10]]*self.n)
-    rtn_optimum = lambda self:np.array([0]*self.n)
-    f0 = -1
-    tol = 10**-3
+    """Exponential benchmark function.
 
-    a = -0.5
-    def obj(self, dna):
-        t1 = - np.exp(self.a * np.sum(dna**2))
-        return t1
+    Exponential function implemented in n dimensions.
+
+    Note that this function is the negative of the traditional maximisation problem
+
+    For details see: https://al-roomi.org/benchmarks/unconstrained/n-dimensions/168-exponential-function
+    """
+
+    f0 = -1
+    a = 0.5
+
+    def __call__(self, x):
+        return -np.exp(-self.a * np.sum(x**2))
+
+    def _get_bounds(self):
+        return np.array([[-1, 1]] * self.n)
+
+    def _get_optimum(self):
+        return np.zeros(self.n)
+
+
+class sphere(benchmark):
+    """Sphere benchmark function.
+
+    Sphere function implemented in n dimensions.
+
+    For details see: https://www.sfu.ca/~ssurjano/spheref.html
+    """
+
+    f0 = 0
+
+    def __call__(self, x):
+        return np.sum(x**2)
+
+    def _get_bounds(self):
+        return np.array([[-5.12, 5.12]] * self.n)
+
+    def _get_optimum(self):
+        return np.zeros(self.n)
 
 
 class happycat(benchmark):
-    '''
-    happycat function in n dimensions
-    '''
-    
-    default_bounds = lambda self:np.array([[-2, 2]]*self.n)
-    rtn_optimum = lambda self:np.array([-1]*self.n)
-    f0 = 0
-    tol = None
+    """Happycat benchmark function.
 
-    a = 1/8
-    def obj(self, dna):
-        norm = np.sum(dna**2)
-        t1 = ((norm - self.n)**2)**(self.a)
-        t2 = (1/self.n)*(0.5*norm + np.sum(dna)) + 0.5
+    Happycat function implemented in n dimensions.
+
+    For details see: https://homepages.fhv.at/hgb/New-Papers/PPSN12_BF12.pdf
+    """
+
+    f0 = 0
+    a = 1 / 8
+
+    def __call__(self, x):
+        norm = np.sum(x**2)
+        t1 = ((norm - self.n) ** 2) ** (self.a)
+        t2 = (1 / self.n) * (0.5 * norm + np.sum(x)) + 0.5
         return t1 + t2
+
+    def _get_bounds(self):
+        return np.array([[-2, 2]] * self.n)
+
+    def _get_optimum(self):
+        return -np.ones(self.n)
 
 
 class periodic(benchmark):
-    '''
-    periodic function in n dimensions
-    '''
-    
-    default_bounds = lambda self:np.array([[-10, 10]]*self.n)
-    rtn_optimum = lambda self:np.array([0]*self.n)
-    f0 = 0.9
-    tol = None
+    """Periodic benchmark function.
 
-    def obj(self, dna):
-        t1 = np.sum(np.sin(dna)**2) +1
-        t2 = - 0.1 * np.exp(-np.sum(dna**2))
+    Periodic function implemented in n dimensions.
+
+    For details see: https://al-roomi.org/benchmarks/unconstrained/2-dimensions/158-price-s-function-no-2
+    """
+
+    f0 = 0.9
+
+    def __call__(self, x):
+        t1 = np.sum(np.sin(x) ** 2) + 1
+        t2 = -0.1 * np.exp(-np.sum(x**2))
         return t1 + t2
+
+    def _get_bounds(self):
+        return np.array([[-10, 10]] * self.n)
+
+    def _get_optimum(self):
+        return np.zeros(self.n)
+
 
