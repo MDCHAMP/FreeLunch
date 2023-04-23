@@ -209,7 +209,7 @@ class PSO(optimiser):
 
 class QPSO(PSO):
     """Quantum Particle Swarm Optimisation
-    
+
     Implemented as in: @TJR TODO link to paper and report and differences
     """
 

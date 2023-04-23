@@ -161,5 +161,3 @@ class periodic(benchmark):
 
     def _get_optimum(self):
         return np.zeros(self.n)
-
-

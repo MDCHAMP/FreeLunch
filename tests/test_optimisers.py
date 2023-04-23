@@ -32,6 +32,7 @@ def early_stopper(state):
     if state.gen == 3:
         return False
 
+
 def set_testing_hypers(opt):
     hypers = opt.hyper_defaults
     hypers["N"] = 10
@@ -58,6 +59,7 @@ def test_can_json(opt, n):
     best, runs = opt(obj=o, bounds=o.bounds, hypers=hypers)(n_runs=n)
     s = json.dumps(runs, cls=tech.freelunch_json_encoder)
 
+
 def test_early_stop():
     o = exponential(2)
     opt = optimisers.DE(o, o.bounds)
@@ -65,14 +67,16 @@ def test_early_stop():
     opt()
     assert opt.gen == 3
 
-@pytest.mark.parametrize("n", [1,2])
+
+@pytest.mark.parametrize("n", [1, 2])
 def test_can_mp(n):
     obj = exponential(2)
-    opt = optimisers.DE(obj, obj.bounds, {'N':10, 'G':10})
+    opt = optimisers.DE(obj, obj.bounds, {"N": 10, "G": 10})
     opt(1, n)
 
+
 @pytest.mark.parametrize("opt", optimiser_classes)
-def test_can_optimise(opt): # this is a flaky test but wcyd
+def test_can_optimise(opt):  # this is a flaky test but wcyd
     obj = sphere(1)
     optim = opt(obj, obj.bounds)
     (x0, f0), runs = optim()
