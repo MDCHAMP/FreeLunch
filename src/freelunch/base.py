@@ -1,7 +1,6 @@
 """Base classes for optimisers.
 
-Description of module goes here...
-
+Implement the base class and public API including a common framework for each optimisation run. 
 """
 from functools import partial
 from typing import Iterable
@@ -74,7 +73,7 @@ class optimiser:
         # MP case
         if n_workers > 1:
             with Pool(processes=n_workers, **mp_args) as pool:
-                runs = pool.starmap(self.run, [()]*n_runs)
+                runs = pool.starmap(self.run, [()] * n_runs)
         # No MP
         else:
             runs = [self.run() for _ in range(n_runs)]
@@ -133,7 +132,7 @@ class optimiser:
 
         Returns:
             Any: Return flag. If False, optimisation halts
-        """        
+        """
         if self.post_step_hook is not None:
             return self.post_step_hook(self)
 
