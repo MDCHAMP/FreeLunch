@@ -59,7 +59,6 @@ def test_can_json(opt, n):
     best, runs = opt(obj=o, bounds=o.bounds, hypers=hypers)(n_runs=n)
     s = json.dumps(runs, cls=tech.freelunch_json_encoder)
 
-# @pytest.mark.xfail
 def test_early_stop():
     o = exponential(2)
     opt = optimisers.DE(o, o.bounds)
@@ -69,7 +68,7 @@ def test_early_stop():
 
 
 # @TODO more grnaular tests here
-
 def test_can_optimise():
     pass
+
 

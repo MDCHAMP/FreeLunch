@@ -171,6 +171,10 @@ def pdist(A, B=None):
 def expm(A):
     v, S = np.linalg.eig(A)
     if not len(np.unique(v)) == len(v):
+        if np.allclose(A, np.zeros_like(A)): # zero case
+            return np.eye(len(v))
+        elif np.all(A[~np.diag(np.array([True]*len(v)))]==0): # matrix is diagonal
+            return np.diag(np.exp(np.diag(A)))
         raise ValueError(
             "Non-diagonisable input matrix! Try choosing different parameters"
         )

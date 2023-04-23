@@ -210,6 +210,16 @@ def test_pdist():
     assert np.all(pdist(A, A) == DAA)
     assert np.all(pdist(A, B) == DAB)
 
+def test_expm():
+    z = np.zeros((2,2))
+    assert np.allclose(expm(z), np.eye(2))
+    d = np.eye(2)
+    assert np.allclose(expm(d), np.diag(np.exp(np.diag(d))))
+    a = np.array([[2,0],[0,3]])
+    b = np.array([[1,0],[0,8]])
+    assert np.allclose(expm(a+b), expm(a)@expm(b))
+    assert np.allclose(expm(a.T), expm(a).T)
+
 
 def test_json_encoder():
     json.dumps(

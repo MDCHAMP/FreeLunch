@@ -57,7 +57,8 @@ class optimiser:
         """Adds nfe counting and bad value handling to raw_obj"""
         fit = obj(vec)
         self.nfe += 1
-        if not isinstance(fit, float):
+        # validation checks go left to right an only evaluate if the prev passes
+        if fit is None or isinstance(fit, bool) or not np.isfinite(fit) or not np.isreal(fit):
             fit = _BAD_OBJ_SCORE
         return fit
 
