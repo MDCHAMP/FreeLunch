@@ -333,3 +333,61 @@ class PAO(PSO):
         self.vel = self.Xprime[..., 1]
         self.pos = self.bounder(self.pos, self.bounds)
         self.fit = np.array([self.obj(x) for x in self.pos])
+
+
+class GWO(optimiser):
+    """Grey Wolf Optimiser
+
+    Implemented as in: https://doi.org/10.1016/j.advengsoft.2013.12.007
+
+    """
+
+    name = "Grey Wolf Optimiser"
+    tags = ["Continuous domain", "Grey wolf"]
+    hyper_definitions = {
+        "a": "Encircling vector (np.array, I.shape=(2,))",
+    }
+    hyper_defaults = {
+        "a": np.array([2, 0]),
+    }
+    
+    def update_hierarchy(self):
+        """Update the Wolf Hierarchy
+
+        To make our lives a bit easier here we adopt a tensor representation of the 
+        alpha, beta, delta wolves. The hierarchy is stored in a tensor which is stacked
+        front to back alpha, beta, delta so total size is (N, D, 3)
+
+        """
+        if self.hierarchy is not None:
+            all_fit = np.concatenate(self.fit, self.hierarchy[0])
+            all_wolves = np.vstack((self.pos, np.transpose(self.hierarchy[1],[2,1,0])[:,:,0]))
+        else:
+            all_fit = self.fit
+            all_wolves = self.pos
+        idx = np.argsort(all_fit)
+        self.hierarchy = (
+            all_fit[idx[:3]],
+            np.transpose(all_wolves[idx[:3],:][:,:,None],[2,1,0])
+        )
+    
+    def pre_loop(self):
+        # Just your usual pre loop stuff but also get the wolf hierarchy
+        self.pos = tech.uniform_continuous_init(self.bounds, self.hypers["N"])
+        self.fit = np.array([self.obj(x) for x in self.pos])
+        self.hierarchy = None
+        self.update_hierarchy()
+
+    def step(self):
+        # Eq 3.4
+        C = np.random.uniform(size=(1,1,3))
+        # Eq 3.5
+        D = np.abs( C*self.hierarchy[1] - self.pos[:,:,None])
+        # Eq 3.3
+        a = tech.lin_vary(self.hypers["a"], self.gen, self.hypers["G"])
+        A = 2*a*np.random.uniform(size=(1,1,3)) - a
+        # Eq 3.6
+        X = self.hierarchy[1] - A*D
+        # Eq 3.7
+        self.pos = np.sum(X,axis=2)/3
+        self.fit = np.array([self.obj(x) for x in self.pos])
